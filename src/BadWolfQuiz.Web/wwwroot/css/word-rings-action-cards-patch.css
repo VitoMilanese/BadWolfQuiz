@@ -7,7 +7,8 @@
 }
 
 .word-rings-stage-wrap {
-    padding-top: 2px;
+    box-sizing: border-box;
+    padding-top: clamp(12px, 1.35vh, 18px);
 }
 
 .word-rings-stage {
@@ -18,18 +19,16 @@
     display: none !important;
 }
 
-/* The previous patch forced `align-self: end;`, which pushed the entire playfield to the bottom. */
-
+/* Keep enough vertical breathing room below the toolbar while preserving the centered playfield. */
 @supports (width: 1cqh) {
     .word-rings-stage {
-        width: min(100cqw, calc((100cqh - 6px) * 1.4), 1640px);
+        width: min(100cqw, calc((100cqh - 4px) * 1.4), 1640px);
     }
 }
 
 .word-rings-bank-column {
     max-height: 100%;
 }
-
 
 .word-rings-action-effect-notice {
     position: fixed;
@@ -162,6 +161,10 @@
         padding-top: 8px;
         padding-bottom: 4px;
         row-gap: 8px;
+    }
+
+    .word-rings-stage-wrap {
+        padding-top: 8px;
     }
 }
 

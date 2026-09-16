@@ -40,7 +40,7 @@
     grid-template-areas: "players stage bank";
 }
 
-/* Theft keeps the source and revealed card artwork level while target selection lives on the right. */
+/* Theft keeps both card artwork boxes identical and places target selection under the revealed card. */
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) {
     width: min(96vw, 820px);
 }
@@ -48,7 +48,7 @@
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-dialog-card {
     grid-template-columns: minmax(0, 308px) minmax(0, 308px);
     grid-template-areas:
-        "preview theft-label"
+        ". theft-label"
         "preview theft-card"
         ". target"
         ". word"
@@ -62,7 +62,7 @@
 
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-dialog-preview {
     grid-area: preview;
-    align-self: end;
+    align-self: start;
     padding: 0;
 }
 
@@ -83,25 +83,36 @@
     align-self: end;
 }
 
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-dialog-preview,
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-theft-preview,
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-theft-placeholder {
+    width: min(100%, 308px);
+    max-width: 308px;
+    aspect-ratio: 3 / 4;
+}
+
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-theft-preview,
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-theft-placeholder {
     grid-area: theft-card;
     justify-self: center;
-    width: min(100%, 308px);
-    max-width: 308px;
 }
 
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-dialog-preview,
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-theft-preview {
-    width: min(100%, 308px);
-    max-width: 308px;
+    min-height: 0;
     border: 0;
     background: transparent;
     box-shadow: none;
 }
 
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-dialog-preview .word-rings-action-card-image,
+.word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-card.is-theft-preview .word-rings-action-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .word-rings-action-dialog:has(.word-rings-action-theft-preview:not([hidden])) .word-rings-action-theft-placeholder {
-    aspect-ratio: 3 / 4;
     visibility: hidden;
     pointer-events: none;
 }

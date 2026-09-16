@@ -199,7 +199,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("is-negative", patchCss, StringComparison.Ordinal);
         Assert.Contains("is-neutral", patchCss, StringComparison.Ordinal);
         Assert.DoesNotContain("is-action-temporary-word", patchCss, StringComparison.Ordinal);
-        Assert.Contains("align-self: end;", patchCss, StringComparison.Ordinal);
+        Assert.Contains("align-self: center;", patchCss, StringComparison.Ordinal);
         Assert.Contains(".word-rings-toolbar-progress[hidden]", patchCss, StringComparison.Ordinal);
 
         Assert.Contains("PendingImmunityDecisions", patchService, StringComparison.Ordinal);
@@ -216,7 +216,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("OnPostResolveImmunityDecision", patchApi, StringComparison.Ordinal);
         Assert.Contains("OnPostEnsureTargetWords", patchApi, StringComparison.Ordinal);
 
-        Assert.Contains("word-rings-action-cards-patch.css?v=3", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-patch.css?v=4", tagHelper, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-cards-v2.css?v=7", tagHelper, StringComparison.Ordinal);
         Assert.Contains("word-rings-action-cards-patch.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.True(
