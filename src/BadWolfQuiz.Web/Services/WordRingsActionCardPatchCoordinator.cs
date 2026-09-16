@@ -472,7 +472,7 @@ public sealed class WordRingsActionCardPatchCoordinator
         cardId switch
         {
             2 or 8 => string.Equals(actorName, targetName, StringComparison.Ordinal),
-            4 or 5 or 6 or 7 or 13 => true,
+            5 or 6 or 7 or 13 => true,
             _ => false
         };
 

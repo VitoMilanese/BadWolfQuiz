@@ -117,6 +117,16 @@ public sealed class WordRingsRoomApiModel(IWebHostEnvironment environment) : Pag
             actionCards = ActionCards.GetState(roomCode, playerToken)
         });
 
+    public IActionResult OnPostActionCardTheftPreview(
+        string? roomCode,
+        string? playerToken,
+        Guid? targetPlayerId) =>
+        Execute(() => new
+        {
+            success = true,
+            preview = ActionCards.GetTheftPreview(roomCode, playerToken, targetPlayerId)
+        });
+
     public IActionResult OnPostUseActionCard(
         string? roomCode,
         string? playerToken,

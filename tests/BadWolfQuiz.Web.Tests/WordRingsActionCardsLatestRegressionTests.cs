@@ -184,6 +184,74 @@ public sealed class WordRingsActionCardsLatestRegressionTests
     }
 
     [Fact]
+    public void Theft_reveals_one_stable_card_and_tracks_targets_as_hands_change()
+    {
+        var root = CreateRoot();
+        try
+        {
+            var environment = new LatestTestWebHostEnvironment(root);
+            var rooms = WordRingsRoomHostCoordinator.Get(environment);
+            var cards = WordRingsActionCardCoordinator.Get(environment);
+            var patch = WordRingsActionCardPatchCoordinator.Get(environment);
+
+            var host = rooms.CreateRoom("Host", 15, partialScoreEnabled: false, hostChoosesRules: false);
+            var guest = rooms.JoinRoom(host.RoomCode, "Guest");
+            var newcomer = rooms.JoinRoom(host.RoomCode, "Newcomer");
+            cards.RegisterRoom(host, enabled: true, correctWordsPerCard: 2, maximumCards: 4);
+            _ = rooms.StartGame(host.RoomCode, host.PlayerToken);
+            cards.BeginRound(host.RoomCode, host.PlayerToken);
+
+            patch.GrantDebugCard(host.RoomCode, host.PlayerToken, host.State.PlayerId, (int)WordRingsActionCardKind.Theft);
+            patch.GrantDebugCard(host.RoomCode, host.PlayerToken, guest.State.PlayerId, (int)WordRingsActionCardKind.Hint);
+            patch.GrantDebugCard(host.RoomCode, host.PlayerToken, guest.State.PlayerId, (int)WordRingsActionCardKind.Mask);
+
+            var initialTargets = cards.GetTheftPreview(host.RoomCode, host.PlayerToken, null);
+            Assert.Contains(initialTargets.Players, player => player.Id == guest.State.PlayerId);
+            Assert.DoesNotContain(initialTargets.Players, player => player.Id == newcomer.State.PlayerId);
+
+            var first = cards.GetTheftPreview(host.RoomCode, host.PlayerToken, guest.State.PlayerId);
+            var repeated = cards.GetTheftPreview(host.RoomCode, host.PlayerToken, guest.State.PlayerId);
+            Assert.NotNull(first.CardId);
+            Assert.Equal(first.CardId, repeated.CardId);
+
+            patch.GrantDebugCard(host.RoomCode, host.PlayerToken, newcomer.State.PlayerId, (int)WordRingsActionCardKind.Immunity);
+            Assert.Contains(
+                cards.GetTheftPreview(host.RoomCode, host.PlayerToken, null).Players,
+                player => player.Id == newcomer.State.PlayerId);
+
+            _ = cards.UseCard(
+                host.RoomCode,
+                guest.PlayerToken,
+                -first.CardId!.Value,
+                null,
+                null);
+            var refreshed = cards.GetTheftPreview(host.RoomCode, host.PlayerToken, guest.State.PlayerId);
+            Assert.NotNull(refreshed.CardId);
+            Assert.NotEqual(first.CardId, refreshed.CardId);
+
+            var result = cards.UseCard(
+                host.RoomCode,
+                host.PlayerToken,
+                (int)WordRingsActionCardKind.Theft,
+                guest.State.PlayerId,
+                null);
+            Assert.Contains(result.State.Cards, card => card.Id == refreshed.CardId);
+            Assert.DoesNotContain(
+                cards.GetState(host.RoomCode, guest.PlayerToken).Cards,
+                card => card.Id == refreshed.CardId);
+
+            patch.GrantDebugCard(host.RoomCode, host.PlayerToken, host.State.PlayerId, (int)WordRingsActionCardKind.Theft);
+            var finalTargets = cards.GetTheftPreview(host.RoomCode, host.PlayerToken, null);
+            Assert.DoesNotContain(finalTargets.Players, player => player.Id == guest.State.PlayerId);
+            Assert.Contains(finalTargets.Players, player => player.Id == newcomer.State.PlayerId);
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
     public void Latest_layout_patch_centers_the_stage_instead_of_bottom_aligning_it()
     {
         var css = File.ReadAllText(Path.Combine(

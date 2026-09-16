@@ -16,7 +16,7 @@
     const language = (document.documentElement.lang || 'en').toLowerCase().split('-')[0];
     const translations = {
         en: {
-            cardNames: ['', 'Swap', 'Replace', 'Block', 'Temporary word', 'Immunity', 'Hint', 'Rest', 'Shuffle', 'Time-out', 'Shield', 'Mask', 'Anagram', 'Cleanse'],
+            cardNames: ['', 'Swap', 'Replace', 'Block', 'Theft', 'Immunity', 'Hint', 'Rest', 'Shuffle', 'Time-out', 'Shield', 'Mask', 'Anagram', 'Cleanse'],
             negative: 'Player {0} used the card "{1}" on player {2}.',
             positive: 'Player {0} used the card "{1}" on player {2}.',
             shield: 'Player {0} protected themselves with "Shield" from "{1}" used by {2}.',
@@ -34,7 +34,7 @@
             anagramDescription: 'Shuffle letters in the selected player’s words until their next correct check is confirmed.'
         },
         uk: {
-            cardNames: ['', 'Обмін', 'Заміна', 'Блокування', 'Тимчасове слово', 'Імунітет', 'Підказка', 'Перепочинок', 'Перетасовка', 'Тайм-аут', 'Щит', 'Маскування', 'Анаграма', 'Очищення'],
+            cardNames: ['', 'Обмін', 'Заміна', 'Блокування', 'Крадіжка', 'Імунітет', 'Підказка', 'Перепочинок', 'Перетасовка', 'Тайм-аут', 'Щит', 'Маскування', 'Анаграма', 'Очищення'],
             negative: 'Гравець {0} застосував картку "{1}" до гравця {2}.',
             positive: 'Гравець {0} застосував картку "{1}" до гравця {2}.',
             shield: 'Гравець {0} захистився карткою "Щит" від картки "{1}" гравця {2}.',
@@ -52,7 +52,7 @@
             anagramDescription: 'Перемішати літери у словах обраного гравця до наступної підтвердженої правильної перевірки.'
         },
         it: {
-            cardNames: ['', 'Scambio', 'Sostituzione', 'Blocco', 'Parola temporanea', 'Immunità', 'Suggerimento', 'Pausa', 'Rimescola', 'Time-out', 'Scudo', 'Mascheramento', 'Anagramma', 'Purifica'],
+            cardNames: ['', 'Scambio', 'Sostituzione', 'Blocco', 'Furto', 'Immunità', 'Suggerimento', 'Pausa', 'Rimescola', 'Time-out', 'Scudo', 'Mascheramento', 'Anagramma', 'Purifica'],
             negative: 'Il giocatore {0} ha usato la carta "{1}" sul giocatore {2}.',
             positive: 'Il giocatore {0} ha usato la carta "{1}" sul giocatore {2}.',
             shield: 'Il giocatore {0} si è protetto con "Scudo" dalla carta "{1}" usata da {2}.',

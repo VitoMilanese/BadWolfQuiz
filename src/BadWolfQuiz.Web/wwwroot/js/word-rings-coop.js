@@ -762,12 +762,16 @@
             name.textContent = player.name;
             main.append(name);
 
-            const meta = document.createElement('div');
-            meta.className = 'word-rings-player-meta';
-            const score = document.createElement('span');
-            score.textContent = `${formatScore(player.score)} pt`;
-            meta.append(score);
-            card.append(main, meta);
+            card.append(main);
+            const dedicatedHostCard = state?.dedicatedHostMode === true && player.isHost === true;
+            if (!dedicatedHostCard) {
+                const meta = document.createElement('div');
+                meta.className = 'word-rings-player-meta';
+                const score = document.createElement('span');
+                score.textContent = `${formatScore(player.score)} pt`;
+                meta.append(score);
+                card.append(meta);
+            }
             playersList.append(card);
         }
     };
@@ -897,13 +901,14 @@
         state = nextState;
         processRoomEvents(nextState);
         if (nextState.phase === 'playing') resultShown = false;
+        const dedicatedHostViewer = nextState.dedicatedHostMode === true && nextState.isHost === true;
         const ownScore = nextState.players?.find(player => player.id === nextState.playerId)?.score
             ?? nextState.playerScore
             ?? 0;
-        progress.textContent = format(
-            root.dataset.roomScoreTemplate,
-            formatScore(ownScore),
-            nextState.targetScore);
+        progress.hidden = dedicatedHostViewer;
+        progress.textContent = dedicatedHostViewer
+            ? ''
+            : format(root.dataset.roomScoreTemplate, formatScore(ownScore), nextState.targetScore);
         renderPlayers(nextState.players);
         renderRules(nextState);
         renderPlacements(nextState.placements);

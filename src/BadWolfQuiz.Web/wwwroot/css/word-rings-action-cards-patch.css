@@ -26,24 +26,6 @@
     max-height: 100%;
 }
 
-.word-rings-bank-column > .word-rings-bank:has(.word-rings-word.is-action-temporary-word) {
-    flex: 0 1 auto;
-    overflow-y: visible;
-}
-
-.word-rings-bank:has(.word-rings-word.is-action-temporary-word) {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
-.word-rings-bank:has(.word-rings-word.is-action-temporary-word) .word-rings-word-list {
-    gap: 5px;
-}
-
-.word-rings-bank:has(.word-rings-word.is-action-temporary-word) .word-rings-word {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
 
 .word-rings-action-effect-notice {
     position: fixed;

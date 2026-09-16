@@ -9,7 +9,7 @@ public enum WordRingsActionCardKind
     Swap = 1,
     Replace = 2,
     Block = 3,
-    Temporary = 4,
+    Theft = 4,
     Immunity = 5,
     Hint = 6,
     Rest = 7,
@@ -24,6 +24,13 @@ public enum WordRingsActionCardKind
 public sealed record WordRingsActionCardItem(int Id, bool IsTemporary);
 
 public sealed record WordRingsActionCardTarget(Guid Id, string Name, bool IsSelf);
+
+public sealed record WordRingsActionCardTheftTarget(Guid Id, string Name);
+
+public sealed record WordRingsActionCardTheftPreview(
+    IReadOnlyList<WordRingsActionCardTheftTarget> Players,
+    Guid? SelectedPlayerId,
+    int? CardId);
 
 public sealed record WordRingsActionCardSnapshot(
     bool Enabled,
@@ -72,6 +79,7 @@ public sealed class WordRingsActionCardCoordinator
         [
             WordRingsActionCardKind.Replace,
             WordRingsActionCardKind.Block,
+            WordRingsActionCardKind.Theft,
             WordRingsActionCardKind.Shuffle,
             WordRingsActionCardKind.Timeout,
             WordRingsActionCardKind.Mask,
@@ -153,6 +161,49 @@ public sealed class WordRingsActionCardCoordinator
             var meta = RequireMeta(state.RoomCode);
             SynchronizePlayers(meta, state);
             return BuildSnapshot(meta, state);
+        }
+    }
+
+    public WordRingsActionCardTheftPreview GetTheftPreview(
+        string? roomCode,
+        string? playerToken,
+        Guid? targetPlayerId)
+    {
+        var state = SynchronizeTurnState(roomCode, playerToken);
+        lock (_metaSync)
+        {
+            var meta = RequireMeta(state.RoomCode);
+            SynchronizePlayers(meta, state);
+            if (!IsActive(meta, state) || !IsParticipant(state, state.PlayerId))
+            {
+                throw new InvalidOperationException("ActionCardsUnavailable");
+            }
+
+            var actor = RequirePlayer(meta, state.PlayerId);
+            if (!actor.Cards.Contains(WordRingsActionCardKind.Theft))
+            {
+                throw new InvalidOperationException("ActionCardNotOwned");
+            }
+
+            var players = state.Players
+                .Where(player => IsParticipant(state, player.Id) && player.Id != state.PlayerId)
+                .Where(player => RequirePlayer(meta, player.Id).Cards.Count > 0)
+                .Select(player => new WordRingsActionCardTheftTarget(player.Id, player.Name))
+                .ToArray();
+
+            if (targetPlayerId is null)
+            {
+                return new WordRingsActionCardTheftPreview(players, null, null);
+            }
+
+            if (!players.Any(player => player.Id == targetPlayerId.Value))
+            {
+                throw new InvalidOperationException("ActionCardTargetUnavailable");
+            }
+
+            var target = RequirePlayer(meta, targetPlayerId.Value);
+            var revealed = GetOrRevealTheftCard(actor, targetPlayerId.Value, target);
+            return new WordRingsActionCardTheftPreview(players, targetPlayerId, (int)revealed);
         }
     }
 
@@ -349,6 +400,7 @@ public sealed class WordRingsActionCardCoordinator
                 SynchronizePlayers(meta, state);
                 var actor = RequirePlayer(meta, actorId);
                 if (!actor.Cards.Remove(kind)) throw new InvalidOperationException("ActionCardNotOwned");
+                InvalidateTheftReveals(meta, actorId, kind);
                 meta.Revision++;
                 var actorName = state.Players.FirstOrDefault(player => player.Id == actorId)?.Name ?? string.Empty;
                 return new WordRingsActionCardUseResult(BuildSnapshot(meta, state), actorName, false);
@@ -363,6 +415,7 @@ public sealed class WordRingsActionCardCoordinator
         Guid targetId;
         string targetName;
         bool blockedByShield = false;
+        WordRingsActionCardKind? theftCard = null;
         int shuffleCount = 0;
         HashSet<WordRingsActionCardKind>? shuffleOldKinds = null;
 
@@ -386,6 +439,15 @@ public sealed class WordRingsActionCardCoordinator
             var target = RequirePlayer(meta, targetId);
             targetName = state.Players.First(player => player.Id == targetId).Name;
 
+            if (kind == WordRingsActionCardKind.Theft)
+            {
+                if (targetId == actorId || target.Cards.Count == 0)
+                {
+                    throw new InvalidOperationException("ActionCardTargetUnavailable");
+                }
+                theftCard = GetOrRevealTheftCard(actor, targetId, target);
+            }
+
             if (kind == WordRingsActionCardKind.Shuffle && targetId == actorId)
             {
                 shuffleCount = actor.Cards.Count;
@@ -393,6 +455,7 @@ public sealed class WordRingsActionCardCoordinator
             }
 
             actor.Cards.Remove(kind);
+            InvalidateTheftReveals(meta, actorId, kind);
 
             if (actorId != targetId && ShieldedCards.Contains(kind) && target.Cards.Contains(WordRingsActionCardKind.Shield))
             {
@@ -402,6 +465,21 @@ public sealed class WordRingsActionCardCoordinator
                     BuildSnapshot(meta, state),
                     targetName,
                     true);
+            }
+
+            if (kind == WordRingsActionCardKind.Theft)
+            {
+                if (theftCard is not WordRingsActionCardKind revealed || !target.Cards.Remove(revealed))
+                {
+                    throw new InvalidOperationException("ActionCardTargetUnavailable");
+                }
+                actor.Cards.Add(revealed);
+                InvalidateTheftReveals(meta, targetId, revealed);
+                meta.Revision++;
+                return new WordRingsActionCardUseResult(
+                    BuildSnapshot(meta, state),
+                    targetName,
+                    false);
             }
         }
 
@@ -415,9 +493,6 @@ public sealed class WordRingsActionCardCoordinator
                 break;
             case WordRingsActionCardKind.Block:
                 ApplyBlock(code, targetId);
-                break;
-            case WordRingsActionCardKind.Temporary:
-                GrantTemporaryWord(code, state, targetId);
                 break;
             case WordRingsActionCardKind.Immunity:
                 lock (_metaSync)
@@ -442,6 +517,7 @@ public sealed class WordRingsActionCardCoordinator
                     var target = RequirePlayer(meta, targetId);
                     var count = targetId == actorId ? shuffleCount : target.Cards.Count;
                     var oldKinds = targetId == actorId ? shuffleOldKinds! : target.Cards.ToHashSet();
+                    InvalidateTheftReveals(meta, targetId);
                     ShuffleCards(target, count, oldKinds);
                 }
                 break;
@@ -537,6 +613,7 @@ public sealed class WordRingsActionCardCoordinator
         foreach (var stale in meta.Players.Keys.Where(id => !live.Contains(id)).ToArray())
         {
             meta.Players.Remove(stale);
+            foreach (var observer in meta.Players.Values) observer.TheftReveals.Remove(stale);
         }
         foreach (var player in state.Players)
         {
@@ -679,6 +756,14 @@ public sealed class WordRingsActionCardCoordinator
             .ToArray();
         var others = participantIds.Where(id => id != actorId).ToArray();
 
+        if (kind == WordRingsActionCardKind.Theft)
+        {
+            if (requestedTargetId is not Guid theftTarget || !others.Contains(theftTarget))
+            {
+                throw new InvalidOperationException("ActionCardTargetUnavailable");
+            }
+            return theftTarget;
+        }
         if (kind is WordRingsActionCardKind.Swap or WordRingsActionCardKind.Block)
         {
             if (others.Length == 0) throw new InvalidOperationException("ActionCardTargetUnavailable");
@@ -932,6 +1017,38 @@ public sealed class WordRingsActionCardCoordinator
         return false;
     }
 
+    private static WordRingsActionCardKind GetOrRevealTheftCard(
+        PlayerActionState actor,
+        Guid targetId,
+        PlayerActionState target)
+    {
+        if (actor.TheftReveals.TryGetValue(targetId, out var revealed) && target.Cards.Contains(revealed))
+        {
+            return revealed;
+        }
+
+        actor.TheftReveals.Remove(targetId);
+        if (target.Cards.Count == 0)
+        {
+            throw new InvalidOperationException("ActionCardTargetUnavailable");
+        }
+        revealed = target.Cards[Random.Shared.Next(target.Cards.Count)];
+        actor.TheftReveals[targetId] = revealed;
+        return revealed;
+    }
+
+    private static void InvalidateTheftReveals(
+        RoomActionMeta meta,
+        Guid targetId,
+        WordRingsActionCardKind? card = null)
+    {
+        foreach (var observer in meta.Players.Values)
+        {
+            if (!observer.TheftReveals.TryGetValue(targetId, out var revealed)) continue;
+            if (card is null || revealed == card.Value) observer.TheftReveals.Remove(targetId);
+        }
+    }
+
     private static void TryAwardNormalCard(RoomActionMeta meta, PlayerActionState player)
     {
         if (player.Cards.Count >= meta.MaximumCards) return;
@@ -1157,6 +1274,7 @@ public sealed class WordRingsActionCardCoordinator
     private sealed class PlayerActionState
     {
         public List<WordRingsActionCardKind> Cards { get; } = [];
+        public Dictionary<Guid, WordRingsActionCardKind> TheftReveals { get; } = [];
         public int CorrectProgress { get; set; }
         public bool TurnFailureImmunity { get; set; }
         public bool PendingTurnFailureImmunity { get; set; }

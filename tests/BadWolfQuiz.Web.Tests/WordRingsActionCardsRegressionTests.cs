@@ -198,7 +198,7 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("is-positive", patchCss, StringComparison.Ordinal);
         Assert.Contains("is-negative", patchCss, StringComparison.Ordinal);
         Assert.Contains("is-neutral", patchCss, StringComparison.Ordinal);
-        Assert.Contains(":has(.word-rings-word.is-action-temporary-word)", patchCss, StringComparison.Ordinal);
+        Assert.DoesNotContain("is-action-temporary-word", patchCss, StringComparison.Ordinal);
         Assert.Contains("align-self: end;", patchCss, StringComparison.Ordinal);
 
         Assert.Contains("PendingImmunityDecisions", patchService, StringComparison.Ordinal);
@@ -215,11 +215,11 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("OnPostResolveImmunityDecision", patchApi, StringComparison.Ordinal);
         Assert.Contains("OnPostEnsureTargetWords", patchApi, StringComparison.Ordinal);
 
-        Assert.Contains("word-rings-action-cards-patch.css?v=1", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("word-rings-action-cards-patch.js?v=1", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-patch.css?v=2", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("word-rings-action-cards-patch.js?v=2", tagHelper, StringComparison.Ordinal);
         Assert.True(
-            tagHelper.IndexOf("word-rings-action-cards-patch.js?v=1", StringComparison.Ordinal) <
-            tagHelper.IndexOf("word-rings-action-cards-v2.js?v=4", StringComparison.Ordinal));
+            tagHelper.IndexOf("word-rings-action-cards-patch.js?v=2", StringComparison.Ordinal) <
+            tagHelper.IndexOf("word-rings-action-cards-v2.js?v=5", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -244,6 +244,10 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("randomPlayer: 'Випадковий гравець'", script, StringComparison.Ordinal);
         Assert.Contains("const passiveCards = new Set([10]);", script, StringComparison.Ordinal);
         Assert.Contains("const outOfTurn = new Set([8, 13]);", script, StringComparison.Ordinal);
+        Assert.Contains("const soloPool = [2, 5, 6, 8];", script, StringComparison.Ordinal);
+        Assert.Contains("04-theft.png", script, StringComparison.Ordinal);
+        Assert.Contains("ActionCardTheftPreview", script, StringComparison.Ordinal);
+        Assert.Contains("theftNoPlayers", script, StringComparison.Ordinal);
         Assert.Contains("closest('.word-rings-word.is-action-blocked')", script, StringComparison.Ordinal);
         Assert.Contains("lastRenderedCardSignature", script, StringComparison.Ordinal);
         Assert.Contains("new MutationObserver", pointerDrag, StringComparison.Ordinal);
@@ -251,6 +255,8 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("regularVisibleBankWords", coopScript, StringComparison.Ordinal);
         Assert.Contains("data-action-overflow-word=\"true\"", coopScript, StringComparison.Ordinal);
         Assert.Contains("wordrings:bank-rendered", coopScript, StringComparison.Ordinal);
+        Assert.Contains("dedicatedHostCard", coopScript, StringComparison.Ordinal);
+        Assert.Contains("progress.hidden = dedicatedHostViewer", coopScript, StringComparison.Ordinal);
         Assert.Contains("regularVisibleBankWords", soloScript, StringComparison.Ordinal);
         Assert.Contains("data-room-sound-enabled", page, StringComparison.Ordinal);
 
@@ -285,9 +291,12 @@ public sealed class WordRingsActionCardsRegressionTests
         Assert.Contains("actor.Cards.Remove(kind)", service, StringComparison.Ordinal);
         Assert.Contains("if (requestedTargetId is null) return others[Random.Shared.Next(others.Length)];", service, StringComparison.Ordinal);
         Assert.Contains("if (!others.Contains(requestedTargetId.Value))", service, StringComparison.Ordinal);
-        Assert.Contains("TemporaryWordLifetime.ExpireAtTurnEnd", service, StringComparison.Ordinal);
-        Assert.DoesNotContain("ExpireOnNextTurnStart", service, StringComparison.Ordinal);
-        Assert.Contains("regular.Concat(liveTemporary)", service, StringComparison.Ordinal);
+        Assert.Contains("Theft = 4", service, StringComparison.Ordinal);
+        Assert.DoesNotContain("Temporary = 4", service, StringComparison.Ordinal);
+        Assert.Contains("GetTheftPreview", service, StringComparison.Ordinal);
+        Assert.Contains("TheftReveals", service, StringComparison.Ordinal);
+        Assert.Contains("InvalidateTheftReveals", service, StringComparison.Ordinal);
+        Assert.Contains("target.Cards.Remove(revealed)", service, StringComparison.Ordinal);
         Assert.Contains("TimeoutNoticeRevision", service, StringComparison.Ordinal);
         Assert.Contains("TimeoutNoticePlayerName", service, StringComparison.Ordinal);
         Assert.Contains("actorMeta.BlockedWords.Remove(actorWord);", service, StringComparison.Ordinal);

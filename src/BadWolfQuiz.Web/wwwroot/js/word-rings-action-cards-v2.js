@@ -21,18 +21,19 @@
             target: 'Apply to', word: 'Your word', randomPlayer: 'Random player', passive: 'Passive', unavailable: 'This card cannot be used right now.',
             shielded: 'The target Shield blocked the effect.', used: 'Action card used.', discarded: 'Action card discarded.',
             immune: 'Immunity cancelled the failed attempt.', noCards: 'Earn cards by placing words correctly.', timeoutNotice: '{0} skips this turn!',
+            theftRevealed: 'Revealed card', theftNoPlayers: 'No other player currently has an action card.', theftLoading: 'Loading card…',
             cards: [
                 ['', ''],
                 ['Swap', 'Exchange one of your words with a random word of the selected player.'],
                 ['Replace', 'Discard a word and receive a new one.'],
                 ['Block', 'Deactivate 2 random words of the selected player for one turn.'],
-                ['Temporary word', 'Receive one additional word until that player finishes the relevant turn.'],
+                ['Theft', 'Steal the one revealed action card from the selected player.'],
                 ['Immunity', 'Activate immunity: one failed attempt has no consequences.'],
                 ['Hint', 'Highlight a word that definitely fits.'],
                 ['Rest', 'Skip your turn and receive immunity for your next turn.'],
                 ['Shuffle', 'Replace all held action cards with the same number of random other cards.'],
                 ['Time-out', 'The selected player skips their next turn.'],
-                ['Shield', 'Passive: while held, blocks Replace, Block, Shuffle, Time-out, Mask and Anagram used against you.'],
+                ['Shield', 'Passive: while held, blocks Replace, Block, Theft, Shuffle, Time-out, Mask and Anagram used against you.'],
                 ['Mask', 'Hide some letters in the selected player’s visible words until each affected word is checked.'],
                 ['Anagram', 'Shuffle letters in the selected player’s visible words until each affected word is checked.'],
                 ['Cleanse', 'Remove Block, Time-out, Mask and Anagram effects; if none are active, grant one-turn immunity.']
@@ -44,18 +45,19 @@
             target: 'Застосувати до', word: 'Ваше слово', randomPlayer: 'Випадковий гравець', passive: 'Пасивна', unavailable: 'Цю картку зараз не можна використати.',
             shielded: 'Щит гравця заблокував ефект.', used: 'Картку дій використано.', discarded: 'Картку дій викинуто.',
             immune: 'Імунітет скасував невдалу спробу.', noCards: 'Правильно розміщуйте слова, щоб отримувати картки.', timeoutNotice: '{0} пропускає хід!',
+            theftRevealed: 'Відкрита картка', theftNoPlayers: 'Зараз немає іншого гравця з картками дій.', theftLoading: 'Завантаження картки…',
             cards: [
                 ['', ''],
                 ['Обмін', 'Обміняти своє слово на випадкове слово обраного гравця.'],
                 ['Заміна', 'Скинути слово й отримати нове.'],
                 ['Блокування', 'Деактивувати 2 випадкових слова обраного гравця на один хід.'],
-                ['Тимчасове слово', 'Отримати додаткове слово до завершення відповідного ходу гравця.'],
+                ['Крадіжка', 'Вкрасти одну відкриту картку дій обраного гравця.'],
                 ['Імунітет', 'Активувати імунітет: одна невдала спроба не матиме наслідків.'],
                 ['Підказка', 'Підсвітити слово, яке точно підходить.'],
                 ['Перепочинок', 'Пропустити хід, але отримати імунітет на наступний.'],
                 ['Перетасовка', 'Змінити всі свої картки дій на таку ж кількість випадкових інших.'],
                 ['Тайм-аут', 'Обраний гравець пропускає наступний хід.'],
-                ['Щит', 'Пасивна: поки картка в інвентарі, блокує Заміну, Блокування, Перетасовку, Тайм-аут, Маскування та Анаграму проти вас.'],
+                ['Щит', 'Пасивна: поки картка в інвентарі, блокує Заміну, Блокування, Крадіжку, Перетасовку, Тайм-аут, Маскування та Анаграму проти вас.'],
                 ['Маскування', 'Приховати частину літер у видимих словах обраного гравця, доки кожне з них не буде перевірене.'],
                 ['Анаграма', 'Перемішати літери у видимих словах обраного гравця, доки кожне з них не буде перевірене.'],
                 ['Очищення', 'Прибрати ефекти Блокування, Тайм-аут, Маскування й Анаграма; якщо їх немає — дати імунітет на один хід.']
@@ -67,18 +69,19 @@
             target: 'Applica a', word: 'La tua parola', randomPlayer: 'Giocatore casuale', passive: 'Passiva', unavailable: 'Questa carta non può essere usata ora.',
             shielded: 'Lo Scudo del giocatore ha bloccato l’effetto.', used: 'Carta azione usata.', discarded: 'Carta azione scartata.',
             immune: 'L’immunità ha annullato il tentativo fallito.', noCards: 'Posiziona correttamente le parole per ottenere carte.', timeoutNotice: '{0} salta il turno!',
+            theftRevealed: 'Carta rivelata', theftNoPlayers: 'Nessun altro giocatore ha una carta azione.', theftLoading: 'Caricamento carta…',
             cards: [
                 ['', ''],
                 ['Scambio', 'Scambia una tua parola con una parola casuale del giocatore scelto.'],
                 ['Sostituzione', 'Scarta una parola e ricevine una nuova.'],
                 ['Blocco', 'Disattiva 2 parole casuali del giocatore scelto per un turno.'],
-                ['Parola temporanea', 'Ricevi una parola extra fino alla fine del turno pertinente del giocatore.'],
+                ['Furto', 'Ruba la carta azione rivelata del giocatore selezionato.'],
                 ['Immunità', 'Attiva l’immunità: un tentativo fallito non avrà conseguenze.'],
                 ['Suggerimento', 'Evidenzia una parola sicuramente valida.'],
                 ['Pausa', 'Salta il turno e ottieni immunità per il turno successivo.'],
                 ['Rimescola', 'Sostituisci tutte le carte con lo stesso numero di carte casuali diverse.'],
                 ['Time-out', 'Il giocatore scelto salta il prossimo turno.'],
-                ['Scudo', 'Passiva: finché è in mano blocca Sostituzione, Blocco, Rimescola, Time-out, Mascheramento e Anagramma contro di te.'],
+                ['Scudo', 'Passiva: finché è in mano blocca Sostituzione, Blocco, Furto, Rimescola, Time-out, Mascheramento e Anagramma contro di te.'],
                 ['Mascheramento', 'Nascondi alcune lettere nelle parole visibili del giocatore scelto finché ogni parola interessata non viene verificata.'],
                 ['Anagramma', 'Mescola le lettere nelle parole visibili del giocatore scelto finché ogni parola interessata non viene verificata.'],
                 ['Purifica', 'Rimuove Blocco, Time-out, Mascheramento e Anagramma; altrimenti concede immunità per un turno.']
@@ -95,12 +98,14 @@
     };
     const text = translations[language] || translations.en;
     const icons = ['', '⇄', '↻', '⛔', '＋', '♥', '💡', '☕', '⤨', '⏳', '🛡', '◐', '🔀', '✦'];
-    const soloPool = [2, 4, 5, 6, 8];
+    const cardImages = ['', '01-swap.png', '02-replace.png', '03-block.png', '04-theft.png', '05-immunity.png', '06-hint.png', '07-rest.png', '08-shuffle.png', '09-time-out.png', '10-shield.png', '11-mask.png', '12-anagram.png', '13-cleanse.png'];
+    const cardImageBase = '/images/word-rings/action-cards/';
+    const soloPool = [2, 5, 6, 8];
     const outOfTurn = new Set([8, 13]);
     const passiveCards = new Set([10]);
     const randomOptionalTargetCards = new Set([1, 3]);
     const selfOnlyCards = new Set([7]);
-    const otherOnlyCards = new Set([1, 3, 9]);
+    const otherOnlyCards = new Set([1, 3, 4, 9]);
     const explicitTargetCards = new Set([1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13]);
 
     const format = (template, ...values) => values.reduce(
@@ -129,6 +134,7 @@
     let soloImmunityArmed = false;
     let soloAttempt = null;
     let selectedCard = null;
+    let theftPreviewRequest = 0;
     let carouselOffset = 0;
     let lastRenderedCardSignature = '';
 
@@ -260,6 +266,7 @@
         <form method="dialog" class="word-rings-action-dialog-card">
             <div class="word-rings-action-dialog-preview" data-action-dialog-preview></div>
             <label class="word-rings-action-dialog-field" data-action-target-row hidden><span></span><select data-action-target></select></label>
+            <div class="word-rings-action-theft-preview" data-action-theft-preview hidden></div>
             <label class="word-rings-action-dialog-field" data-action-word-row hidden><span></span><select data-action-word></select></label>
             <p class="word-rings-action-dialog-message" data-action-dialog-message></p>
             <div class="word-rings-action-dialog-actions">
@@ -272,6 +279,7 @@
     const dialogPreview = dialog.querySelector('[data-action-dialog-preview]');
     const targetRow = dialog.querySelector('[data-action-target-row]');
     const targetSelect = dialog.querySelector('[data-action-target]');
+    const theftPreview = dialog.querySelector('[data-action-theft-preview]');
     const wordRow = dialog.querySelector('[data-action-word-row]');
     const wordSelect = dialog.querySelector('[data-action-word]');
     const dialogMessage = dialog.querySelector('[data-action-dialog-message]');
@@ -424,10 +432,24 @@
         const passive = passiveCards.has(id);
         button.classList.toggle('is-passive', passive);
         button.classList.toggle('is-unusable', !preview && !cardUsable(id));
+        const artwork = document.createElement('img');
+        artwork.className = 'word-rings-action-card-image';
+        artwork.alt = '';
+        artwork.loading = 'lazy';
+        const imageFile = cardImages[id] || '';
+        artwork.hidden = !imageFile;
+        if (imageFile) artwork.src = `${cardImageBase}${imageFile}`;
         const icon = createElement('span', 'word-rings-action-card-icon', icons[id] || '★');
+        icon.hidden = Boolean(imageFile);
+        if (imageFile) {
+            artwork.addEventListener('error', () => {
+                artwork.hidden = true;
+                icon.hidden = false;
+            }, { once: true });
+        }
         const name = createElement('strong', 'word-rings-action-card-name', definition.title);
         const description = createElement('span', 'word-rings-action-card-description', definition.description);
-        button.append(icon, name, description);
+        button.append(artwork, icon, name, description);
         if (passive) button.append(createElement('span', 'word-rings-action-card-passive', text.passive));
         if (!preview) button.addEventListener('click', () => openCardDialog(card));
         return button;
@@ -557,6 +579,64 @@
         return players;
     };
 
+    const loadTheftPreview = async targetId => {
+        if (isSolo || Number(selectedCard?.id) !== 4 ||
+            !(targetSelect instanceof HTMLSelectElement) || !(theftPreview instanceof HTMLElement)) return;
+        const session = currentSession();
+        if (!session?.token) return;
+        const requestId = ++theftPreviewRequest;
+        theftPreview.hidden = false;
+        theftPreview.replaceChildren(createElement('p', 'word-rings-action-theft-status', text.theftLoading));
+        if (confirmButton instanceof HTMLButtonElement) confirmButton.disabled = true;
+
+        try {
+            const fields = { roomCode, playerToken: session.token };
+            if (targetId) fields.targetPlayerId = targetId;
+            const payload = await roomPost('ActionCardTheftPreview', fields);
+            if (requestId !== theftPreviewRequest || Number(selectedCard?.id) !== 4) return;
+            if (!payload.success) throw new Error(payload.error || 'ActionCardError');
+            const preview = payload.preview || {};
+
+            if (!targetId) {
+                const players = Array.isArray(preview.players) ? preview.players : [];
+                const previousTarget = targetSelect.value;
+                targetSelect.replaceChildren();
+                for (const player of players) {
+                    const option = document.createElement('option');
+                    option.value = player.id;
+                    option.textContent = player.name;
+                    option.dataset.isSelf = 'false';
+                    targetSelect.append(option);
+                }
+                if (!players.length) {
+                    theftPreview.replaceChildren(createElement('p', 'word-rings-action-theft-status', text.theftNoPlayers));
+                    return;
+                }
+                const selected = players.some(player => player.id === previousTarget)
+                    ? previousTarget
+                    : players[0].id;
+                targetSelect.value = selected;
+                await loadTheftPreview(selected);
+                return;
+            }
+
+            const cardId = Number(preview.cardId || 0);
+            if (!Number.isInteger(cardId) || cardId <= 0) {
+                theftPreview.replaceChildren(createElement('p', 'word-rings-action-theft-status', text.theftNoPlayers));
+                return;
+            }
+            const label = createElement('strong', 'word-rings-action-theft-label', text.theftRevealed);
+            const revealedCard = makeCard({ id: cardId, isTemporary: false }, true);
+            revealedCard.classList.add('is-theft-preview');
+            theftPreview.replaceChildren(label, revealedCard);
+            if (confirmButton instanceof HTMLButtonElement) confirmButton.disabled = !cardUsable(4);
+        } catch (error) {
+            if (requestId !== theftPreviewRequest) return;
+            console.error('Could not preview Word Rings theft card.', error);
+            theftPreview.replaceChildren(createElement('p', 'word-rings-action-theft-status', root.dataset.roomError || String(error.message || error)));
+        }
+    };
+
     const populateWordSelect = cardId => {
         if (!(wordRow instanceof HTMLElement) || !(wordSelect instanceof HTMLSelectElement)) return;
         const selectedTargetIsSelf = !isSolo && targetSelect instanceof HTMLSelectElement
@@ -577,6 +657,7 @@
     const openCardDialog = card => {
         const id = Number(card.id);
         selectedCard = card;
+        theftPreviewRequest++;
         if (dialogPreview) {
             dialogPreview.replaceChildren();
             const preview = makeCard(card, true);
@@ -584,41 +665,60 @@
             dialogPreview.append(preview);
         }
         if (dialogMessage) dialogMessage.textContent = cardUsable(id) || passiveCards.has(id) ? '' : text.unavailable;
+        if (theftPreview instanceof HTMLElement) {
+            theftPreview.hidden = id !== 4 || isSolo;
+            theftPreview.replaceChildren();
+        }
 
         if (targetRow instanceof HTMLElement && targetSelect instanceof HTMLSelectElement) {
-            const targets = cardTargets(id);
             targetRow.hidden = isSolo || !explicitTargetCards.has(id);
             targetSelect.replaceChildren();
-            if (randomOptionalTargetCards.has(id)) {
-                const random = document.createElement('option');
-                random.value = '';
-                random.textContent = text.randomPlayer;
-                random.dataset.isSelf = 'false';
-                targetSelect.append(random);
-            }
-            for (const player of targets) {
-                const option = document.createElement('option');
-                option.value = player.id;
-                option.textContent = player.name;
-                option.dataset.isSelf = player.isSelf === true ? 'true' : 'false';
-                targetSelect.append(option);
+            if (id === 4 && !isSolo) {
+                targetRow.hidden = false;
+            } else {
+                const targets = cardTargets(id);
+                if (randomOptionalTargetCards.has(id)) {
+                    const random = document.createElement('option');
+                    random.value = '';
+                    random.textContent = text.randomPlayer;
+                    random.dataset.isSelf = 'false';
+                    targetSelect.append(random);
+                }
+                for (const player of targets) {
+                    const option = document.createElement('option');
+                    option.value = player.id;
+                    option.textContent = player.name;
+                    option.dataset.isSelf = player.isSelf === true ? 'true' : 'false';
+                    targetSelect.append(option);
+                }
             }
         }
         populateWordSelect(id);
         if (confirmButton instanceof HTMLButtonElement) {
             confirmButton.hidden = passiveCards.has(id);
-            confirmButton.disabled = !cardUsable(id);
+            confirmButton.disabled = !cardUsable(id) || (id === 4 && !isSolo);
         }
         if (!dialog.open) dialog.showModal();
+        if (id === 4 && !isSolo) void loadTheftPreview(null);
     };
 
     targetSelect?.addEventListener('change', () => {
-        if (selectedCard) populateWordSelect(Number(selectedCard.id));
+        if (!selectedCard) return;
+        const id = Number(selectedCard.id);
+        if (id === 4 && !isSolo) {
+            void loadTheftPreview(targetSelect instanceof HTMLSelectElement ? targetSelect.value : '');
+            return;
+        }
+        populateWordSelect(id);
     });
     cancelButton?.addEventListener('click', () => dialog.close());
     dialog.addEventListener('cancel', event => {
         event.preventDefault();
         dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+        theftPreviewRequest++;
+        selectedCard = null;
     });
 
     const removeSoloCard = id => {
@@ -694,7 +794,6 @@
         }
         removeSoloCard(id);
         if (id === 2) replaceSoloWord(selectedWord);
-        if (id === 4) grantSoloTemporaryWord();
         if (id === 5) soloImmunityArmed = true;
         if (id === 6) setSoloHint();
     };
