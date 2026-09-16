@@ -261,8 +261,9 @@ public sealed class WordRingsActionCardsLatestRegressionTests
             "wwwroot",
             "css",
             "word-rings-action-cards-patch.css"));
+        var normalizedCss = css.ReplaceLineEndings("\n");
 
-        Assert.Contains(".word-rings-stage {\n    align-self: center;\n}", css, StringComparison.Ordinal);
+        Assert.Contains(".word-rings-stage {\n    align-self: center;\n}", normalizedCss, StringComparison.Ordinal);
     }
 
     private static void InjectPendingImmunityDecision(
