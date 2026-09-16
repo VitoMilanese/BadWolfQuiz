@@ -22,6 +22,17 @@ public sealed class GameplayPolishAssetsTagHelper : TagHelper
             return;
         }
 
+        if (output.Attributes.ContainsName("data-player-id") &&
+            output.Attributes.ContainsName("data-final-status"))
+        {
+            // Player pages can survive for a long time on phones while the browser
+            // suspends JavaScript and network activity. Install the recovery adapter
+            // before SignalR is loaded so the eventual player connection can restart
+            // itself and refresh presence/question state when the page resumes.
+            output.PreContent.AppendHtml(
+                "<script src=\"/js/player-mobile-recovery.js?v=1\"></script>");
+        }
+
         if (output.Attributes.TryGetAttribute("data-final-status", out var finalStatus) &&
             string.Equals(
                 finalStatus.Value?.ToString(),
