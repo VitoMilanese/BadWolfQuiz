@@ -22,8 +22,10 @@
 
     const soloStorageKey = 'badwolf.wordrings.gameplay-options';
     const roomStorageKey = `badwolf.wordrings.room.${roomCode}`;
+    const firstTurnRouletteStorageKey = `badwolf.wordrings.first-turn-roulette.${roomCode}`;
     let currentOptions = null;
     let lastRoomState = null;
+    let lastObservedRoomPhase = null;
     let rebalancing = false;
     let rouletteRunning = false;
     let rouletteAudio = null;
@@ -49,6 +51,22 @@
         if (!roomCode) return '';
         try { return String(JSON.parse(localStorage.getItem(roomStorageKey) || 'null')?.token || ''); }
         catch { return ''; }
+    };
+
+    const firstTurnRouletteDone = () => {
+        if (!roomCode) return false;
+        try { return sessionStorage.getItem(firstTurnRouletteStorageKey) === 'done'; }
+        catch { return false; }
+    };
+
+    const markFirstTurnRouletteDone = () => {
+        if (!roomCode) return;
+        try { sessionStorage.setItem(firstTurnRouletteStorageKey, 'done'); } catch { }
+    };
+
+    const resetFirstTurnRoulette = () => {
+        if (!roomCode) return;
+        try { sessionStorage.removeItem(firstTurnRouletteStorageKey); } catch { }
     };
 
     const formValue = (init, key) => init?.body instanceof FormData ? init.body.get(key) : null;
@@ -88,12 +106,23 @@
         return Math.min(Number(options?.handSize || 5), Math.max(1, Math.ceil(remaining)));
     };
 
+    const pendingHandDeficit = () =>
+        root.classList.contains('has-pending-word') || root.classList.contains('is-awaiting-host-judgement') ? 1 : 0;
+
+    const statePendingHandDeficit = state => {
+        const hasOwnServerPending = Array.isArray(state?.placements) && state.placements.some(placement =>
+            placement?.isPending === true && placement?.playerId === state?.playerId);
+        return hasOwnServerPending || root.classList.contains('has-pending-word') ? 1 : 0;
+    };
+
     const decorateRoomState = (state, options = currentOptions) => {
         if (!state || !Array.isArray(state.bankWords) || !Array.isArray(state.queuedWords) || !options) return state;
         const allWords = [...state.bankWords, ...state.queuedWords];
-        const limit = state.dedicatedHostMode === true && state.isHost === true
-            ? Math.min(options.handSize, allWords.length)
-            : Math.min(effectiveHandSize(options, state.targetScore, state.playerScore), allWords.length);
+        const baseLimit = state.dedicatedHostMode === true && state.isHost === true
+            ? Number(options.handSize || 5)
+            : effectiveHandSize(options, state.targetScore, state.playerScore);
+        const deficit = state.dedicatedHostMode === true && state.isHost === true ? 0 : statePendingHandDeficit(state);
+        const limit = Math.min(Math.max(0, baseLimit - deficit), allWords.length);
         state.bankWords = allWords.slice(0, limit);
         state.queuedWords = allWords.slice(limit);
         return state;
@@ -277,14 +306,18 @@
     const rebalanceSoloHand = () => {
         if (!isSolo || !currentOptions) return;
         const values = parseProgress();
-        rebalanceWordList(effectiveHandSize(currentOptions, values.target, values.correct));
+        const allowed = Math.max(0,
+            effectiveHandSize(currentOptions, values.target, values.correct) -
+            (root.classList.contains('has-pending-word') ? 1 : 0));
+        rebalanceWordList(allowed);
     };
 
     const rebalanceCooperativeHand = () => {
         if (isSolo || !currentOptions || !lastRoomState) return;
         const allowed = lastRoomState.dedicatedHostMode === true && lastRoomState.isHost === true
             ? currentOptions.handSize
-            : effectiveHandSize(currentOptions, lastRoomState.targetScore, lastRoomState.playerScore);
+            : Math.max(0,
+                effectiveHandSize(currentOptions, lastRoomState.targetScore, lastRoomState.playerScore) - pendingHandDeficit());
         rebalanceWordList(allowed, true);
     };
 
@@ -315,7 +348,10 @@
             queueMicrotask(overrideSoloExhaustionResult);
         }).observe(progress, { childList: true, characterData: true, subtree: true });
     }
-    new MutationObserver(overrideSoloExhaustionResult).observe(root, { attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(() => {
+        queueMicrotask(isSolo ? rebalanceSoloHand : rebalanceCooperativeHand);
+        queueMicrotask(overrideSoloExhaustionResult);
+    }).observe(root, { attributes: true, attributeFilter: ['class'] });
     if (wordList instanceof HTMLElement) {
         new MutationObserver(() => queueMicrotask(isSolo ? rebalanceSoloHand : rebalanceCooperativeHand))
             .observe(wordList, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'class'] });
@@ -359,21 +395,19 @@
         : [];
 
     const maybeStartFirstTurnRoulette = state => {
-        if (isSolo || rouletteRunning || !state || state.phase !== 'playing' || !state.currentPlayerId || state.seedSetupPending === true) return;
+        if (isSolo || rouletteRunning || firstTurnRouletteDone() || !state || state.phase !== 'playing' || !state.currentPlayerId || state.seedSetupPending === true) return;
         const participants = (state.players || [])
             .map((player, index) => ({ player, index }))
             .filter(item => !(state.dedicatedHostMode === true && item.player.isHost === true));
         if (participants.length === 0 || participants.some(item => Number(item.player.score || 0) !== 0)) return;
-        const played = (state.placements || []).some(item => item.isSeed !== true && item.isPending !== true);
-        if (played) return;
+        const played = (state.placements || []).some(item => item.isSeed !== true);
+        if (played) {
+            markFirstTurnRouletteDone();
+            return;
+        }
         const selected = participants.findIndex(item => item.player.id === state.currentPlayerId);
         if (selected < 0) return;
-        const key = `${roomCode}:${state.version}:${state.currentPlayerId}`;
-        const storageKey = `badwolf.wordrings.first-turn-roulette.${roomCode}`;
-        try {
-            if (sessionStorage.getItem(storageKey) === key) return;
-            sessionStorage.setItem(storageKey, key);
-        } catch { }
+        markFirstTurnRouletteDone();
 
         window.setTimeout(async () => {
             const cards = playerCards();
@@ -411,6 +445,10 @@
 
     const processRoomState = state => {
         if (!state) return state;
+        if (state.phase === 'waiting' || (lastObservedRoomPhase === 'finished' && state.phase === 'playing')) {
+            resetFirstTurnRoulette();
+        }
+        lastObservedRoomPhase = state.phase;
         lastRoomState = decorateRoomState(state);
         window.setTimeout(() => {
             rebalanceCooperativeHand();
@@ -530,6 +568,7 @@
         }
 
         if (roomHandler === 'StartRoom') {
+            resetFirstTurnRoulette();
             const response = await nativeFetch(input, init);
             try {
                 const payload = await response.clone().json();

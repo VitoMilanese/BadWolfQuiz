@@ -194,4 +194,22 @@
   <data name="WordRingsRed50_Description" xml:space="preserve"><value>Правильно помістити сумарно 50 слів у червоне кільце.</value></data>
   <data name="WordRingsHost10_Name" xml:space="preserve"><value>Головний суддя</value></data>
   <data name="WordRingsHost10_Description" xml:space="preserve"><value>Провести 10 ігор «Слівце в кільце» як хост, який не бере участі у грі та перевіряє слова.</value></data>
+  <data name="WordRingsCleanseImmediate_Name" xml:space="preserve"><value>Миттєве очищення</value></data>
+  <data name="WordRingsCleanseImmediate_Description" xml:space="preserve"><value>Накласти на гравця негативний ефект і відразу зняти його карткою «Очищення».</value></data>
+  <data name="WordRingsShieldSave_Name" xml:space="preserve"><value>Під щитом</value></data>
+  <data name="WordRingsShieldSave_Description" xml:space="preserve"><value>Уникнути негативного ефекту завдяки картці «Щит».</value></data>
+  <data name="WordRingsMaskedCorrect_Name" xml:space="preserve"><value>Крізь маску</value></data>
+  <data name="WordRingsMaskedCorrect_Description" xml:space="preserve"><value>Правильно поставити слово, частина літер якого прихована ефектом «Маскування».</value></data>
+  <data name="WordRingsAnagramCorrect_Name" xml:space="preserve"><value>Розплутана анаграма</value></data>
+  <data name="WordRingsAnagramCorrect_Description" xml:space="preserve"><value>Правильно поставити слово під дією ефекту «Анаграма».</value></data>
+  <data name="WordRingsHintTripleCorrect_Name" xml:space="preserve"><value>Підказка в саму точку</value></data>
+  <data name="WordRingsHintTripleCorrect_Description" xml:space="preserve"><value>Поставити підсвічене «Підказкою» слово в перетин усіх трьох кілець і отримати правильне зарахування.</value></data>
+  <data name="WordRingsStealMaskedWord_Name" xml:space="preserve"><value>Крадіжка під маскою</value></data>
+  <data name="WordRingsStealMaskedWord_Description" xml:space="preserve"><value>Викрасти в іншого гравця слово з прихованими літерами від «Маскування».</value></data>
+  <data name="WordRingsStealAnagramWord_Name" xml:space="preserve"><value>Вкрадена анаграма</value></data>
+  <data name="WordRingsStealAnagramWord_Description" xml:space="preserve"><value>Викрасти в іншого гравця слово з перемішаними літерами від «Анаграми».</value></data>
+  <data name="WordRingsStealBlockedWord_Name" xml:space="preserve"><value>Вкрасти заборонене</value></data>
+  <data name="WordRingsStealBlockedWord_Description" xml:space="preserve"><value>Викрасти в іншого гравця слово, заблоковане карткою «Блокування».</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Name" xml:space="preserve"><value>Зіграти все</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Description" xml:space="preserve"><value>У мультиплеєрі першим використати всі картки дій зі своєї руки.</value></data>
 </root>

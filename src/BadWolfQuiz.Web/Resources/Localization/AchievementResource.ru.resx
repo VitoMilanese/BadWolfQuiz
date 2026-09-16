@@ -194,4 +194,22 @@
   <data name="WordRingsRed50_Description" xml:space="preserve"><value>Україна</value></data>
   <data name="WordRingsHost10_Name" xml:space="preserve"><value>Україна</value></data>
   <data name="WordRingsHost10_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsCleanseImmediate_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsCleanseImmediate_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsShieldSave_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsShieldSave_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsMaskedCorrect_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsMaskedCorrect_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsAnagramCorrect_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsAnagramCorrect_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsHintTripleCorrect_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsHintTripleCorrect_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsStealMaskedWord_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsStealMaskedWord_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsStealAnagramWord_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsStealAnagramWord_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsStealBlockedWord_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsStealBlockedWord_Description" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Name" xml:space="preserve"><value>Україна</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Description" xml:space="preserve"><value>Україна</value></data>
 </root>

@@ -130,6 +130,26 @@
         }
     };
 
+    const wirePlayerAction = (button, callback) => {
+        let pointerHandled = false;
+        button.addEventListener('pointerdown', event => {
+            if (event.pointerType === 'mouse' && event.button !== 0) return;
+            pointerHandled = true;
+            event.preventDefault();
+            event.stopPropagation();
+            callback();
+        });
+        button.addEventListener('click', event => {
+            if (pointerHandled) {
+                pointerHandled = false;
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            callback();
+        });
+    };
+
     const renderPlayerActions = () => {
         if (!playersList || !hostState) return;
         const cards = [...playersList.querySelectorAll(':scope > .word-rings-player-card')];
@@ -148,7 +168,7 @@
                 pass.title = root.dataset.roomPassTurn || '';
                 pass.setAttribute('aria-label', pass.title);
                 pass.disabled = busy || Boolean(hostState.pendingPlacement);
-                pass.addEventListener('click', () => void action('SetRoomTurn', { playerId: player.id }));
+                wirePlayerAction(pass, () => void action('SetRoomTurn', { playerId: player.id }));
                 actions.append(pass);
             }
             if (hostState.phase !== 'finished') {
@@ -159,7 +179,7 @@
                 kick.title = root.dataset.roomKickPlayer || '';
                 kick.setAttribute('aria-label', kick.title);
                 kick.disabled = busy || Boolean(hostState.pendingPlacement);
-                kick.addEventListener('click', () => void action('KickRoomPlayer', { playerId: player.id }));
+                wirePlayerAction(kick, () => void action('KickRoomPlayer', { playerId: player.id }));
                 actions.append(kick);
             }
             if (actions.childElementCount) card.append(actions);

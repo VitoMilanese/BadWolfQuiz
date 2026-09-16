@@ -194,4 +194,22 @@
   <data name="WordRingsRed50_Description" xml:space="preserve"><value>Posiziona correttamente 50 parole complessive nell’anello rosso.</value></data>
   <data name="WordRingsHost10_Name" xml:space="preserve"><value>Arbitro veterano</value></data>
   <data name="WordRingsHost10_Description" xml:space="preserve"><value>Gestisci 10 partite come host non giocante che giudica le parole.</value></data>
+  <data name="WordRingsCleanseImmediate_Name" xml:space="preserve"><value>Pulizia immediata</value></data>
+  <data name="WordRingsCleanseImmediate_Description" xml:space="preserve"><value>Applica un effetto negativo a un giocatore e rimuovilo subito con Purifica.</value></data>
+  <data name="WordRingsShieldSave_Name" xml:space="preserve"><value>Sotto lo scudo</value></data>
+  <data name="WordRingsShieldSave_Description" xml:space="preserve"><value>Evita un effetto negativo grazie a Scudo.</value></data>
+  <data name="WordRingsMaskedCorrect_Name" xml:space="preserve"><value>Attraverso la maschera</value></data>
+  <data name="WordRingsMaskedCorrect_Description" xml:space="preserve"><value>Posiziona correttamente una parola con alcune lettere nascoste da Mascheramento.</value></data>
+  <data name="WordRingsAnagramCorrect_Name" xml:space="preserve"><value>Anagramma risolto</value></data>
+  <data name="WordRingsAnagramCorrect_Description" xml:space="preserve"><value>Posiziona correttamente una parola sotto l’effetto Anagramma.</value></data>
+  <data name="WordRingsHintTripleCorrect_Name" xml:space="preserve"><value>Suggerimento al centro</value></data>
+  <data name="WordRingsHintTripleCorrect_Description" xml:space="preserve"><value>Posiziona una parola evidenziata da Suggerimento nell’intersezione di tutti e tre gli anelli e falla convalidare.</value></data>
+  <data name="WordRingsStealMaskedWord_Name" xml:space="preserve"><value>Furto mascherato</value></data>
+  <data name="WordRingsStealMaskedWord_Description" xml:space="preserve"><value>Ruba una parola attualmente colpita da Mascheramento.</value></data>
+  <data name="WordRingsStealAnagramWord_Name" xml:space="preserve"><value>Anagramma rubato</value></data>
+  <data name="WordRingsStealAnagramWord_Description" xml:space="preserve"><value>Ruba una parola attualmente colpita da Anagramma.</value></data>
+  <data name="WordRingsStealBlockedWord_Name" xml:space="preserve"><value>Rubare il vietato</value></data>
+  <data name="WordRingsStealBlockedWord_Description" xml:space="preserve"><value>Ruba una parola attualmente bloccata da Blocco.</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Name" xml:space="preserve"><value>Giocale tutte</value></data>
+  <data name="WordRingsFirstEmptyActionHand_Description" xml:space="preserve"><value>In multigiocatore, sii il primo a usare tutte le carte azione in mano.</value></data>
 </root>
