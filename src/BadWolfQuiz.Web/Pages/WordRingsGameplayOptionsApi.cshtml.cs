@@ -76,7 +76,7 @@ public sealed class WordRingsGameplayOptionsApiModel(IWebHostEnvironment environ
             return new
             {
                 success = true,
-                state = Gameplay.FinalizePlayerExhaustion(roomCode, playerToken, playerId)
+                state = Gameplay.GetDecoratedRoomState(roomCode, playerToken)
             };
         });
 
