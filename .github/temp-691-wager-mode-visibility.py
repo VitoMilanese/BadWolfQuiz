@@ -67,4 +67,11 @@ replace_once(
     "        Assert.Contains(\"presentationTypeSelect?.value === \\\"3\\\" && !isOnDemandChoice\", editor, StringComparison.Ordinal);"
 )
 
+stability_test = "tests/BadWolfQuiz.Web.Tests/MultipleChoiceEditorStabilityRegressionTests.cs"
+p = Path(stability_test)
+text = p.read_text(encoding="utf-8")
+if text.count("382.13") != 2:
+    raise SystemExit(f"Expected two 382.13 cache assertions, found {text.count('382.13')}")
+p.write_text(text.replace("382.13", "382.14"), encoding="utf-8")
+
 print("Applied wager mode visibility fix for normal all-player multiple-choice questions.")
