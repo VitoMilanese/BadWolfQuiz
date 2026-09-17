@@ -69,7 +69,9 @@
                 ? (item.isSecret ? secretUnlockedStateIcon : "✓")
                 : "○";
 
-            return `<article class="${classes}">
+            return `<article class="${classes}"
+                data-achievement-code="${escapeHtml(item.code)}"
+                data-achievement-category="${escapeHtml(item.category)}">
                 <div class="player-achievement-card-top">
                     ${icon}
                     <span class="${stateClass}" aria-hidden="true">${stateIcon}</span>
@@ -80,6 +82,15 @@
             </article>`;
         }).join("");
 
+        const categoryFilter = {
+            label: data.categoryFilter?.label || "Category",
+            all: data.categoryFilter?.all || "All",
+            quizzes: data.categoryFilter?.quizzes || "Quizzes",
+            guessWhatIPlay: data.categoryFilter?.guessWhatIPlay || "Guess What I Play?",
+            wordRings: data.categoryFilter?.wordRings || "Word Rings",
+            outOfGame: data.categoryFilter?.outOfGame || "Out of game"
+        };
+
         const targetDialog = ensureDialog();
         targetDialog.setAttribute("aria-labelledby", "host-player-achievements-title");
         targetDialog.innerHTML = `<div class="player-achievements-dialog-card">
@@ -88,17 +99,32 @@
                 <button class="dialog-close" type="button" data-host-player-achievements-close aria-label="${escapeHtml(data.closeLabel)}">×</button>
             </header>
             <div class="player-achievements-dialog-body">
-                <section class="player-achievements-panel">
+                <section class="player-achievements-panel" data-achievement-category-filter-scope>
                     <div class="player-achievements-heading"><div>
                         <span class="player-achievements-kicker">BAD WOLF / MILESTONES</span>
                         <p>${escapeHtml(data.subtitle)}</p>
-                    </div><strong class="player-achievements-count">${escapeHtml(data.unlockedCountText)}</strong></div>
+                    </div><div class="achievement-category-filter-actions">
+                        <label class="achievement-category-filter-control">
+                            <span>${escapeHtml(categoryFilter.label)}</span>
+                            <select data-achievement-category-filter>
+                                <option value="all">${escapeHtml(categoryFilter.all)}</option>
+                                <option value="quizzes">${escapeHtml(categoryFilter.quizzes)}</option>
+                                <option value="guess-what-i-play">${escapeHtml(categoryFilter.guessWhatIPlay)}</option>
+                                <option value="word-rings">${escapeHtml(categoryFilter.wordRings)}</option>
+                                <option value="out-of-game">${escapeHtml(categoryFilter.outOfGame)}</option>
+                            </select>
+                        </label>
+                        <strong class="player-achievements-count"
+                            data-achievement-visible-count
+                            data-achievement-count-template="${escapeHtml(data.unlockedCountTemplate || "{0} / {1}")}">${escapeHtml(data.unlockedCountText)}</strong>
+                    </div></div>
                     <div class="player-achievements-grid">${cards}</div>
                 </section>
             </div>
         </div>`;
         targetDialog.querySelector("[data-host-player-achievements-close]")
             ?.addEventListener("click", () => targetDialog.close());
+        window.BadWolfAchievementCategoryFilter?.initialize(targetDialog);
     };
 
     const openFor = async button => {

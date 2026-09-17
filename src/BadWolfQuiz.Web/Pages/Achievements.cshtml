@@ -1,6 +1,7 @@
 @page
 @model BadWolfQuiz.Web.Pages.AchievementsModel
 @inject IStringLocalizer<AchievementResource> AchievementLocalizer
+@inject IStringLocalizer<AchievementCategoryFilterResource> CategoryFilterLocalizer
 @{
     ViewData["Title"] = AchievementLocalizer["Achievements_Title"];
     var resetLabels = AchievementResetText.Current;
@@ -14,6 +15,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/player-achievements.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/achievements-page.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/achievement-category-filter.css" asp-append-version="true" />
 }
 
 <div class="self-achievements-page">
@@ -38,15 +40,31 @@
     </section>
 
     <main class="self-achievements-content">
-        <section class="player-achievements-panel self-achievements-panel" aria-describedby="self-achievements-subtitle">
+        <section class="player-achievements-panel self-achievements-panel"
+                 data-achievement-category-filter-scope
+                 aria-describedby="self-achievements-subtitle">
             <div class="player-achievements-heading">
                 <div>
                     <span class="player-achievements-kicker">BAD WOLF / MILESTONES</span>
                     <p id="self-achievements-subtitle">@AchievementLocalizer["Achievements_Subtitle"]</p>
                 </div>
-                <strong class="player-achievements-count">
-                    @AchievementLocalizer["Achievements_UnlockedCount", Model.UnlockedCount, Model.Achievements.Count]
-                </strong>
+                <div class="self-achievements-heading-actions">
+                    <label class="self-achievements-category-filter">
+                        <span>@CategoryFilterLocalizer["Label"]</span>
+                        <select data-achievement-category-filter>
+                            <option value="all">@CategoryFilterLocalizer["All"]</option>
+                            <option value="quizzes">@CategoryFilterLocalizer["Quizzes"]</option>
+                            <option value="guess-what-i-play">@CategoryFilterLocalizer["GuessWhatIPlay"]</option>
+                            <option value="word-rings">@CategoryFilterLocalizer["WordRings"]</option>
+                            <option value="out-of-game">@CategoryFilterLocalizer["OutOfGame"]</option>
+                        </select>
+                    </label>
+                    <strong class="player-achievements-count"
+                            data-achievement-visible-count
+                            data-achievement-count-template="@AchievementLocalizer["Achievements_UnlockedCount"].Value">
+                        @AchievementLocalizer["Achievements_UnlockedCount", Model.UnlockedCount, Model.Achievements.Count]
+                    </strong>
+                </div>
             </div>
 
             <div class="player-achievements-grid">
@@ -66,8 +84,11 @@
                             (int)Math.Round(achievement.Progress * 100d / achievement.Target),
                             0,
                             100);
+                    var category = PlayerAchievementCategoryCatalog.GetFilterValue(achievement.Code);
 
-                    <article class="@cardClasses" data-achievement-code="@achievement.Code">
+                    <article class="@cardClasses"
+                             data-achievement-code="@achievement.Code"
+                             data-achievement-category="@category">
                         <div class="player-achievement-card-top">
                             @if (lockedSecret)
                             {
@@ -169,5 +190,6 @@
 
 @section Scripts {
     <script src="~/js/achievement-image-trim.js" asp-append-version="true"></script>
+    <script src="~/js/achievement-category-filter.js" asp-append-version="true"></script>
     <script src="~/js/achievement-reset.js" asp-append-version="true"></script>
 }
