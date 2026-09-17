@@ -21,18 +21,18 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             return;
         }
 
-        output.PreContent.AppendHtml(
+        output.PostContent.AppendHtml(
             "<script>" +
             "window.badWolfHostMultipleChoiceBootstrapInitialized=true;" +
             "</script>" +
-            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.10\"></script>" +
-            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.10\" " +
+            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.11\"></script>" +
+            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.11\" " +
             $"data-saved-question-type=\"{(int)editor.Input.PresentationType}\"></script>" +
+            "<script>window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();</script>" +
             "<script src=\"/js/multiple-correct-answer-options.js?v=461.1\"></script>" +
             "<script>" +
             "(()=>{" +
             "const finish=()=>{" +
-            "window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();" +
             "window.setTimeout(()=>{" +
             "const s=document.querySelector('[data-question-save-status]');" +
             "if(!s)return;" +

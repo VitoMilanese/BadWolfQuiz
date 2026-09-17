@@ -20,6 +20,14 @@
             FieldPrefix = "Input.AnswerBlocks",
             Blocks = Model.Input.AnswerBlocks
         };
+
+    var isOnDemandChoice =
+        Model.Input.PresentationType ==
+            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice &&
+        (Model.Input.RevealAnswerOptionsOnDemand ||
+         Model.Input.AllPlayerMode ==
+            BadWolfQuiz.Web.Services.AllPlayerQuestionCompatibility.MultipleChoiceOnDemandMode);
+    Model.Input.RevealAnswerOptionsOnDemand = isOnDemandChoice;
 }
 
 @if (TempData["SuccessMessage"] is string successMessage)
@@ -71,10 +79,14 @@
         margin: 0;
         color: var(--muted);
     }
+    .question-editor[data-on-demand-choice="true"] .answer-reward-modifier-setting {
+        display: none !important;
+    }
 </style>
 
 <form method="post" class="question-editor" enctype="multipart/form-data"
       data-ajax-question-editor
+      data-on-demand-choice="@(isOnDemandChoice ? "true" : "false")"
       data-save-error="@Localizer["Error_Unexpected"]">
     <input type="hidden" asp-for="Input.Id" />
     <input type="hidden" asp-for="Input.QuizId" />
@@ -93,7 +105,7 @@
         </select>
         <label class="checkbox-row all-player-choice-on-demand-setting"
                data-all-player-choice-on-demand-setting
-               hidden>
+               hidden="@(Model.Input.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice ? null : "hidden")">
             <input asp-for="Input.RevealAnswerOptionsOnDemand"
                    data-all-player-choice-on-demand />
             <span>
@@ -200,7 +212,8 @@
         </label>
 
 
-        <div id="wager-mode-setting">
+        <div id="wager-mode-setting"
+             hidden="@((Model.Input.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard && !isOnDemandChoice) ? "hidden" : null)">
             <label asp-for="Input.WagerMode">
                 @Localizer["Label_WagerMode"]
             </label>
@@ -226,7 +239,7 @@
         </div>
 
         <label class="checkbox-row answer-reward-modifier-setting"
-               hidden="@(Model.Input.RevealAnswerOptionsOnDemand ? "hidden" : null)">
+               hidden="@(isOnDemandChoice ? "hidden" : null)">
             <input asp-for="Input.AllowAnswerRewardModifiers" />
             <span>
                 <strong>@Localizer["Label_AllowAnswerRewardModifiers"]</strong>
@@ -605,6 +618,9 @@
             });
         })();
 
+        const questionEditorForm =
+            document.querySelector("form[data-ajax-question-editor]");
+
         const wagerQuestionCheckbox =
             document.getElementById("Input_IsSpecial");
 
@@ -636,7 +652,8 @@
             const isFourClues = presentationTypeSelect?.value === "1";
             const isOnDemandChoice =
                 presentationTypeSelect?.value === "3" &&
-                onDemandChoiceCheckbox?.checked === true;
+                (onDemandChoiceCheckbox?.checked === true ||
+                 questionEditorForm?.dataset.onDemandChoice === "true");
             document.getElementById("four-clues-help").hidden = !isFourClues;
             document.querySelectorAll(".wager-question-setting").forEach(
                 element => element.hidden = isFourClues);
@@ -660,8 +677,11 @@
             if (answerRewardModifierSetting) {
                 answerRewardModifierSetting.hidden = isOnDemandChoice;
             }
-            if (isOnDemandChoice && answerRewardModifierCheckbox) {
-                answerRewardModifierCheckbox.checked = false;
+            if (answerRewardModifierCheckbox) {
+                answerRewardModifierCheckbox.disabled = isOnDemandChoice;
+                if (isOnDemandChoice) {
+                    answerRewardModifierCheckbox.checked = false;
+                }
             }
 
             updateBuzzModeVisibility();
@@ -684,15 +704,33 @@
             "change",
             updateBuzzModeVisibility);
 
+        const syncOnDemandDatasetFromCheckbox = () => {
+            if (!questionEditorForm) {
+                return;
+            }
+            const enabled =
+                presentationTypeSelect?.value === "3" &&
+                onDemandChoiceCheckbox?.checked === true;
+            questionEditorForm.dataset.onDemandChoice =
+                enabled ? "true" : "false";
+        };
+
         onDemandChoiceCheckbox?.addEventListener(
             "change",
-            updateQuestionTypeUi);
+            () => {
+                syncOnDemandDatasetFromCheckbox();
+                updateQuestionTypeUi();
+            });
 
         document.addEventListener(
             "badwolf:question-editor-on-demand-synced",
-            updateQuestionTypeUi);
+            () => {
+                syncOnDemandDatasetFromCheckbox();
+                updateQuestionTypeUi();
+            });
 
         presentationTypeSelect?.addEventListener("change", async () => {
+            syncOnDemandDatasetFromCheckbox();
             updateQuestionTypeUi();
             if (presentationTypeSelect.value === "1") {
                 const section = document.getElementById("question-blocks");

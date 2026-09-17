@@ -39,14 +39,15 @@ public sealed class MultipleChoiceEditorStabilityRegressionTests
         Assert.Contains("listener.name === \"scheduleSync\"", guard, StringComparison.Ordinal);
         Assert.Contains("const installOverrides = () =>", guard, StringComparison.Ordinal);
         Assert.Contains("const restoreOverrides = () =>", guard, StringComparison.Ordinal);
-        Assert.Contains("capture: true, once: true", guard, StringComparison.Ordinal);
+        Assert.DoesNotContain("capture: true, once: true", guard, StringComparison.Ordinal);
+        Assert.Contains("    installOverrides();", guard, StringComparison.Ordinal);
         Assert.DoesNotContain(
             "window.MutationObserver = GuardedMutationObserver;\n    }\n\n    EventTarget.prototype.addEventListener",
             guard,
             StringComparison.Ordinal);
 
-        var guardAsset = "multiple-choice-answer-options-guard.js?v=382.10";
-        var controllerAsset = "multiple-choice-answer-options.js?v=382.10";
+        var guardAsset = "multiple-choice-answer-options-guard.js?v=382.11";
+        var controllerAsset = "multiple-choice-answer-options.js?v=382.11";
         Assert.Contains(guardAsset, tagHelper, StringComparison.Ordinal);
         Assert.Contains(controllerAsset, tagHelper, StringComparison.Ordinal);
         Assert.True(
@@ -56,6 +57,8 @@ public sealed class MultipleChoiceEditorStabilityRegressionTests
             "badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver",
             tagHelper,
             StringComparison.Ordinal);
+        Assert.Contains("output.PostContent.AppendHtml", tagHelper, StringComparison.Ordinal);
+        Assert.DoesNotContain("output.PreContent.AppendHtml", tagHelper, StringComparison.Ordinal);
         Assert.Contains("document.readyState==='loading'", tagHelper, StringComparison.Ordinal);
         Assert.Contains("window.setTimeout(finish,0)", tagHelper, StringComparison.Ordinal);
     }

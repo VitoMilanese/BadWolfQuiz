@@ -276,6 +276,8 @@
             modeInput instanceof HTMLInputElement) {
             onDemandCheckbox.checked =
                 modeInput.value === "multipleChoiceOnDemand";
+            form.dataset.onDemandChoice =
+                onDemandCheckbox.checked ? "true" : "false";
             document.dispatchEvent(new CustomEvent(
                 "badwolf:question-editor-on-demand-synced"));
         }
@@ -540,6 +542,7 @@
             const onDemand = allPlayerChoice &&
                 onDemandCheckbox instanceof HTMLInputElement &&
                 onDemandCheckbox.checked;
+            form.dataset.onDemandChoice = onDemand ? "true" : "false";
             const isAllPlayer = isText || (allPlayerChoice && !onDemand);
 
             if (onDemandSetting instanceof HTMLElement) {
@@ -955,12 +958,5 @@
         }, 0);
     };
 
-    if (document.readyState === "loading") {
-        document.addEventListener(
-            "DOMContentLoaded",
-            waitForEditorMount,
-            { once: true });
-    } else {
-        waitForEditorMount();
-    }
+    waitForEditorMount();
 })();
