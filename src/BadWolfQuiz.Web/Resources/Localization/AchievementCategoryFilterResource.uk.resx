@@ -9,4 +9,5 @@
   <data name="Quizzes" xml:space="preserve"><value>Квізи</value></data>
   <data name="GuessWhatIPlay" xml:space="preserve"><value>У що я граю?</value></data>
   <data name="WordRings" xml:space="preserve"><value>Слівце в кільце</value></data>
+  <data name="OutOfGame" xml:space="preserve"><value>Поза грою</value></data>
 </root>

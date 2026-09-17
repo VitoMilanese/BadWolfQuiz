@@ -4,7 +4,8 @@ public enum PlayerAchievementCategory
 {
     Quizzes,
     GuessWhatIPlay,
-    WordRings
+    WordRings,
+    OutOfGame
 }
 
 public static class PlayerAchievementCategoryCatalog
@@ -19,6 +20,12 @@ public static class PlayerAchievementCategoryCatalog
         return achievementCode switch
         {
             "SoloAi" or "RoomCreatorWin" => PlayerAchievementCategory.GuessWhatIPlay,
+            "Registered" or
+            "GitHubVisitor" or
+            "PasswordChanged" or
+            "DeveloperContacted" or
+            "DeveloperReplied" or
+            "Contributor" => PlayerAchievementCategory.OutOfGame,
             _ => PlayerAchievementCategory.Quizzes
         };
     }
@@ -28,6 +35,7 @@ public static class PlayerAchievementCategoryCatalog
         {
             PlayerAchievementCategory.GuessWhatIPlay => "guess-what-i-play",
             PlayerAchievementCategory.WordRings => "word-rings",
+            PlayerAchievementCategory.OutOfGame => "out-of-game",
             _ => "quizzes"
         };
 }

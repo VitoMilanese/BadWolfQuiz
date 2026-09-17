@@ -9,4 +9,5 @@
   <data name="Quizzes" xml:space="preserve"><value>Quiz</value></data>
   <data name="GuessWhatIPlay" xml:space="preserve"><value>Indovina a cosa sto giocando</value></data>
   <data name="WordRings" xml:space="preserve"><value>Parola nel cerchio</value></data>
+  <data name="OutOfGame" xml:space="preserve"><value>Fuori dal gioco</value></data>
 </root>

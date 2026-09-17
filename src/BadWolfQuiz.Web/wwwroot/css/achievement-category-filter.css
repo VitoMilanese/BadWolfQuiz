@@ -1,4 +1,5 @@
-.self-achievements-heading-actions {
+.self-achievements-heading-actions,
+.achievement-category-filter-actions {
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
@@ -6,13 +7,15 @@
     gap: 10px;
 }
 
-.self-achievements-category-filter {
+.self-achievements-category-filter,
+.achievement-category-filter-control {
     display: grid;
     gap: 5px;
     min-width: min(280px, 42vw);
 }
 
-.self-achievements-category-filter > span {
+.self-achievements-category-filter > span,
+.achievement-category-filter-control > span {
     color: var(--muted);
     font-size: 0.66rem;
     font-weight: 850;
@@ -20,7 +23,8 @@
     text-transform: uppercase;
 }
 
-.self-achievements-category-filter select {
+.self-achievements-category-filter select,
+.achievement-category-filter-control select {
     width: 100%;
     min-height: 42px;
     padding: 8px 36px 8px 12px;
@@ -34,36 +38,41 @@
     cursor: pointer;
 }
 
-.self-achievements-category-filter select:hover {
+.self-achievements-category-filter select:hover,
+.achievement-category-filter-control select:hover {
     border-color: color-mix(in srgb, var(--gold) 58%, var(--line));
 }
 
-.self-achievements-category-filter select:focus-visible {
+.self-achievements-category-filter select:focus-visible,
+.achievement-category-filter-control select:focus-visible {
     outline: 2px solid var(--red-bright);
     outline-offset: 2px;
 }
 
-.self-achievements-panel .player-achievement-card[hidden] {
+[data-achievement-category-filter-scope] .player-achievement-card[hidden] {
     display: none;
 }
 
 @media (max-width: 720px) {
-    .self-achievements-panel .player-achievements-heading {
+    [data-achievement-category-filter-scope] .player-achievements-heading {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .self-achievements-heading-actions {
+    .self-achievements-heading-actions,
+    .achievement-category-filter-actions {
         width: 100%;
         align-items: stretch;
     }
 
-    .self-achievements-category-filter {
+    .self-achievements-category-filter,
+    .achievement-category-filter-control {
         min-width: 0;
         width: 100%;
     }
 
-    .self-achievements-heading-actions .player-achievements-count {
+    .self-achievements-heading-actions .player-achievements-count,
+    .achievement-category-filter-actions .player-achievements-count {
         align-self: flex-start;
     }
 }

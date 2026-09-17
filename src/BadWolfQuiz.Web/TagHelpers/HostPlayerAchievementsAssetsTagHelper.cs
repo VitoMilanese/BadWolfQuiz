@@ -28,8 +28,10 @@ public sealed class HostPlayerAchievementsAssetsTagHelper(
             localizer["Achievements_Title"].Value);
         output.PostContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=11\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/achievement-category-filter.css?v=2\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
-            "<script defer src=\"/js/host-player-achievements.js?v=7\"></script>");
+            "<script defer src=\"/js/achievement-category-filter.js?v=2\"></script>" +
+            "<script defer src=\"/js/host-player-achievements.js?v=8\"></script>");
     }
 }
 

@@ -9,4 +9,5 @@
   <data name="Quizzes" xml:space="preserve"><value>Quizzes</value></data>
   <data name="GuessWhatIPlay" xml:space="preserve"><value>Guess What I Play?</value></data>
   <data name="WordRings" xml:space="preserve"><value>Word Rings</value></data>
+  <data name="OutOfGame" xml:space="preserve"><value>Out of game</value></data>
 </root>

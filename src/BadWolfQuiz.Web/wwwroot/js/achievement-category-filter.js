@@ -1,8 +1,14 @@
 (() => {
-    const initialize = () => {
-        const select = document.querySelector("[data-achievement-category-filter]");
-        const grid = document.querySelector(".self-achievements-panel .player-achievements-grid");
-        const count = document.querySelector("[data-achievement-visible-count]");
+    const initializedScopes = new WeakSet();
+
+    const initializeScope = scope => {
+        if (!(scope instanceof Element) || initializedScopes.has(scope)) {
+            return;
+        }
+
+        const select = scope.querySelector("[data-achievement-category-filter]");
+        const grid = scope.querySelector(".player-achievements-grid");
+        const count = scope.querySelector("[data-achievement-visible-count]");
         if (!(select instanceof HTMLSelectElement) || !(grid instanceof HTMLElement)) {
             return;
         }
@@ -59,12 +65,42 @@
             attributeFilter: ["class"]
         });
 
+        initializedScopes.add(scope);
         applyFilter();
     };
 
+    const initialize = root => {
+        if (root instanceof Element && root.matches("[data-achievement-category-filter-scope]")) {
+            initializeScope(root);
+        }
+
+        if (root && typeof root.querySelectorAll === "function") {
+            for (const scope of root.querySelectorAll("[data-achievement-category-filter-scope]")) {
+                initializeScope(scope);
+            }
+        }
+    };
+
+    const start = () => {
+        initialize(document);
+
+        const observer = new MutationObserver(mutations => {
+            for (const mutation of mutations) {
+                for (const node of mutation.addedNodes) {
+                    if (node instanceof Element) {
+                        initialize(node);
+                    }
+                }
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    };
+
+    window.BadWolfAchievementCategoryFilter = { initialize };
+
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initialize, { once: true });
+        document.addEventListener("DOMContentLoaded", start, { once: true });
     } else {
-        initialize();
+        start();
     }
 })();

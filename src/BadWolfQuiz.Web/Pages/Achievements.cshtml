@@ -40,7 +40,9 @@
     </section>
 
     <main class="self-achievements-content">
-        <section class="player-achievements-panel self-achievements-panel" aria-describedby="self-achievements-subtitle">
+        <section class="player-achievements-panel self-achievements-panel"
+                 data-achievement-category-filter-scope
+                 aria-describedby="self-achievements-subtitle">
             <div class="player-achievements-heading">
                 <div>
                     <span class="player-achievements-kicker">BAD WOLF / MILESTONES</span>
@@ -54,6 +56,7 @@
                             <option value="quizzes">@CategoryFilterLocalizer["Quizzes"]</option>
                             <option value="guess-what-i-play">@CategoryFilterLocalizer["GuessWhatIPlay"]</option>
                             <option value="word-rings">@CategoryFilterLocalizer["WordRings"]</option>
+                            <option value="out-of-game">@CategoryFilterLocalizer["OutOfGame"]</option>
                         </select>
                     </label>
                     <strong class="player-achievements-count"
