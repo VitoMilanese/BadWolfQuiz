@@ -71,6 +71,14 @@ public sealed class UnfinishedGameLifecycleRegressionTests
         var deleteHandler = pageModel[deleteHandlerStart..nextHandlerStart];
         Assert.DoesNotContain("IsArchived =", deleteHandler, StringComparison.Ordinal);
         Assert.DoesNotContain("SaveChangesAsync", deleteHandler, StringComparison.Ordinal);
+        Assert.Contains("snapshot is not null", deleteHandler, StringComparison.Ordinal);
+        Assert.Contains("activeGameAvailability.CanResume(snapshot)", deleteHandler, StringComparison.Ordinal);
+        Assert.Contains("await activeGameStore.RemoveAsync", deleteHandler, StringComparison.Ordinal);
+        Assert.DoesNotContain("if (!await activeGameStore.RemoveAsync", deleteHandler, StringComparison.Ordinal);
+        Assert.DoesNotContain("snapshot is null ||", deleteHandler, StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            deleteHandler.Split("return NotFound();", StringSplitOptions.None).Length - 1);
 
         Assert.Contains(
             "sessionRegistry.Create(snapshot, settings);",

@@ -166,15 +166,10 @@ public sealed class IndexModel(
         }
 
         var snapshot = activeGameStore.Find(currentHost.RequiredId, quizId);
-        if (snapshot is null || !activeGameAvailability.CanResume(snapshot))
+        if (snapshot is not null && activeGameAvailability.CanResume(snapshot))
         {
-            return NotFound();
-        }
-
-        sessionRegistry.RemoveUnfinished(currentHost.RequiredId, quizId);
-        if (!await activeGameStore.RemoveAsync(currentHost.RequiredId, quizId))
-        {
-            return NotFound();
+            sessionRegistry.RemoveUnfinished(currentHost.RequiredId, quizId);
+            await activeGameStore.RemoveAsync(currentHost.RequiredId, quizId);
         }
 
         TempData["SuccessMessage"] = unfinishedGameLocalizer["Deleted"].Value;
