@@ -2911,7 +2911,7 @@
     <value>Start without answer options</value>
   </data>
   <data name="Hint_AllPlayerChoiceOnDemand" xml:space="preserve">
-    <value>The question starts with the buzzer like a regular question. Before the first buzz, the host can reveal the answer options to every player.</value>
+    <value>The question starts with the buzzer like a regular question. The host can reveal the answer options during the active question; the value is then reduced by 50%, and players who already used the buzzer cannot choose an option.</value>
   </data>
   <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
     <value>Show answer options</value>

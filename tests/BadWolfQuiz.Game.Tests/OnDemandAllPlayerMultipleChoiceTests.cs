@@ -20,7 +20,7 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
     }
 
     [Fact]
-    public void Question_starts_with_regular_buzzer_and_can_switch_to_all_player_choice()
+    public void Question_starts_with_regular_buzzer_and_reveal_halves_value()
     {
         var session = CreateSession();
         session.AddPlayer("Rose");
@@ -32,31 +32,31 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
         Assert.False(question.AreAllPlayerChoiceOptionsRevealed);
         Assert.False(question.IsAllPlayerQuestion);
         Assert.True(question.CanRevealAllPlayerChoiceOptions);
+        Assert.Equal(200, question.CorrectAnswerValue);
 
         if (question.BuzzerStatus == QuestionBuzzerStatus.Inactive)
         {
             session.ActivateQuestionBuzzer(100);
         }
-        Assert.Equal(QuestionBuzzerStatus.Open, question.BuzzerStatus);
 
-        var revealed = session.RevealAllPlayerChoiceOptions(100);
+        session.RevealAllPlayerChoiceOptions(100);
 
-        Assert.Same(question, revealed);
         Assert.True(question.AreAllPlayerChoiceOptionsRevealed);
         Assert.True(question.IsAllPlayerQuestion);
         Assert.False(question.CanRevealAllPlayerChoiceOptions);
+        Assert.Empty(question.AllPlayerChoiceExcludedPlayerIds);
+        Assert.Equal(100, question.CorrectAnswerValue);
         Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
-        Assert.Null(question.AnsweringPlayerId);
-        Assert.Equal(RuntimeQuestionStatus.Active, question.Status);
         Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
         Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
     }
 
     [Fact]
-    public void First_buzzer_claim_permanently_blocks_option_reveal()
+    public void Current_buzzer_claim_does_not_block_reveal_and_claimant_is_excluded()
     {
         var session = CreateSession();
         var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Jack");
         session.Start();
         var question = session.SelectQuestion(100);
         if (question.BuzzerStatus == QuestionBuzzerStatus.Inactive)
@@ -66,38 +66,44 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
 
         session.ClaimQuestionBuzzer(100, rose.Id);
 
-        Assert.True(question.AllPlayerChoiceRevealLocked);
-        Assert.False(question.CanRevealAllPlayerChoiceOptions);
-        Assert.Throws<GameRuleViolationException>(() =>
-            session.RevealAllPlayerChoiceOptions(100));
-    }
-
-    [Fact]
-    public void Revealed_phase_survives_session_state_restore()
-    {
-        var session = CreateSession();
-        session.AddPlayer("Rose");
-        session.Start();
-        session.SelectQuestion(100);
+        Assert.True(question.CanRevealAllPlayerChoiceOptions);
         session.RevealAllPlayerChoiceOptions(100);
 
-        var restored = GameSession.Restore(
-            session.Quiz,
-            session.Settings,
-            session.CaptureState());
-        var question = Assert.Single(restored.Board.Questions);
-
-        Assert.True(question.RevealAnswerOptionsOnDemand);
-        Assert.True(question.AreAllPlayerChoiceOptionsRevealed);
-        Assert.True(question.IsAllPlayerQuestion);
+        Assert.Contains(rose.Id, question.AllPlayerChoiceExcludedPlayerIds);
+        Assert.Null(question.AnsweringPlayerId);
         Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
+        Assert.Equal(100, question.CorrectAnswerValue);
     }
 
     [Fact]
-    public void Buzzer_claim_lock_survives_session_state_restore()
+    public void Earlier_buzzer_attempts_are_excluded_when_options_are_revealed()
     {
         var session = CreateSession();
         var rose = session.AddPlayer("Rose");
+        var jack = session.AddPlayer("Jack");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        if (question.BuzzerStatus == QuestionBuzzerStatus.Inactive)
+        {
+            session.ActivateQuestionBuzzer(100);
+        }
+
+        session.ClaimQuestionBuzzer(100, rose.Id);
+        session.JudgeQuestionAnswer(100, rose.Id, false);
+
+        Assert.True(question.CanRevealAllPlayerChoiceOptions);
+        session.RevealAllPlayerChoiceOptions(100);
+
+        Assert.Contains(rose.Id, question.AllPlayerChoiceExcludedPlayerIds);
+        Assert.DoesNotContain(jack.Id, question.AllPlayerChoiceExcludedPlayerIds);
+    }
+
+    [Fact]
+    public void Revealed_phase_and_exclusions_survive_session_state_restore()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Jack");
         session.Start();
         var question = session.SelectQuestion(100);
         if (question.BuzzerStatus == QuestionBuzzerStatus.Inactive)
@@ -105,6 +111,7 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
             session.ActivateQuestionBuzzer(100);
         }
         session.ClaimQuestionBuzzer(100, rose.Id);
+        session.RevealAllPlayerChoiceOptions(100);
 
         var restored = GameSession.Restore(
             session.Quiz,
@@ -112,8 +119,12 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
             session.CaptureState());
         var restoredQuestion = Assert.Single(restored.Board.Questions);
 
-        Assert.True(restoredQuestion.AllPlayerChoiceRevealLocked);
-        Assert.False(restoredQuestion.CanRevealAllPlayerChoiceOptions);
+        Assert.True(restoredQuestion.RevealAnswerOptionsOnDemand);
+        Assert.True(restoredQuestion.AreAllPlayerChoiceOptionsRevealed);
+        Assert.True(restoredQuestion.IsAllPlayerQuestion);
+        Assert.Contains(rose.Id, restoredQuestion.AllPlayerChoiceExcludedPlayerIds);
+        Assert.Equal(100, restoredQuestion.CorrectAnswerValue);
+        Assert.Equal(QuestionBuzzerStatus.Closed, restoredQuestion.BuzzerStatus);
     }
 
     private static GameSession CreateSession()

@@ -260,6 +260,9 @@
             "[data-all-player-choice-on-demand-setting]");
         const onDemandCheckbox = document.querySelector(
             "[data-all-player-choice-on-demand]");
+        if (onDemandSetting instanceof HTMLElement) {
+            typePanel?.append(onDemandSetting);
+        }
         if (onDemandCheckbox instanceof HTMLInputElement &&
             modeInput instanceof HTMLInputElement) {
             onDemandCheckbox.checked =
@@ -827,7 +830,12 @@
             window.setTimeout(rebuildMultipleChoiceAnswerPreview, 30);
         }, true);
 
-        onDemandCheckbox?.addEventListener("change", scheduleSync);
+        if (onDemandCheckbox instanceof HTMLInputElement) {
+            onDemandCheckbox.addEventListener("change", () => {
+                updateQuestionTypeUi();
+                scheduleSync();
+            });
+        }
 
         select.addEventListener("change", () => {
             if (isChoiceType(select.value)) {

@@ -114,9 +114,11 @@ public sealed class RuntimeQuestion
     private readonly List<QuestionAnswerAttempt> _answerAttempts = [];
     private readonly List<Wager> _allPlayerWagers = [];
     private readonly List<int> _remainingHostMultipleChoiceOptionIds = [];
+    private readonly List<GamePlayerId> _allPlayerChoiceExcludedPlayerIds = [];
     private readonly IReadOnlyList<QuestionAnswerAttempt> _readOnlyAnswerAttempts;
     private readonly IReadOnlyList<Wager> _readOnlyAllPlayerWagers;
     private readonly IReadOnlyList<int> _readOnlyRemainingHostMultipleChoiceOptionIds;
+    private readonly IReadOnlyList<GamePlayerId> _readOnlyAllPlayerChoiceExcludedPlayerIds;
 
     internal RuntimeQuestion(
         int sourceRoundId,
@@ -152,6 +154,8 @@ public sealed class RuntimeQuestion
         _readOnlyAllPlayerWagers = _allPlayerWagers.AsReadOnly();
         _readOnlyRemainingHostMultipleChoiceOptionIds =
             _remainingHostMultipleChoiceOptionIds.AsReadOnly();
+        _readOnlyAllPlayerChoiceExcludedPlayerIds =
+            _allPlayerChoiceExcludedPlayerIds.AsReadOnly();
 
         if (IsHostMultipleChoice)
         {
@@ -184,17 +188,14 @@ public sealed class RuntimeQuestion
 
     public bool AreAllPlayerChoiceOptionsRevealed { get; private set; }
 
-    public bool AllPlayerChoiceRevealLocked { get; private set; }
+    public IReadOnlyList<GamePlayerId> AllPlayerChoiceExcludedPlayerIds =>
+        _readOnlyAllPlayerChoiceExcludedPlayerIds;
 
     public bool CanRevealAllPlayerChoiceOptions =>
         RevealAnswerOptionsOnDemand &&
         !AreAllPlayerChoiceOptionsRevealed &&
-        !AllPlayerChoiceRevealLocked &&
         !IsSpecial &&
-        Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active &&
-        BuzzerStatus != QuestionBuzzerStatus.Claimed &&
-        AnsweringPlayerId is null &&
-        _answerAttempts.Count == 0;
+        Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
 
     public bool IsAllPlayerQuestion =>
         PresentationType == QuestionPresentationType.AllPlayerText ||
@@ -249,9 +250,11 @@ public sealed class RuntimeQuestion
 
     public int CorrectAnswerValue => IsSpecial && !IsAllPlayerQuestion
         ? Wager?.Amount ?? Points
-        : PresentationType == QuestionPresentationType.FourClues
-            ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
-            : IsHostMultipleChoice
+        : RevealAnswerOptionsOnDemand && AreAllPlayerChoiceOptionsRevealed
+            ? Math.Max(1, Points / 2)
+            : PresentationType == QuestionPresentationType.FourClues
+                ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
+                : IsHostMultipleChoice
                 ? HostMultipleChoiceRewardValue
                 : Points;
 
@@ -289,7 +292,7 @@ public sealed class RuntimeQuestion
             ? _remainingHostMultipleChoiceOptionIds.ToArray()
             : null,
         AreAllPlayerChoiceOptionsRevealed,
-        AllPlayerChoiceRevealLocked);
+        _allPlayerChoiceExcludedPlayerIds.ToArray());
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -301,10 +304,10 @@ public sealed class RuntimeQuestion
         AnsweringPlayerId = state.AnsweringPlayerId;
         AreAllPlayerChoiceOptionsRevealed =
             !RevealAnswerOptionsOnDemand || state.AllPlayerChoiceOptionsRevealed;
-        AllPlayerChoiceRevealLocked = RevealAnswerOptionsOnDemand &&
-            (state.AllPlayerChoiceRevealLocked ||
-             state.BuzzerStatus == QuestionBuzzerStatus.Claimed ||
-             state.AnswerAttempts.Count > 0);
+        _allPlayerChoiceExcludedPlayerIds.Clear();
+        _allPlayerChoiceExcludedPlayerIds.AddRange(
+            (state.AllPlayerChoiceExcludedPlayerIds ?? [])
+                .Distinct());
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues
             ? Math.Clamp(state.RevealedClueCount == 0 ? 2 : state.RevealedClueCount, 2, 4)
             : 0;
@@ -440,6 +443,17 @@ public sealed class RuntimeQuestion
                 "Answer options can no longer be revealed for this question.");
         }
 
+        _allPlayerChoiceExcludedPlayerIds.Clear();
+        _allPlayerChoiceExcludedPlayerIds.AddRange(
+            _answerAttempts
+                .Select(attempt => attempt.PlayerId)
+                .Distinct());
+        if (AnsweringPlayerId is { } answeringPlayerId &&
+            !_allPlayerChoiceExcludedPlayerIds.Contains(answeringPlayerId))
+        {
+            _allPlayerChoiceExcludedPlayerIds.Add(answeringPlayerId);
+        }
+
         AreAllPlayerChoiceOptionsRevealed = true;
         BuzzerStatus = QuestionBuzzerStatus.Closed;
         AnsweringPlayerId = null;
@@ -507,10 +521,6 @@ public sealed class RuntimeQuestion
 
         AnsweringPlayerId = playerId;
         BuzzerStatus = QuestionBuzzerStatus.Claimed;
-        if (RevealAnswerOptionsOnDemand)
-        {
-            AllPlayerChoiceRevealLocked = true;
-        }
     }
 
     internal QuestionAnswerAttempt JudgeAnswer(
@@ -580,10 +590,6 @@ public sealed class RuntimeQuestion
             appliedRewardModifier);
 
         _answerAttempts.Add(attempt);
-        if (RevealAnswerOptionsOnDemand)
-        {
-            AllPlayerChoiceRevealLocked = true;
-        }
 
         if (isCorrect || IsSpecial)
         {
@@ -774,10 +780,6 @@ public sealed class RuntimeQuestion
             judgedAtUtc);
 
         _answerAttempts.Add(attempt);
-        if (RevealAnswerOptionsOnDemand)
-        {
-            AllPlayerChoiceRevealLocked = true;
-        }
         return attempt;
     }
 

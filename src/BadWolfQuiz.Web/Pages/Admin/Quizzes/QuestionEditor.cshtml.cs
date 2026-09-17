@@ -77,6 +77,8 @@ public sealed class QuestionEditorModel(
             PresentationType = presentationType,
             AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
                 storedPresentationType),
+            RevealAnswerOptionsOnDemand = storedPresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
@@ -144,6 +146,16 @@ public sealed class QuestionEditorModel(
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        Input.AllPlayerMode = Input.PresentationType switch
+        {
+            QuestionPresentationType.AllPlayerText =>
+                AllPlayerQuestionCompatibility.TextMode,
+            QuestionPresentationType.AllPlayerMultipleChoice =>
+                Input.RevealAnswerOptionsOnDemand
+                    ? AllPlayerQuestionCompatibility.MultipleChoiceOnDemandMode
+                    : AllPlayerQuestionCompatibility.MultipleChoiceMode,
+            _ => null
+        };
         Input.PresentationType =
             AllPlayerQuestionCompatibility.ResolvePostedPresentationType(
                 Input.PresentationType,
@@ -151,6 +163,8 @@ public sealed class QuestionEditorModel(
         var isAllPlayerMultipleChoiceOnDemand =
             Input.PresentationType ==
                 QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
+        Input.RevealAnswerOptionsOnDemand =
+            isAllPlayerMultipleChoiceOnDemand;
         if (isAllPlayerMultipleChoiceOnDemand)
         {
             Input.IsSpecial = false;
@@ -999,6 +1013,9 @@ public sealed class QuestionEditorModel(
         public QuestionPresentationType PresentationType { get; set; }
 
         public string? AllPlayerMode { get; set; }
+
+        [Display(Name = "Label_AllPlayerChoiceOnDemand")]
+        public bool RevealAnswerOptionsOnDemand { get; set; }
 
         [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
         public bool ExcludeFromRandomWagerSelection { get; set; }

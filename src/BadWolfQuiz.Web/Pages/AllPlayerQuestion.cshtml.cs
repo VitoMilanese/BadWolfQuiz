@@ -770,6 +770,10 @@ public sealed class AllPlayerQuestionModel(
         var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;
         var review = isText ? GetTextReview(game, question) : null;
         var allSubmitted = AllCurrentPlayersSubmitted(game, question);
+        var isChoiceExcluded =
+            question.RevealAnswerOptionsOnDemand &&
+            question.AreAllPlayerChoiceOptionsRevealed &&
+            question.AllPlayerChoiceExcludedPlayerIds.Contains(player.Id);
         var phase = isWagering
             ? "wagering"
             : isClosed
@@ -804,7 +808,9 @@ public sealed class AllPlayerQuestionModel(
                             player.Id.Value.GetHashCode()))
                     : Array.Empty<ChoiceOption>(),
             hasSubmitted = attempt is not null,
+            isChoiceExcluded,
             isAccepting = phase == "answering" &&
+                !isChoiceExcluded &&
                 (!isText || review!.Accepting),
             isJudging = phase is "judging" or "awaitingMissing",
             isClosed,
@@ -887,7 +893,7 @@ public sealed class AllPlayerQuestionModel(
     {
         if (!question.IsSpecial)
         {
-            return isCorrect ? question.Points : 0;
+            return isCorrect ? question.CorrectAnswerValue : 0;
         }
 
         return question.AllPlayerWagers.SingleOrDefault(wager =>
@@ -905,18 +911,32 @@ public sealed class AllPlayerQuestionModel(
         GameSessionRegistration game,
         RuntimeQuestion question)
     {
+        IEnumerable<GamePlayer> participants;
         if (!question.IsSpecial ||
             question.Status == RuntimeQuestionStatus.AwaitingWager)
         {
-            return game.Session.Players.ToArray();
+            participants = game.Session.Players;
+        }
+        else
+        {
+            var wagerPlayerIds = question.AllPlayerWagers
+                .Select(wager => wager.PlayerId)
+                .ToHashSet();
+            participants = game.Session.Players
+                .Where(player => wagerPlayerIds.Contains(player.Id));
         }
 
-        var wagerPlayerIds = question.AllPlayerWagers
-            .Select(wager => wager.PlayerId)
-            .ToHashSet();
-        return game.Session.Players
-            .Where(player => wagerPlayerIds.Contains(player.Id))
-            .ToArray();
+        if (question.RevealAnswerOptionsOnDemand &&
+            question.AreAllPlayerChoiceOptionsRevealed &&
+            question.AllPlayerChoiceExcludedPlayerIds.Count > 0)
+        {
+            var excludedPlayerIds =
+                question.AllPlayerChoiceExcludedPlayerIds.ToHashSet();
+            participants = participants.Where(player =>
+                !excludedPlayerIds.Contains(player.Id));
+        }
+
+        return participants.ToArray();
     }
 
     private static bool AllCurrentPlayersSubmitted(

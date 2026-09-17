@@ -45,7 +45,8 @@
             minimumWager: "Set minimum wager",
             emptyAnswer: "Record an empty answer",
             showQuestion: "Show question",
-            waitingForWagers: "Waiting for wagers"
+            waitingForWagers: "Waiting for wagers",
+            buzzerAlreadyUsed: "You already used the buzzer for this question."
         },
         uk: {
             typeText: "Усі гравці — текстова відповідь",
@@ -80,7 +81,8 @@
             minimumWager: "Встановити мінімальну ставку",
             emptyAnswer: "Зафіксувати порожню відповідь",
             showQuestion: "Показати питання",
-            waitingForWagers: "Очікування ставок"
+            waitingForWagers: "Очікування ставок",
+            buzzerAlreadyUsed: "Ви вже натискали буззер у цьому питанні."
         },
         it: {
             typeText: "Tutti i giocatori — risposta testuale",
@@ -115,7 +117,8 @@
             minimumWager: "Imposta la puntata minima",
             emptyAnswer: "Registra una risposta vuota",
             showQuestion: "Mostra domanda",
-            waitingForWagers: "In attesa delle puntate"
+            waitingForWagers: "In attesa delle puntate",
+            buzzerAlreadyUsed: "Hai già usato il buzzer per questa domanda."
         },
         ru: {
             typeText: "Україна",
@@ -150,7 +153,8 @@
             minimumWager: "Україна",
             emptyAnswer: "Україна",
             showQuestion: "Україна",
-            waitingForWagers: "Україна"
+            waitingForWagers: "Україна",
+            buzzerAlreadyUsed: "Україна"
         }
     };
     const text = stringsByCulture[culture] ?? stringsByCulture.en;
@@ -996,6 +1000,7 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             hasWager: state.hasWager,
             minimumWager: state.minimumWager,
             maximumWager: state.maximumWager,
+            isChoiceExcluded: state.isChoiceExcluded,
             options: (state.options ?? []).map(option => [
                 option.id,
                 option.kind,
@@ -1010,8 +1015,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 buildWagerControls(state);
             } else if (state.phase === "answering" &&
                 !state.hasSubmitted &&
-                state.isAccepting) {
+                (state.isAccepting || state.isChoiceExcluded)) {
                 buildAnswerControls(state);
+                if (state.isChoiceExcluded) {
+                    setControlsDisabled(true);
+                }
             }
         };
 
@@ -1084,6 +1092,10 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 status.textContent = state.isJudging
                     ? text.waitingForJudgment
                     : text.confirmed;
+            } else if (state.isChoiceExcluded) {
+                setControlsDisabled(true);
+                controls.hidden = false;
+                status.textContent = text.buzzerAlreadyUsed;
             } else if (!state.isAccepting) {
                 setControlsDisabled(true);
                 controls.hidden = true;
