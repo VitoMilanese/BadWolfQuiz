@@ -1138,6 +1138,38 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostRevealAllPlayerChoiceOptionsAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.RevealAllPlayerChoiceOptions(
+                game.PublicCode,
+                sourceQuestionId);
+            await BroadcastPlayersAsync(game, cancellationToken);
+            await BroadcastBuzzerAsync(game, cancellationToken);
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_JudgmentRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostRevealClueAsync(
         Guid id,
         int sourceQuestionId,

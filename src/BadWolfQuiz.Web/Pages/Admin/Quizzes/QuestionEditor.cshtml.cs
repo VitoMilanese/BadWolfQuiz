@@ -64,22 +64,34 @@ public sealed class QuestionEditorModel(
             AllPlayerQuestionCompatibility.ResolveStoredPresentationType(question);
         var wagerMode = QuestionWagerModes.GetMode(storedPresentationType);
         var presentationType =
-            QuestionWagerModes.GetContentPresentationType(storedPresentationType);
+            AllPlayerQuestionCompatibility.GetContentPresentationType(
+                storedPresentationType);
+        var isAllPlayerMultipleChoiceOnDemand =
+            storedPresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
 
         Input = new InputModel
         {
             Id = question.Id,
             QuizId = question.Category.Round.QuizId,
             RoundId = question.Category.Round.Id,
-            IsSpecial = question.IsSpecial,
-            WagerMode = wagerMode,
+            IsSpecial =
+                !isAllPlayerMultipleChoiceOnDemand && question.IsSpecial,
+            WagerMode = isAllPlayerMultipleChoiceOnDemand
+                ? QuestionWagerMode.Normal
+                : wagerMode,
             PresentationType = presentationType,
             AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
-                presentationType),
+                storedPresentationType),
+            RevealAnswerOptionsOnDemand = isAllPlayerMultipleChoiceOnDemand,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
-            BuzzModeOverride = question.BuzzModeOverride,
+            BuzzModeOverride =
+                presentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
+                !Enum.IsDefined(typeof(BuzzActivationMode), question.BuzzModeOverride)
+                    ? BuzzActivationMode.UseRoundDefault
+                    : question.BuzzModeOverride,
             BuzzDelaySeconds = question.BuzzDelaySeconds,
             Tags = question.Tags.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Select(x => x.Name)
@@ -143,10 +155,32 @@ public sealed class QuestionEditorModel(
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
+        Input.AllPlayerMode = Input.PresentationType switch
+        {
+            QuestionPresentationType.AllPlayerText =>
+                AllPlayerQuestionCompatibility.TextMode,
+            QuestionPresentationType.AllPlayerMultipleChoice =>
+                Input.RevealAnswerOptionsOnDemand
+                    ? AllPlayerQuestionCompatibility.MultipleChoiceOnDemandMode
+                    : AllPlayerQuestionCompatibility.MultipleChoiceMode,
+            _ => null
+        };
         Input.PresentationType =
             AllPlayerQuestionCompatibility.ResolvePostedPresentationType(
                 Input.PresentationType,
                 Input.AllPlayerMode);
+        var isAllPlayerMultipleChoiceOnDemand =
+            Input.PresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
+        Input.RevealAnswerOptionsOnDemand =
+            isAllPlayerMultipleChoiceOnDemand;
+        if (isAllPlayerMultipleChoiceOnDemand)
+        {
+            Input.IsSpecial = false;
+            Input.WagerMode = QuestionWagerMode.Normal;
+            Input.ExcludeFromRandomWagerSelection = true;
+        }
+
         if (Input.PresentationType != QuestionPresentationType.Standard)
         {
             Input.WagerMode = QuestionWagerMode.Normal;
@@ -188,7 +222,9 @@ public sealed class QuestionEditorModel(
             }
         }
 
-        if (Input.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice)
+        if (Input.PresentationType is
+            QuestionPresentationType.AllPlayerMultipleChoice or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand)
         {
             ValidateAllPlayerMultipleChoiceAnswerOptions();
         }
@@ -235,9 +271,9 @@ public sealed class QuestionEditorModel(
                 question.Id)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
 
-        var isAllPlayer = Input.PresentationType is
-            QuestionPresentationType.AllPlayerText or
-            QuestionPresentationType.AllPlayerMultipleChoice;
+        var isAllPlayerMultipleChoice = Input.PresentationType is
+            QuestionPresentationType.AllPlayerMultipleChoice or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
         var isHostMultipleChoice =
             Input.PresentationType == QuestionPresentationType.HostMultipleChoice;
         var answerLayout = GetAnswerOptionsLayout();
@@ -249,14 +285,20 @@ public sealed class QuestionEditorModel(
         question.IsSpecial =
             Input.PresentationType != QuestionPresentationType.FourClues &&
             Input.PresentationType != QuestionPresentationType.HostMultipleChoice &&
+            !isAllPlayerMultipleChoiceOnDemand &&
             Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
-            isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection;
+            isHostMultipleChoice ||
+            isAllPlayerMultipleChoiceOnDemand ||
+            Input.ExcludeFromRandomWagerSelection;
         question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers;
-        question.BuzzModeOverride = question.IsSpecial || isAllPlayer
+        var disableBuzzMode =
+            Input.PresentationType == QuestionPresentationType.AllPlayerText ||
+            (question.IsSpecial && !isAllPlayerMultipleChoice);
+        question.BuzzModeOverride = disableBuzzMode
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
-        question.BuzzDelaySeconds = question.IsSpecial || isAllPlayer
+        question.BuzzDelaySeconds = disableBuzzMode
             ? 0
             : Math.Max(0, Input.BuzzDelaySeconds);
         question.UpdatedAtUtc = DateTime.UtcNow;
@@ -454,7 +496,9 @@ public sealed class QuestionEditorModel(
             entity.SortOrder = inputBlock.SortOrder;
             entity.BlockType = inputBlock.BlockType;
             entity.TextContent = isAnswerOptionsMarker
-                ? Input.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice
+                ? Input.PresentationType is
+                        QuestionPresentationType.AllPlayerMultipleChoice or
+                        QuestionPresentationType.AllPlayerMultipleChoiceOnDemand
                     ? AnswerOptionsBlockContract.StoreOptionState(
                         answerLayout.Options.Count,
                         AnswerOptionsBlockContract.ParseCorrectOptionIndexes(
@@ -982,6 +1026,9 @@ public sealed class QuestionEditorModel(
         public QuestionPresentationType PresentationType { get; set; }
 
         public string? AllPlayerMode { get; set; }
+
+        [Display(Name = "Label_AllPlayerChoiceOnDemand")]
+        public bool RevealAnswerOptionsOnDemand { get; set; }
 
         [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
         public bool ExcludeFromRandomWagerSelection { get; set; }

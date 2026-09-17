@@ -21,17 +21,18 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             return;
         }
 
-        output.PreContent.AppendHtml(
+        output.PostContent.AppendHtml(
             "<script>" +
             "window.badWolfHostMultipleChoiceBootstrapInitialized=true;" +
             "</script>" +
-            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.7\"></script>" +
-            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.7\" " +
+            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.15\"></script>" +
+            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.15\" " +
             $"data-saved-question-type=\"{(int)editor.Input.PresentationType}\"></script>" +
+            "<script>window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();</script>" +
             "<script src=\"/js/multiple-correct-answer-options.js?v=461.1\"></script>" +
             "<script>" +
-            "document.addEventListener('DOMContentLoaded',()=>{" +
-            "window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();" +
+            "(()=>{" +
+            "const finish=()=>{" +
             "window.setTimeout(()=>{" +
             "const s=document.querySelector('[data-question-save-status]');" +
             "if(!s)return;" +
@@ -42,7 +43,11 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             "s.hidden=p.h;s.textContent=p.t;s.className=p.c;s.style.display=p.d;" +
             "},0);" +
             "},0);" +
-            "},{once:true});" +
+            "};" +
+            "if(document.readyState==='loading'){" +
+            "document.addEventListener('DOMContentLoaded',finish,{once:true});" +
+            "}else{window.setTimeout(finish,0);}" +
+            "})();" +
             "</script>");
     }
 }

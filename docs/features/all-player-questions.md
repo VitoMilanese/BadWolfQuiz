@@ -4,12 +4,13 @@
 
 Mandatory all-player questions replace the normal first-to-buzz flow with a phase in which every current player may submit one answer from the player page.
 
-This feature is released with `BadWolfQuiz.Web` **1.16.0**. Structured multiple-choice answer options with separate reveal-only answer content are added in **1.22.38**. Standard answer-content authoring for all-player text questions is added in **1.22.39**. Multiple correct options for all-player multiple choice are added in **1.26.0**.
+This feature is released with `BadWolfQuiz.Web` **1.16.0**. Structured multiple-choice answer options with separate reveal-only answer content are added in **1.22.38**. Standard answer-content authoring for all-player text questions is added in **1.22.39**. Multiple correct options for all-player multiple choice are added in **1.26.0**. The optional **Start without answer options** hybrid flow for all-player multiple choice is added in **1.46.0**.
 
-The runtime exposes two presentation modes:
+The runtime exposes two normal presentation modes plus one persisted hybrid marker:
 
 - `AllPlayerText` for private free-text submissions judged by the host;
-- `AllPlayerMultipleChoice` for one choice from two to four shuffled Text or Image options.
+- `AllPlayerMultipleChoice` for one choice from two to four shuffled Text or Image options;
+- `AllPlayerMultipleChoiceOnDemand` as the persisted marker for an all-player multiple-choice question that starts with the normal buzzer and switches to the all-player choice phase only when the host reveals the options.
 
 These modes use the existing `QuestionPresentationType` field, so they do not require a database migration.
 
@@ -35,6 +36,13 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 - Question content remains limited to Text and Image blocks for this presentation type.
 - The question may be marked as a wager question and may participate in random wager selection.
 
+When **Start without answer options** is enabled for an all-player multiple-choice question:
+
+- the authored **Button mode** remains visible, enabled, and persisted;
+- **Wager mode** is hidden and normalized to the normal mode, and the question cannot be a wager question or a random-wager candidate;
+- **Allow x2 and 1/2 answer scoring** remains visible, enabled, and persisted normally for buzzer judgments before the answer options are revealed;
+- the setting is stored through the existing presentation-type compatibility marker, without a new database column.
+
 Legacy multiple-choice questions that store only the old flat two-to-four answer blocks are wrapped into the **Answer options** structure when opened in the editor. The database is not changed until the question is saved.
 
 Opening an existing all-player question establishes a clean editor baseline. Leaving through Back, Next, refresh, page close, or Escape uses the shared unsaved-changes guard without stacking a native browser prompt over the application dialog.
@@ -55,6 +63,22 @@ The type selector is rendered by Razor and also posts a hidden all-player mode m
 For multiple choice, automatic completion or the host's early close action reveals the answer presentation and stops the question timers. For text mode, automatic completion stops both timers and starts sequential host judging without resolving the question first. An early host close does the same after recording empty responses for missing participants.
 
 For wager all-player questions, the participants after wagering are the players who submitted wagers. A player who joins after the wager phase has finished does not become a required respondent and therefore does not block automatic completion.
+
+### Start without answer options
+
+An on-demand all-player multiple-choice question begins as a normal buzzer question with its answer options hidden. The host may judge buzzer answers with the normal Correct, Incorrect, x2, and 1/2 actions allowed by the question settings, or choose **Show answer options** while the question is still active.
+
+When the host reveals the options:
+
+1. the buzzer closes and any unresolved current claimant is cleared without being marked incorrect;
+2. the question switches to the normal all-player multiple-choice answering phase;
+3. the question timer restarts and the separate buzzer-answer timer stops;
+4. the host receives the normal bottom answer-options drawer and **Proceed to answer review** action;
+5. the question value becomes 50% of its original value for the all-player choice phase, with a minimum correct-answer value of 1 point;
+6. players whose earlier buzzer answer was already judged incorrect can see the options but cannot submit one and are excluded from waiting/progress/completion totals;
+7. a player who had only claimed the buzzer but had not yet been judged remains eligible to choose an option.
+
+The revealed phase and the excluded-player set are included in unfinished-game state so recovery resumes the same phase and eligibility rules.
 
 ## Multiple-choice ordering and presentation
 
@@ -94,6 +118,8 @@ For a normal all-player question, scoring is the same for both modes:
 
 For `AllPlayerMultipleChoice`, selecting any option marked correct earns the normal correct-answer result. Selecting any unmarked option is incorrect. The same complete correct-option set is used for wager questions, answer history, and active-game recovery.
 
+For an on-demand all-player multiple-choice question after the options are revealed, a correct choice awards 50% of the original question value instead of the full value. Before reveal, normal buzzer judgments use the original value and honor the authored x2 / 1/2 reward setting when enabled.
+
 All-player questions may also be explicit or randomly selected wager questions. Every participating player privately submits an individual wager from the player screen before the question is shown. The host sees only submitted/not-submitted status, may assign the minimum wager for an AFK player, and reveals the question after every wager exists. The host wager screen uses the full gameplay width, and **Show question** stays in a stable bottom action area outside the right status drawer. Each correct answer adds that player's own wager and each incorrect answer subtracts that player's own wager. If the host closes answering while a player is still missing, the automatically recorded empty response is incorrect and also subtracts that player's own wager. Wager all-player questions use the configured wager-answer timer start mode and duration.
 
 Incorrect submissions remain stored as answer attempts. Their score delta is zero for normal all-player questions and the negative wager amount for wager all-player questions, allowing statistics to distinguish an incorrect answer from a missing answer.
@@ -119,6 +145,7 @@ The focused regression suite covers:
 - wager participation rules, including late players who did not submit wagers;
 - shuffled Text/Image choices scoped only to selectable options;
 - judging against every marked-correct option for normal and wager scoring;
+- on-demand multiple-choice editor state, buzzer-to-choice transition, 50% post-reveal value, unresolved-claimant eligibility, judged-incorrect exclusion, completion counting, reward modifiers, and unfinished-game recovery;
 - shared all-correct-options-plus-additional-content reveal behavior across live gameplay, editor preview, AnswerKey, and resolved-question preview;
 - active-game snapshot round-tripping of the full correct-option set;
 - reconnect approval, local-storage token recovery, and control rebuilding;

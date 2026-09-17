@@ -2907,4 +2907,13 @@
   <data name="GameSettings_CategoryColorsEnabled" xml:space="preserve">
     <value>Кольорові категорії</value>
   </data>
+  <data name="Label_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>Спочатку без варіантів відповіді</value>
+  </data>
+  <data name="Hint_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>Питання починається з буззером як звичайне. Хост може показати варіанти під час активного питання; після цього вартість зменшується на 50%, а гравці, які вже натискали буззер, не можуть обирати відповідь.</value>
+  </data>
+  <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
+    <value>Показати варіанти відповіді</value>
+  </data>
 </root>

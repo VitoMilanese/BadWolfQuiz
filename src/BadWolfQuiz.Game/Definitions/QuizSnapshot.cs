@@ -9,7 +9,8 @@ public enum QuestionPresentationType
     AllPlayerText = 2,
     AllPlayerMultipleChoice = 3,
     HostMultipleChoice = 4,
-    AllPlayerPeerRatedText = 5
+    AllPlayerPeerRatedText = 5,
+    AllPlayerMultipleChoiceOnDemand = 7
 }
 
 public enum QuestionBuzzerMode
@@ -280,7 +281,9 @@ public sealed class QuizQuestionSnapshot
                 nameof(questionBlocks));
         }
 
-        if (presentationType == QuestionPresentationType.AllPlayerMultipleChoice)
+        if (presentationType is
+            QuestionPresentationType.AllPlayerMultipleChoice or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand)
         {
             if (!answerLayout.IsStructurallyValid)
             {
@@ -354,7 +357,8 @@ public sealed class QuizQuestionSnapshot
         IsSpecial = presentationType is
             QuestionPresentationType.FourClues or
             QuestionPresentationType.HostMultipleChoice or
-            QuestionPresentationType.AllPlayerPeerRatedText
+            QuestionPresentationType.AllPlayerPeerRatedText or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand
                 ? false
                 : isSpecial;
         PresentationType = presentationType;
@@ -366,6 +370,7 @@ public sealed class QuizQuestionSnapshot
             : buzzDelaySeconds;
         ExcludeFromRandomWagerSelection =
             presentationType == QuestionPresentationType.HostMultipleChoice ||
+            presentationType == QuestionPresentationType.AllPlayerMultipleChoiceOnDemand ||
             excludeFromRandomWagerSelection;
         AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
@@ -429,7 +434,8 @@ public sealed class QuizQuestionSnapshot
         PresentationType is not
             QuestionPresentationType.FourClues and not
             QuestionPresentationType.HostMultipleChoice and not
-            QuestionPresentationType.AllPlayerPeerRatedText;
+            QuestionPresentationType.AllPlayerPeerRatedText and not
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
 
     public bool IsEligibleForRandomAnonymousSharedWagerSelection =>
         IsEligibleForRandomWagerSelection &&

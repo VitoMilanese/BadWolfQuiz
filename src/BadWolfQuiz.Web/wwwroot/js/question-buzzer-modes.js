@@ -45,13 +45,18 @@
         }
 
         const sync = () => {
-            const isAllPlayer = presentationType.value === "2" ||
-                presentationType.value === "3";
-            const isWager = !isAllPlayer && (wager?.checked ?? false);
-            const usesBuzzer = !isAllPlayer && !isWager;
+            const isAllPlayerText = presentationType.value === "2";
+            const isAllPlayerChoice = presentationType.value === "3";
+            const isWager = !isAllPlayerText && !isAllPlayerChoice &&
+                (wager?.checked ?? false);
+            const usesBuzzer = isAllPlayerChoice ||
+                (!isAllPlayerText && !isWager);
 
             modeSetting.hidden = !usesBuzzer;
             modeSelect.disabled = !usesBuzzer;
+            if (isAllPlayerChoice && !modeSelect.value) {
+                modeSelect.value = "0";
+            }
 
             const showDelay = usesBuzzer && modeSelect.value === "4";
             delaySetting.hidden = !showDelay;

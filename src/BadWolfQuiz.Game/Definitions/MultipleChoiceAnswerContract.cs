@@ -8,6 +8,7 @@ public static class MultipleChoiceAnswerContract
     public static bool IsMultipleChoice(QuestionPresentationType presentationType) =>
         presentationType is
             QuestionPresentationType.AllPlayerMultipleChoice or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand or
             QuestionPresentationType.HostMultipleChoice;
 
     public static string CreateRuntimeMarker(int optionCount) =>

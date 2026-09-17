@@ -36,6 +36,27 @@ public sealed class QuestionBuzzerWebRegressionTests
     }
 
     [Fact]
+    public void All_player_choice_keeps_button_mode_visible_and_selected()
+    {
+        var source = File.ReadAllText(Path.Combine(
+            FindRepositoryRoot(),
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "question-buzzer-modes.js"));
+
+        Assert.Contains("const isAllPlayerText = presentationType.value === \"2\";", source);
+        Assert.Contains("const isAllPlayerChoice = presentationType.value === \"3\";", source);
+        Assert.Contains("const usesBuzzer = isAllPlayerChoice ||", source);
+        Assert.Contains("if (isAllPlayerChoice && !modeSelect.value)", source);
+        Assert.DoesNotContain(
+            "presentationType.value === \"2\" ||\n                presentationType.value === \"3\"",
+            source,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Host_helper_handles_delay_and_media_completion()
     {
         var root = FindRepositoryRoot();

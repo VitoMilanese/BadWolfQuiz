@@ -124,16 +124,5 @@
         delete window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver;
     };
 
-    if (document.readyState === "loading") {
-        // Capture-phase DOMContentLoaded runs before the controller's normal
-        // DOMContentLoaded listener. This keeps the monkey-patch scoped to the
-        // controller initialization instead of the whole page parse lifecycle.
-        nativeAddEventListener.call(
-            document,
-            "DOMContentLoaded",
-            installOverrides,
-            { capture: true, once: true });
-    } else {
-        installOverrides();
-    }
+    installOverrides();
 })();

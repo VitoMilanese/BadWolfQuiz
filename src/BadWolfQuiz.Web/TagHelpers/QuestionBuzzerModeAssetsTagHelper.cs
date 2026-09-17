@@ -32,7 +32,7 @@ public sealed class QuestionBuzzerModeAssetsTagHelper(
             localizer["Label_BuzzDelay"].Value);
 
         output.PostContent.AppendHtml(
-            $"<script src='/js/question-buzzer-modes.js?v=1.22.3' " +
+            $"<script src='/js/question-buzzer-modes.js?v=1.22.3.1' " +
             $"data-saved-buzz-delay='{savedDelay}' " +
             $"data-buzz-delay-label='{delayLabel}'></script>");
     }

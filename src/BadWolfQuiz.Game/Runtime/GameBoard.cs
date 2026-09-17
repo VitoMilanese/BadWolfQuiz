@@ -114,9 +114,11 @@ public sealed class RuntimeQuestion
     private readonly List<QuestionAnswerAttempt> _answerAttempts = [];
     private readonly List<Wager> _allPlayerWagers = [];
     private readonly List<int> _remainingHostMultipleChoiceOptionIds = [];
+    private readonly List<GamePlayerId> _allPlayerChoiceExcludedPlayerIds = [];
     private readonly IReadOnlyList<QuestionAnswerAttempt> _readOnlyAnswerAttempts;
     private readonly IReadOnlyList<Wager> _readOnlyAllPlayerWagers;
     private readonly IReadOnlyList<int> _readOnlyRemainingHostMultipleChoiceOptionIds;
+    private readonly IReadOnlyList<GamePlayerId> _readOnlyAllPlayerChoiceExcludedPlayerIds;
 
     internal RuntimeQuestion(
         int sourceRoundId,
@@ -138,15 +140,22 @@ public sealed class RuntimeQuestion
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
-        PresentationType = presentationType;
+        RevealAnswerOptionsOnDemand = presentationType ==
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
+        PresentationType = RevealAnswerOptionsOnDemand
+            ? QuestionPresentationType.AllPlayerMultipleChoice
+            : presentationType;
+        AreAllPlayerChoiceOptionsRevealed = !RevealAnswerOptionsOnDemand;
         AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
-        RevealedClueCount = presentationType == QuestionPresentationType.FourClues ? 2 : 0;
+        RevealedClueCount = PresentationType == QuestionPresentationType.FourClues ? 2 : 0;
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;
         _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
         _readOnlyAllPlayerWagers = _allPlayerWagers.AsReadOnly();
         _readOnlyRemainingHostMultipleChoiceOptionIds =
             _remainingHostMultipleChoiceOptionIds.AsReadOnly();
+        _readOnlyAllPlayerChoiceExcludedPlayerIds =
+            _allPlayerChoiceExcludedPlayerIds.AsReadOnly();
 
         if (IsHostMultipleChoice)
         {
@@ -175,9 +184,23 @@ public sealed class RuntimeQuestion
 
     public bool AllowAnswerRewardModifiers { get; }
 
-    public bool IsAllPlayerQuestion => PresentationType is
-        QuestionPresentationType.AllPlayerText or
-        QuestionPresentationType.AllPlayerMultipleChoice;
+    public bool RevealAnswerOptionsOnDemand { get; }
+
+    public bool AreAllPlayerChoiceOptionsRevealed { get; private set; }
+
+    public IReadOnlyList<GamePlayerId> AllPlayerChoiceExcludedPlayerIds =>
+        _readOnlyAllPlayerChoiceExcludedPlayerIds;
+
+    public bool CanRevealAllPlayerChoiceOptions =>
+        RevealAnswerOptionsOnDemand &&
+        !AreAllPlayerChoiceOptionsRevealed &&
+        !IsSpecial &&
+        Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
+
+    public bool IsAllPlayerQuestion =>
+        PresentationType == QuestionPresentationType.AllPlayerText ||
+        PresentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
+            AreAllPlayerChoiceOptionsRevealed;
 
     public bool IsHostMultipleChoice =>
         PresentationType == QuestionPresentationType.HostMultipleChoice;
@@ -227,9 +250,11 @@ public sealed class RuntimeQuestion
 
     public int CorrectAnswerValue => IsSpecial && !IsAllPlayerQuestion
         ? Wager?.Amount ?? Points
-        : PresentationType == QuestionPresentationType.FourClues
-            ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
-            : IsHostMultipleChoice
+        : RevealAnswerOptionsOnDemand && AreAllPlayerChoiceOptionsRevealed
+            ? Math.Max(1, Points / 2)
+            : PresentationType == QuestionPresentationType.FourClues
+                ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
+                : IsHostMultipleChoice
                 ? HostMultipleChoiceRewardValue
                 : Points;
 
@@ -265,7 +290,9 @@ public sealed class RuntimeQuestion
         _allPlayerWagers.ToArray(),
         IsHostMultipleChoice
             ? _remainingHostMultipleChoiceOptionIds.ToArray()
-            : null);
+            : null,
+        AreAllPlayerChoiceOptionsRevealed,
+        _allPlayerChoiceExcludedPlayerIds.ToArray());
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -275,6 +302,12 @@ public sealed class RuntimeQuestion
         Wager = state.Wager;
         BuzzerStatus = state.BuzzerStatus;
         AnsweringPlayerId = state.AnsweringPlayerId;
+        AreAllPlayerChoiceOptionsRevealed =
+            !RevealAnswerOptionsOnDemand || state.AllPlayerChoiceOptionsRevealed;
+        _allPlayerChoiceExcludedPlayerIds.Clear();
+        _allPlayerChoiceExcludedPlayerIds.AddRange(
+            (state.AllPlayerChoiceExcludedPlayerIds ?? [])
+                .Distinct());
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues
             ? Math.Clamp(state.RevealedClueCount == 0 ? 2 : state.RevealedClueCount, 2, 4)
             : 0;
@@ -397,6 +430,27 @@ public sealed class RuntimeQuestion
                 "Only an all-player wager question with locked wagers can begin answering.");
         }
 
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
+        AnsweringPlayerId = null;
+        Status = RuntimeQuestionStatus.Active;
+    }
+
+    internal void RevealAllPlayerChoiceOptions()
+    {
+        if (!CanRevealAllPlayerChoiceOptions)
+        {
+            throw new GameRuleViolationException(
+                "Answer options can no longer be revealed for this question.");
+        }
+
+        _allPlayerChoiceExcludedPlayerIds.Clear();
+        _allPlayerChoiceExcludedPlayerIds.AddRange(
+            _answerAttempts
+                .Where(attempt => !attempt.IsCorrect)
+                .Select(attempt => attempt.PlayerId)
+                .Distinct());
+
+        AreAllPlayerChoiceOptionsRevealed = true;
         BuzzerStatus = QuestionBuzzerStatus.Closed;
         AnsweringPlayerId = null;
         Status = RuntimeQuestionStatus.Active;
