@@ -28,6 +28,12 @@
          Model.Input.AllPlayerMode ==
             BadWolfQuiz.Web.Services.AllPlayerQuestionCompatibility.MultipleChoiceOnDemandMode);
     Model.Input.RevealAnswerOptionsOnDemand = isOnDemandChoice;
+    var showWagerMode =
+        Model.Input.PresentationType ==
+            BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard ||
+        (Model.Input.PresentationType ==
+            BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice &&
+         !isOnDemandChoice);
 }
 
 @if (TempData["SuccessMessage"] is string successMessage)
@@ -213,7 +219,7 @@
 
 
         <div id="wager-mode-setting"
-             hidden="@(Model.Input.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard ? "hidden" : null)">
+             hidden="@(showWagerMode ? null : "hidden")">
             <label asp-for="Input.WagerMode">
                 @Localizer["Label_WagerMode"]
             </label>
@@ -662,7 +668,8 @@
             }
 
             const supportsWagerMode =
-                presentationTypeSelect?.value === "0";
+                presentationTypeSelect?.value === "0" ||
+                (presentationTypeSelect?.value === "3" && !isOnDemandChoice);
             if (wagerModeSetting) {
                 wagerModeSetting.hidden = !supportsWagerMode;
             }

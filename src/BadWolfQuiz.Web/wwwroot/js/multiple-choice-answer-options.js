@@ -602,7 +602,8 @@
                 excludeCheckbox.checked = true;
             }
 
-            const supportsWagerMode = type === "0";
+            const supportsWagerMode =
+                type === "0" || (allPlayerChoice && !onDemand);
             if (wagerModeSetting instanceof HTMLElement) {
                 wagerModeSetting.hidden = !supportsWagerMode;
             }

@@ -46,8 +46,8 @@ public sealed class MultipleChoiceEditorStabilityRegressionTests
             guard,
             StringComparison.Ordinal);
 
-        var guardAsset = "multiple-choice-answer-options-guard.js?v=382.13";
-        var controllerAsset = "multiple-choice-answer-options.js?v=382.13";
+        var guardAsset = "multiple-choice-answer-options-guard.js?v=382.14";
+        var controllerAsset = "multiple-choice-answer-options.js?v=382.14";
         Assert.Contains(guardAsset, tagHelper, StringComparison.Ordinal);
         Assert.Contains(controllerAsset, tagHelper, StringComparison.Ordinal);
         Assert.True(
