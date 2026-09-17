@@ -285,7 +285,7 @@
         let standardBuzzMode = buzzSelect instanceof HTMLSelectElement
             ? buzzSelect.value
             : "0";
-        let previousAllPlayer = false;
+        let previousBuzzModeHidden = false;
         let syncScheduled = false;
         let structureChangeInProgress = false;
 
@@ -543,7 +543,7 @@
                 onDemandCheckbox instanceof HTMLInputElement &&
                 onDemandCheckbox.checked;
             form.dataset.onDemandChoice = onDemand ? "true" : "false";
-            const isAllPlayer = isText || (allPlayerChoice && !onDemand);
+            const hideBuzzModeForType = isText;
 
             if (onDemandSetting instanceof HTMLElement) {
                 onDemandSetting.hidden = !allPlayerChoice;
@@ -563,11 +563,11 @@
             choiceHelp.hidden = !allPlayerChoice;
             hostHelp.hidden = !hostChoice;
 
-            if (isAllPlayer && !previousAllPlayer &&
+            if (hideBuzzModeForType && !previousBuzzModeHidden &&
                 buzzSelect instanceof HTMLSelectElement) {
-                standardBuzzMode = buzzSelect.value;
+                standardBuzzMode = buzzSelect.value || "0";
             }
-            if (isAllPlayer) {
+            if (hideBuzzModeForType) {
                 if (buzzSetting) {
                     buzzSetting.hidden = true;
                 }
@@ -581,8 +581,10 @@
                 }
                 if (buzzSelect instanceof HTMLSelectElement) {
                     buzzSelect.disabled = false;
-                    if (previousAllPlayer) {
-                        buzzSelect.value = standardBuzzMode;
+                    if (allPlayerChoice && !buzzSelect.value) {
+                        buzzSelect.value = "0";
+                    } else if (previousBuzzModeHidden) {
+                        buzzSelect.value = standardBuzzMode || "0";
                     }
                 }
             }
@@ -632,7 +634,7 @@
                 setAllowedTopLevelTypes(answerSection, null);
             }
 
-            previousAllPlayer = isAllPlayer;
+            previousBuzzModeHidden = hideBuzzModeForType;
             updateOptionUi();
         };
 

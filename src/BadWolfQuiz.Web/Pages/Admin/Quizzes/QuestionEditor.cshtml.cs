@@ -89,7 +89,11 @@ public sealed class QuestionEditorModel(
             AllowAnswerRewardModifiers =
                 !isAllPlayerMultipleChoiceOnDemand &&
                 question.AllowAnswerRewardModifiers,
-            BuzzModeOverride = question.BuzzModeOverride,
+            BuzzModeOverride =
+                presentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
+                !Enum.IsDefined(typeof(BuzzActivationMode), question.BuzzModeOverride)
+                    ? BuzzActivationMode.UseRoundDefault
+                    : question.BuzzModeOverride,
             BuzzDelaySeconds = question.BuzzDelaySeconds,
             Tags = question.Tags.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)
                 .Select(x => x.Name)
@@ -270,9 +274,9 @@ public sealed class QuestionEditorModel(
                 question.Id)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
 
-        var isAllPlayer = Input.PresentationType is
-            QuestionPresentationType.AllPlayerText or
-            QuestionPresentationType.AllPlayerMultipleChoice;
+        var isAllPlayerMultipleChoice = Input.PresentationType is
+            QuestionPresentationType.AllPlayerMultipleChoice or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
         var isHostMultipleChoice =
             Input.PresentationType == QuestionPresentationType.HostMultipleChoice;
         var answerLayout = GetAnswerOptionsLayout();
@@ -293,10 +297,13 @@ public sealed class QuestionEditorModel(
         question.AllowAnswerRewardModifiers =
             !isAllPlayerMultipleChoiceOnDemand &&
             Input.AllowAnswerRewardModifiers;
-        question.BuzzModeOverride = question.IsSpecial || isAllPlayer
+        var disableBuzzMode =
+            Input.PresentationType == QuestionPresentationType.AllPlayerText ||
+            (question.IsSpecial && !isAllPlayerMultipleChoice);
+        question.BuzzModeOverride = disableBuzzMode
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;
-        question.BuzzDelaySeconds = question.IsSpecial || isAllPlayer
+        question.BuzzDelaySeconds = disableBuzzMode
             ? 0
             : Math.Max(0, Input.BuzzDelaySeconds);
         question.UpdatedAtUtc = DateTime.UtcNow;

@@ -28,6 +28,12 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("specialCheckbox.checked = false", editorScript, StringComparison.Ordinal);
         Assert.Contains("excludeCheckbox.checked = true", editorScript, StringComparison.Ordinal);
         Assert.Contains("buzzSelect.disabled = false", editorScript, StringComparison.Ordinal);
+        Assert.Contains("const hideBuzzModeForType = isText;", editorScript, StringComparison.Ordinal);
+        Assert.Contains("if (allPlayerChoice && !buzzSelect.value)", editorScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("isText || (allPlayerChoice && !onDemand)", editorScript, StringComparison.Ordinal);
+        Assert.Contains("var isAllPlayerMultipleChoice = Input.PresentationType is", editorModel, StringComparison.Ordinal);
+        Assert.Contains("question.IsSpecial && !isAllPlayerMultipleChoice", editorModel, StringComparison.Ordinal);
+        Assert.Contains("Enum.IsDefined(typeof(BuzzActivationMode), question.BuzzModeOverride)", editorModel, StringComparison.Ordinal);
         Assert.Contains("badwolf:question-editor-on-demand-synced", editorScript, StringComparison.Ordinal);
         Assert.Contains("data-on-demand-choice", editor, StringComparison.Ordinal);
         Assert.Contains("Model.Input.AllPlayerMode ==", editor, StringComparison.Ordinal);
@@ -40,7 +46,9 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.DoesNotContain("window.badWolfMultipleChoiceAnswerOptionsEditorLoaded", editorScript, StringComparison.Ordinal);
         Assert.Contains("const supportsWagerMode = type === \"0\";", editorScript, StringComparison.Ordinal);
         Assert.DoesNotContain("type === \"0\" || onDemand", editorScript, StringComparison.Ordinal);
-        Assert.Contains("const hideBuzzMode = isWagerQuestion && !isOnDemandChoice", editor, StringComparison.Ordinal);
+        Assert.Contains("const isAllPlayerChoice =", editor, StringComparison.Ordinal);
+        Assert.Contains("const hideBuzzMode = isWagerQuestion && !isAllPlayerChoice", editor, StringComparison.Ordinal);
+        Assert.Contains("if (isAllPlayerChoice && !buzzModeSelect.value)", editor, StringComparison.Ordinal);
         Assert.Contains("Model.Input.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard ? \"hidden\" : null", editor, StringComparison.Ordinal);
         Assert.Contains("wagerModeSetting.hidden = !supportsWagerMode", editorScript, StringComparison.Ordinal);
         Assert.Contains("answerRewardModifierSetting.hidden = onDemand", editorScript, StringComparison.Ordinal);

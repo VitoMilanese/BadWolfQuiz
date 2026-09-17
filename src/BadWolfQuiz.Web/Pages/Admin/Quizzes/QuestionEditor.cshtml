@@ -689,11 +689,9 @@
         function updateBuzzModeVisibility() {
             const isWagerQuestion =
                 wagerQuestionCheckbox?.checked ?? false;
-            const isOnDemandChoice =
-                presentationTypeSelect?.value === "3" &&
-                (onDemandChoiceCheckbox?.checked === true ||
-                 questionEditorForm?.dataset.onDemandChoice === "true");
-            const hideBuzzMode = isWagerQuestion && !isOnDemandChoice;
+            const isAllPlayerChoice =
+                presentationTypeSelect?.value === "3";
+            const hideBuzzMode = isWagerQuestion && !isAllPlayerChoice;
 
             if (buzzModeSetting) {
                 buzzModeSetting.hidden = hideBuzzMode;
@@ -701,6 +699,9 @@
 
             if (buzzModeSelect) {
                 buzzModeSelect.disabled = hideBuzzMode;
+                if (isAllPlayerChoice && !buzzModeSelect.value) {
+                    buzzModeSelect.value = "0";
+                }
             }
         }
 
