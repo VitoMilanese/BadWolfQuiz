@@ -12,6 +12,16 @@ def replace_once(relative_path: str, old: str, new: str) -> None:
     path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
 
+def replace_exact(relative_path: str, old: str, new: str, expected_count: int) -> None:
+    path = ROOT / relative_path
+    text = path.read_text(encoding="utf-8")
+    count = text.count(old)
+    if count != expected_count:
+        raise RuntimeError(
+            f"Expected {expected_count} matches in {relative_path}, found {count}: {old!r}")
+    path.write_text(text.replace(old, new), encoding="utf-8")
+
+
 editor = "src/BadWolfQuiz.Web/Pages/Admin/Quizzes/QuestionEditor.cshtml"
 controller = "src/BadWolfQuiz.Web/wwwroot/js/multiple-choice-answer-options.js"
 tag_helper = "src/BadWolfQuiz.Web/TagHelpers/MultipleChoiceAnswerOptionsAssetsTagHelper.cs"
@@ -38,8 +48,7 @@ replace_once(
     '''            const supportsWagerMode = type === "0" || onDemand;''',
     '''            const supportsWagerMode = type === "0";''')
 
-replace_once(tag_helper, "382.11", "382.12")
-replace_once(tag_helper, "382.11", "382.12")
+replace_exact(tag_helper, "382.11", "382.12", 2)
 
 replace_once(
     on_demand_tests,
