@@ -42,6 +42,20 @@ jobs:
               raise RuntimeError(f'Expected one patch-script target, found {source.count(old)}')
           source = source.replace(old, new, 1)
           exec(compile(source, '<issue-691-followup>', 'exec'))
+
+          # Keep the generated regression assertions deliberately simple so
+          # the temporary Python/YAML quoting layer cannot corrupt C# strings.
+          test_path = Path('tests/BadWolfQuiz.Web.Tests/OnDemandAllPlayerChoiceRegressionTests.cs')
+          lines = test_path.read_text(encoding='utf-8').splitlines()
+          fixed = []
+          for line in lines:
+              if 'Assert.Contains("asp-for=' in line:
+                  fixed.append('        Assert.Contains("RevealAnswerOptionsOnDemand", editor, StringComparison.Ordinal);')
+              elif 'Assert.Contains("onDemandCheckbox.addEventListener' in line:
+                  fixed.append('        Assert.Contains("onDemandCheckbox.addEventListener", editorScript, StringComparison.Ordinal);')
+              else:
+                  fixed.append(line)
+          test_path.write_text('\n'.join(fixed) + '\n', encoding='utf-8')
           PY
 
       - name: Run focused game tests
