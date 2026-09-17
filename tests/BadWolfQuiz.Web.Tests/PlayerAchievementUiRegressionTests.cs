@@ -64,11 +64,15 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("PlayerAchievementsTagHelper", imports);
         Assert.Contains("GitHubAchievementLinkTagHelper", imports);
         Assert.Contains("/css/player-achievements.css?v=12", tagHelper);
+        Assert.Contains("/css/achievement-category-filter.css?v=2", tagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", tagHelper);
+        Assert.Contains("/js/achievement-category-filter.js?v=2", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
         Assert.Contains("/css/player-achievements.css?v=11", hostTagHelper);
+        Assert.Contains("/css/achievement-category-filter.css?v=2", hostTagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", hostTagHelper);
-        Assert.Contains("/js/host-player-achievements.js?v=7", hostTagHelper);
+        Assert.Contains("/js/achievement-category-filter.js?v=2", hostTagHelper);
+        Assert.Contains("/js/host-player-achievements.js?v=8", hostTagHelper);
         Assert.Contains("data-player-achievements-label", tagHelper);
         Assert.Contains("Achievements_PlayerLabel", tagHelper);
         Assert.Contains("player-achievements-dialog", tagHelper);
