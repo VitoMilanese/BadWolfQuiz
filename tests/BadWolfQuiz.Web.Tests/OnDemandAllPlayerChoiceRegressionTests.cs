@@ -48,6 +48,19 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
             StringComparison.Ordinal);
         Assert.Contains("data-all-player-review-action", lobby, StringComparison.Ordinal);
         Assert.Contains("AllPlayer_ReviewAnswersNow", lobby, StringComparison.Ordinal);
+        Assert.Contains("const sameAllPlayerChoiceLayout =", lobby, StringComparison.Ordinal);
+        Assert.Contains(
+            "currentView.querySelector(\"[data-all-player-server-preview]\")",
+            lobby,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "nextView.querySelector(\"[data-all-player-server-preview]\")",
+            lobby,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "sameMediaAutoplayState &&\n                    sameAllPlayerChoiceLayout &&",
+            lobby,
+            StringComparison.Ordinal);
         Assert.Contains("item.IsAllPlayerQuestion", registration, StringComparison.Ordinal);
     }
 
