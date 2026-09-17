@@ -49,18 +49,18 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         style.Attributes["data-question-hint-client-styles"] = string.Empty;
         style.InnerHtml.AppendHtml("""
 .question-hint-action-button {
-    width: 2.25rem !important;
-    min-width: 2.25rem !important;
-    max-width: 2.25rem !important;
-    height: 2.25rem !important;
-    min-height: 2.25rem !important;
-    max-height: 2.25rem !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
     padding: 0 !important;
     margin: 0 !important;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    flex: 0 0 2.25rem;
+    flex: 0 0 46px;
     box-sizing: border-box;
     line-height: 1;
 }

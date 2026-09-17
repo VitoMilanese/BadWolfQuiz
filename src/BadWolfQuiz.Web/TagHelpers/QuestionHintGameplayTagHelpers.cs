@@ -229,18 +229,18 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
         style.Attributes["data-question-hints-styles"] = string.Empty;
         style.InnerHtml.AppendHtml("""
 .question-hint-action-button {
-    width: 2.25rem;
-    min-width: 2.25rem;
-    max-width: 2.25rem;
-    height: 2.25rem;
-    min-height: 2.25rem;
-    max-height: 2.25rem;
+    width: 46px;
+    min-width: 46px;
+    max-width: 46px;
+    height: 46px;
+    min-height: 46px;
+    max-height: 46px;
     padding: 0;
     margin: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 2.25rem;
+    flex: 0 0 46px;
     box-sizing: border-box;
     line-height: 1;
 }

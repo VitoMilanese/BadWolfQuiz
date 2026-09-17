@@ -106,6 +106,9 @@ public sealed class QuestionHintGameplayRegressionTests
         Assert.Contains("width: calc(100% - clamp(1rem, 2vw, 2rem));", assets, StringComparison.Ordinal);
         Assert.Contains("max-width: none;", assets, StringComparison.Ordinal);
         Assert.Contains("box-sizing: border-box;", assets, StringComparison.Ordinal);
+        Assert.Contains("width: 46px !important;", assets, StringComparison.Ordinal);
+        Assert.Contains("height: 46px !important;", assets, StringComparison.Ordinal);
+        Assert.Contains("flex: 0 0 46px;", assets, StringComparison.Ordinal);
         Assert.Contains("event.stopImmediatePropagation()", assets, StringComparison.Ordinal);
         Assert.Contains("setBusy(true)", assets, StringComparison.Ordinal);
         Assert.Contains("Accept\": \"application/json", assets, StringComparison.Ordinal);
