@@ -8,7 +8,8 @@ public enum ArchivedMediaRole
     AnswerBlock = 2,
     FinalQuestionBlock = 3,
     FinalAnswerBlock = 4,
-    FinalDescriptionBlock = 5
+    FinalDescriptionBlock = 5,
+    HintBlock = 6
 }
 
 public enum ArchiveOperationState

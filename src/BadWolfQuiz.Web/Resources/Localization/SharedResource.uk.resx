@@ -2916,4 +2916,19 @@
   <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
     <value>Показати варіанти відповіді</value>
   </data>
+  <data name="Label_EnableQuestionHints" xml:space="preserve">
+    <value>Додати підказки</value>
+  </data>
+  <data name="Hint_EnableQuestionHints" xml:space="preserve">
+    <value>Додає вкладку «Підказки», де можна створити від 1 до 4 текстових або графічних підказок.</value>
+  </data>
+  <data name="Label_Hints" xml:space="preserve">
+    <value>Підказки</value>
+  </data>
+  <data name="QuestionHints_CountRequired" xml:space="preserve">
+    <value>Для підказок потрібно від 1 до 4 блоків.</value>
+  </data>
+  <data name="QuestionHints_AllowedTypes" xml:space="preserve">
+    <value>Підказки підтримують лише текстові блоки та зображення.</value>
+  </data>
 </root>

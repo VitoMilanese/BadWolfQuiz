@@ -2916,4 +2916,19 @@
   <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
     <value>Show answer options</value>
   </data>
+  <data name="Label_EnableQuestionHints" xml:space="preserve">
+    <value>Add hints</value>
+  </data>
+  <data name="Hint_EnableQuestionHints" xml:space="preserve">
+    <value>Shows a Hints tab where 1 to 4 text or image hints can be authored.</value>
+  </data>
+  <data name="Label_Hints" xml:space="preserve">
+    <value>Hints</value>
+  </data>
+  <data name="QuestionHints_CountRequired" xml:space="preserve">
+    <value>Hints require between 1 and 4 blocks.</value>
+  </data>
+  <data name="QuestionHints_AllowedTypes" xml:space="preserve">
+    <value>Hints support only text and image blocks.</value>
+  </data>
 </root>

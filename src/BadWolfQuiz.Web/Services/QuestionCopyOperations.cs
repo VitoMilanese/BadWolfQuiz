@@ -154,6 +154,7 @@ public static class QuestionCopyOperations
                         (block.FileName != null && block.FileName.Trim() != string.Empty) ||
                         block.AudioOnly ||
                         block.Autoplay) &&
+                    !question.HintBlocks.Any() &&
                     !question.AnswerBlocks.Any(block =>
                         block.BlockType != ContentBlockType.Text ||
                         (block.TextContent != null && block.TextContent.Trim() != string.Empty) ||
@@ -241,6 +242,7 @@ public static class QuestionCopyOperations
                     .ThenInclude(round => round.Quiz)
             .Include(question => question.QuestionBlocks)
             .Include(question => question.AnswerBlocks)
+            .Include(question => question.HintBlocks)
             .Include(question => question.Tags)
             .SingleOrDefaultAsync(question =>
                 question.Id == sourceQuestionId &&
@@ -266,6 +268,10 @@ public static class QuestionCopyOperations
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
                         .ThenInclude(question => question.AnswerBlocks)
+            .Include(category => category.Round)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.HintBlocks)
             .Include(category => category.Round)
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
@@ -385,7 +391,8 @@ public static class QuestionCopyOperations
         !question.AllowAnswerRewardModifiers &&
         question.Tags.Count == 0 &&
         question.QuestionBlocks.All(IsBlankBlock) &&
-        question.AnswerBlocks.All(IsBlankBlock);
+        question.AnswerBlocks.All(IsBlankBlock) &&
+        question.HintBlocks.Count == 0;
 
     private static bool IsBlankBlock(ContentBlockBase block) =>
         block.BlockType == ContentBlockType.Text &&
@@ -417,12 +424,15 @@ public static class QuestionCopyOperations
 
         var existingQuestionBlocks = target.QuestionBlocks.ToArray();
         var existingAnswerBlocks = target.AnswerBlocks.ToArray();
+        var existingHintBlocks = target.HintBlocks.ToArray();
         var existingTags = target.Tags.ToArray();
         db.QuestionContentBlocks.RemoveRange(existingQuestionBlocks);
         db.AnswerContentBlocks.RemoveRange(existingAnswerBlocks);
+        db.QuestionHintContentBlocks.RemoveRange(existingHintBlocks);
         db.QuizQuestionTags.RemoveRange(existingTags);
         target.QuestionBlocks.Clear();
         target.AnswerBlocks.Clear();
+        target.HintBlocks.Clear();
         target.Tags.Clear();
 
         foreach (var tag in source.Tags.OrderBy(tag => tag.Name))
@@ -438,6 +448,11 @@ public static class QuestionCopyOperations
         foreach (var block in source.AnswerBlocks.OrderBy(block => block.SortOrder))
         {
             target.AnswerBlocks.Add(CloneAnswerBlock(block));
+        }
+
+        foreach (var block in source.HintBlocks.OrderBy(block => block.SortOrder))
+        {
+            target.HintBlocks.Add(CloneHintBlock(block));
         }
     }
 
@@ -473,6 +488,11 @@ public static class QuestionCopyOperations
         foreach (var block in source.AnswerBlocks.OrderBy(block => block.SortOrder))
         {
             copy.AnswerBlocks.Add(CloneAnswerBlock(block));
+        }
+
+        foreach (var block in source.HintBlocks.OrderBy(block => block.SortOrder))
+        {
+            copy.HintBlocks.Add(CloneHintBlock(block));
         }
 
         return copy;
@@ -516,6 +536,23 @@ public static class QuestionCopyOperations
         SortOrder = source.SortOrder,
         AudioOnly = source.AudioOnly,
         Autoplay = source.Autoplay,
+        FileData = source.FileData?.ToArray(),
+        FileContentType = source.FileContentType,
+        FileName = source.FileName
+    };
+
+    private static QuestionHintContentBlock CloneHintBlock(
+        QuestionHintContentBlock source) => new()
+    {
+        BlockType = source.BlockType,
+        TextContent = source.TextContent,
+        TopCaption = source.TopCaption,
+        BottomCaption = source.BottomCaption,
+        MediaPath = source.MediaPath,
+        ExternalUrl = source.ExternalUrl,
+        SortOrder = source.SortOrder,
+        AudioOnly = false,
+        Autoplay = false,
         FileData = source.FileData?.ToArray(),
         FileContentType = source.FileContentType,
         FileName = source.FileName

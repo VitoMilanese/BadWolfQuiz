@@ -43,6 +43,9 @@ public sealed class QuizPackageService(QuizDbContext db)
                     .ThenInclude(question => question.AnswerBlocks)
             .Include(item => item.Rounds).ThenInclude(round => round.Categories)
                 .ThenInclude(category => category.Questions)
+                    .ThenInclude(question => question.HintBlocks)
+            .Include(item => item.Rounds).ThenInclude(round => round.Categories)
+                .ThenInclude(category => category.Questions)
                     .ThenInclude(question => question.Tags)
             .SingleOrDefaultAsync(item => item.Id == quizId && !item.IsArchived, cancellationToken);
 
@@ -111,7 +114,8 @@ public sealed class QuizPackageService(QuizDbContext db)
                                     question.QuestionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                                     question.AnswerBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                                     question.Tags.OrderBy(tag => tag.Name).Select(tag => tag.Name).ToArray(),
-                                    question.AllowAnswerRewardModifiers))
+                                    question.AllowAnswerRewardModifiers,
+                                    question.HintBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray()))
                                 .ToArray(),
                             category.DescriptionBlocks.OrderBy(block => block.SortOrder).Select(MapBlock).ToArray(),
                             category.ColorMode,
@@ -312,6 +316,12 @@ public sealed class QuizPackageService(QuizDbContext db)
                         await ApplyBlockAsync(block, sourceBlock);
                         question.AnswerBlocks.Add(block);
                     }
+                    foreach (var sourceBlock in sourceQuestion.HintBlocks ?? [])
+                    {
+                        var block = new QuestionHintContentBlock();
+                        await ApplyBlockAsync(block, sourceBlock);
+                        question.HintBlocks.Add(block);
+                    }
                     category.Questions.Add(question);
                 }
                 round.Categories.Add(category);
@@ -455,7 +465,13 @@ public sealed class QuizPackageService(QuizDbContext db)
                     question.Tags is not null && question.Tags
                         .Select(tag => tag.Trim().ToUpperInvariant())
                         .Distinct(StringComparer.Ordinal)
-                        .Count() != question.Tags.Length)
+                        .Count() != question.Tags.Length ||
+                    question.HintBlocks is { Length: > 4 } ||
+                    question.HintBlocks is { Length: > 0 } &&
+                        question.PresentationType != QuestionPresentationType.Standard ||
+                    question.HintBlocks?.Any(block =>
+                        block.BlockType is not ContentBlockType.Text and
+                            not ContentBlockType.Image) == true)
                 {
                     throw new InvalidDataException("The quiz manifest contains invalid question data.");
                 }
@@ -463,7 +479,9 @@ public sealed class QuizPackageService(QuizDbContext db)
         }
         foreach (var block in package.Rounds.SelectMany(round => round.Categories)
                      .SelectMany(category => category.Questions)
-                     .SelectMany(question => question.QuestionBlocks.Concat(question.AnswerBlocks))
+                     .SelectMany(question => question.QuestionBlocks
+                         .Concat(question.AnswerBlocks)
+                         .Concat(question.HintBlocks ?? []))
                      .Concat(package.Rounds.SelectMany(round => round.DescriptionBlocks ?? []))
                      .Concat(package.Rounds.SelectMany(round => round.Categories)
                          .SelectMany(category => category.DescriptionBlocks ?? []))
@@ -533,7 +551,8 @@ public sealed class QuizPackageService(QuizDbContext db)
         int RowIndex, int? TimeLimitSecondsOverride, BuzzActivationMode BuzzModeOverride,
         int BuzzDelaySeconds, bool IsSpecial, QuestionPresentationType PresentationType,
         bool ExcludeFromRandomWagerSelection, BlockData[] QuestionBlocks, BlockData[] AnswerBlocks,
-        string[]? Tags = null, bool AllowAnswerRewardModifiers = false);
+        string[]? Tags = null, bool AllowAnswerRewardModifiers = false,
+        BlockData[]? HintBlocks = null);
     private sealed record BlockData(
         ContentBlockType BlockType, string? TextContent, string? TopCaption,
         string? BottomCaption, string? MediaPath, string? ExternalUrl,

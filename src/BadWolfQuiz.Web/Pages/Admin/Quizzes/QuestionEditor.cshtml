@@ -21,6 +21,21 @@
             Blocks = Model.Input.AnswerBlocks
         };
 
+    var hintBlockCollection =
+        new BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockCollectionViewModel
+        {
+            CollectionId = "hint-blocks",
+            Title = Localizer["Label_Hints"].Value,
+            FieldPrefix = "Input.HintBlocks",
+            Blocks = Model.Input.HintBlocks,
+            AllowedBlockTypes =
+                new[]
+                {
+                    BadWolfQuiz.Web.Models.ContentBlockType.Text,
+                    BadWolfQuiz.Web.Models.ContentBlockType.Image
+                }
+        };
+
     var isOnDemandChoice =
         Model.Input.PresentationType ==
             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice &&
@@ -85,6 +100,33 @@
         margin: 0;
         color: var(--muted);
     }
+    .question-type-setting .standard-question-hints-setting {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        margin: 0;
+    }
+    .question-type-setting .standard-question-hints-setting[hidden] {
+        display: none !important;
+    }
+    .question-type-setting .standard-question-hints-setting > input {
+        flex: 0 0 auto;
+        margin: 0;
+    }
+    .question-type-setting .standard-question-hints-setting > span {
+        display: flex;
+        align-items: baseline;
+        gap: .35rem;
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+    .question-type-setting .standard-question-hints-setting > span > small {
+        display: inline;
+        margin: 0;
+        color: var(--muted);
+    }
 </style>
 
 <form method="post" class="question-editor" enctype="multipart/form-data"
@@ -114,6 +156,16 @@
             <span>
                 <strong>@Localizer["Label_AllPlayerChoiceOnDemand"]</strong>
                 <small>@Localizer["Hint_AllPlayerChoiceOnDemand"]</small>
+            </span>
+        </label>
+        <label class="checkbox-row standard-question-hints-setting"
+               data-standard-question-hints-setting
+               hidden="@(Model.Input.PresentationType == BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard ? null : "hidden")">
+            <input asp-for="Input.EnableHints"
+                   data-standard-question-hints />
+            <span>
+                <strong>@Localizer["Label_EnableQuestionHints"]</strong>
+                <small>@Localizer["Hint_EnableQuestionHints"]</small>
             </span>
         </label>
         <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
@@ -193,6 +245,14 @@
              model="answerBlockCollection" />
 
     <span asp-validation-for="Input.AnswerBlocks"
+          class="text-danger"></span>
+
+    <h2>@Localizer["Label_Hints"]</h2>
+
+    <partial name="Shared/_ContentBlockCollection"
+             model="hintBlockCollection" />
+
+    <span asp-validation-for="Input.HintBlocks"
           class="text-danger"></span>
 
     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
@@ -606,6 +666,7 @@
 
                     applyBlockIds("Input.QuestionBlocks", result.questionBlocks);
                     applyBlockIds("Input.AnswerBlocks", result.answerBlocks);
+                    applyBlockIds("Input.HintBlocks", result.hintBlocks);
                     form.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
                     form.querySelectorAll('input[name$=".RemoveFile"]').forEach(input => input.checked = false);
                     setStatus(result.message, true);
@@ -650,7 +711,17 @@
         const answerRewardModifierCheckbox =
             document.getElementById("Input_AllowAnswerRewardModifiers");
 
+        const standardHintsSetting =
+            document.querySelector("[data-standard-question-hints-setting]");
+
+        const standardHintsCheckbox =
+            document.querySelector("[data-standard-question-hints]");
+
+        const hintSection =
+            document.getElementById("hint-blocks");
+
         function updateQuestionTypeUi() {
+            const isStandard = presentationTypeSelect?.value === "0";
             const isFourClues = presentationTypeSelect?.value === "1";
             const isOnDemandChoice =
                 presentationTypeSelect?.value === "3" &&
@@ -682,6 +753,13 @@
             if (answerRewardModifierCheckbox) {
                 answerRewardModifierCheckbox.disabled = false;
             }
+
+            if (standardHintsSetting) {
+                standardHintsSetting.hidden = !isStandard;
+            }
+            updateHintBlockLimits();
+            document.dispatchEvent(new CustomEvent(
+                "badwolf:question-editor-hints-changed"));
 
             updateBuzzModeVisibility();
         }
@@ -734,6 +812,18 @@
                 updateQuestionTypeUi();
             });
 
+        standardHintsCheckbox?.addEventListener("change", async () => {
+            if (presentationTypeSelect?.value === "0" &&
+                standardHintsCheckbox.checked &&
+                hintSection &&
+                hintSection.querySelectorAll(".content-block-card").length === 0) {
+                await addContentBlock(hintSection, "Text");
+            }
+            updateHintBlockLimits();
+            document.dispatchEvent(new CustomEvent(
+                "badwolf:question-editor-hints-changed"));
+        });
+
         presentationTypeSelect?.addEventListener("change", async () => {
             syncOnDemandDatasetFromCheckbox();
             updateQuestionTypeUi();
@@ -743,6 +833,13 @@
                     await addContentBlock(section, "Text");
                 }
             }
+            if (presentationTypeSelect.value === "0" &&
+                standardHintsCheckbox?.checked &&
+                hintSection &&
+                hintSection.querySelectorAll(".content-block-card").length === 0) {
+                await addContentBlock(hintSection, "Text");
+            }
+            updateHintBlockLimits();
         });
 
         updateBuzzModeVisibility();
@@ -1195,6 +1292,28 @@
             }, 2500);
         });
 
+        function updateHintBlockLimits() {
+            if (!hintSection) {
+                return;
+            }
+            const count = hintSection.querySelectorAll(
+                '.content-block-list > .content-block-card').length;
+            const enabled =
+                presentationTypeSelect?.value === '0' &&
+                standardHintsCheckbox?.checked === true;
+            const addButton = hintSection.querySelector(
+                '.content-block-add-button');
+            if (addButton instanceof HTMLButtonElement) {
+                addButton.disabled = !enabled || count >= 4;
+            }
+            hintSection.querySelectorAll('.content-block-remove-button')
+                .forEach(button => {
+                    if (button instanceof HTMLButtonElement) {
+                        button.disabled = enabled && count <= 1;
+                    }
+                });
+        }
+
         async function addContentBlock(section, blockType) {
             const list = section.querySelector('.content-block-list');
             const fieldPrefix = section.dataset.blockCollection;
@@ -1203,6 +1322,10 @@
             if (section.id === 'question-blocks' &&
                 presentationTypeSelect?.value === '1' &&
                 index >= 4) {
+                return;
+            }
+            if (section.id === 'hint-blocks' &&
+                (index >= 4 || !['Text', 'Image'].includes(blockType))) {
                 return;
             }
 
@@ -1232,6 +1355,7 @@
             }
 
             clearCollectionValidationError(fieldPrefix);
+            updateHintBlockLimits();
         }
 
         function clearCollectionValidationError(fieldPrefix) {
@@ -1350,6 +1474,14 @@
                 return;
             }
 
+            if (section.id === 'hint-blocks' &&
+                standardHintsCheckbox?.checked === true &&
+                section.querySelectorAll(
+                    '.content-block-list > .content-block-card').length <= 1) {
+                updateHintBlockLimits();
+                return;
+            }
+
             const blockEditor = card.querySelector(
                 ".image-block-editor, .audio-block-editor");
 
@@ -1359,6 +1491,7 @@
 
             card.remove();
             updateContentBlockIndexes(section);
+            updateHintBlockLimits();
         });
 
         let draggedContentBlock = null;
