@@ -575,6 +575,17 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion RevealAllPlayerChoiceOptions(int sourceQuestionId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        question.RevealAllPlayerChoiceOptions();
+        Timer.Restart();
+        AnswerTimer.Stop();
+        return question;
+    }
+
     public RuntimeQuestion RevealNextClue(int sourceQuestionId)
     {
         EnsureRunning();

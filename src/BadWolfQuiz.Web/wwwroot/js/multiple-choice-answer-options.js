@@ -256,6 +256,15 @@
         const specialCheckbox = document.getElementById("Input_IsSpecial");
         const excludeCheckbox = document.getElementById(
             "Input_ExcludeFromRandomWagerSelection");
+        const onDemandSetting = document.querySelector(
+            "[data-all-player-choice-on-demand-setting]");
+        const onDemandCheckbox = document.querySelector(
+            "[data-all-player-choice-on-demand]");
+        if (onDemandCheckbox instanceof HTMLInputElement &&
+            modeInput instanceof HTMLInputElement) {
+            onDemandCheckbox.checked =
+                modeInput.value === "multipleChoiceOnDemand";
+        }
         const saveStatus = document.querySelector("[data-question-save-status]");
         let standardBuzzMode = buzzSelect instanceof HTMLSelectElement
             ? buzzSelect.value
@@ -511,13 +520,25 @@
             const isText = type === "2";
             const allPlayerChoice = type === "3";
             const hostChoice = type === "4";
-            const isAllPlayer = isText || allPlayerChoice;
+            if (!allPlayerChoice && onDemandCheckbox instanceof HTMLInputElement) {
+                onDemandCheckbox.checked = false;
+            }
+            const onDemand = allPlayerChoice &&
+                onDemandCheckbox instanceof HTMLInputElement &&
+                onDemandCheckbox.checked;
+            const isAllPlayer = isText || (allPlayerChoice && !onDemand);
+
+            if (onDemandSetting instanceof HTMLElement) {
+                onDemandSetting.hidden = !allPlayerChoice;
+            }
 
             if (modeInput instanceof HTMLInputElement) {
                 modeInput.value = isText
                     ? "text"
                     : allPlayerChoice
-                        ? "multipleChoice"
+                        ? onDemand
+                            ? "multipleChoiceOnDemand"
+                            : "multipleChoice"
                         : "";
             }
 
@@ -537,19 +558,26 @@
                     buzzSelect.disabled = false;
                     buzzSelect.value = "5";
                 }
-            } else if (previousAllPlayer && type === "0" &&
-                buzzSelect instanceof HTMLSelectElement) {
-                buzzSelect.value = standardBuzzMode;
+            } else {
+                if (buzzSetting) {
+                    buzzSetting.hidden = false;
+                }
+                if (previousAllPlayer &&
+                    buzzSelect instanceof HTMLSelectElement) {
+                    buzzSelect.value = standardBuzzMode;
+                }
             }
 
             document.querySelectorAll(".wager-question-setting")
                 .forEach(element => {
-                    element.hidden = type === "1" || hostChoice;
+                    element.hidden = type === "1" || hostChoice || onDemand;
                 });
-            if (hostChoice && specialCheckbox instanceof HTMLInputElement) {
+            if ((hostChoice || onDemand) &&
+                specialCheckbox instanceof HTMLInputElement) {
                 specialCheckbox.checked = false;
             }
-            if (hostChoice && excludeCheckbox instanceof HTMLInputElement) {
+            if ((hostChoice || onDemand) &&
+                excludeCheckbox instanceof HTMLInputElement) {
                 excludeCheckbox.checked = true;
             }
 
@@ -798,6 +826,8 @@
             }
             window.setTimeout(rebuildMultipleChoiceAnswerPreview, 30);
         }, true);
+
+        onDemandCheckbox?.addEventListener("change", scheduleSync);
 
         select.addEventListener("change", () => {
             if (isChoiceType(select.value)) {

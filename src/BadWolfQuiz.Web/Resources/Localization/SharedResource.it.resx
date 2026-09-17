@@ -2907,4 +2907,13 @@
   <data name="GameSettings_CategoryColorsEnabled" xml:space="preserve">
     <value>Categorie colorate</value>
   </data>
+  <data name="Label_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>Inizia senza opzioni di risposta</value>
+  </data>
+  <data name="Hint_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>La domanda inizia con il buzzer come una domanda normale. Prima del primo buzzer, il conduttore può mostrare le opzioni di risposta a tutti i giocatori.</value>
+  </data>
+  <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
+    <value>Mostra le opzioni di risposta</value>
+  </data>
 </root>

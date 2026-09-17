@@ -63,6 +63,15 @@
             <option value="2">@Localizer["QuestionType_AllPlayerText"]</option>
             <option value="3">@Localizer["QuestionType_AllPlayerMultipleChoice"]</option>
         </select>
+        <label class="checkbox-row all-player-choice-on-demand-setting"
+               data-all-player-choice-on-demand-setting
+               hidden>
+            <input type="checkbox" data-all-player-choice-on-demand />
+            <span>
+                <strong>@Localizer["Label_AllPlayerChoiceOnDemand"]</strong>
+                <small>@Localizer["Hint_AllPlayerChoiceOnDemand"]</small>
+            </span>
+        </label>
         <small id="four-clues-help" hidden>@Localizer["FourClues_EditorHint"]</small>
     </section>
 

@@ -165,9 +165,7 @@ public sealed class GameSessionRegistration
         }
 
         var question = Session.Board.Questions.FirstOrDefault(item =>
-            item.PresentationType is
-                QuestionPresentationType.AllPlayerMultipleChoice or
-                QuestionPresentationType.AllPlayerText &&
+            item.IsAllPlayerQuestion &&
             item.Status is RuntimeQuestionStatus.Selected or
                 RuntimeQuestionStatus.Active);
 

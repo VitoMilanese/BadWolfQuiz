@@ -2907,4 +2907,13 @@
   <data name="GameSettings_CategoryColorsEnabled" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Label_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

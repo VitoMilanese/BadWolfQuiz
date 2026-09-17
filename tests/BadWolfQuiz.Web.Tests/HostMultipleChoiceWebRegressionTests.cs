@@ -110,7 +110,8 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("options.Count is < 4 or > 10", editor);
         Assert.Contains("option.TextContent.Trim().Length > 20", editor);
         Assert.Contains("Distinct(StringComparer.OrdinalIgnoreCase)", editor);
-        Assert.Contains("isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection", editor);
+        Assert.Contains("isHostMultipleChoice ||", editor);
+        Assert.Contains("Input.ExcludeFromRandomWagerSelection", editor);
         Assert.Contains("ContentBlockType.AnswerOptions", editor);
         Assert.Contains("GetAnswerOptionsLayout", editor);
 

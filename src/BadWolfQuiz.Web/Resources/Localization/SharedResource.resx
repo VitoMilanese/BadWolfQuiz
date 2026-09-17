@@ -2907,4 +2907,13 @@
   <data name="GameSettings_CategoryColorsEnabled" xml:space="preserve">
     <value>Colored categories</value>
   </data>
+  <data name="Label_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>Start without answer options</value>
+  </data>
+  <data name="Hint_AllPlayerChoiceOnDemand" xml:space="preserve">
+    <value>The question starts with the buzzer like a regular question. Before the first buzz, the host can reveal the answer options to every player.</value>
+  </data>
+  <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
+    <value>Show answer options</value>
+  </data>
 </root>

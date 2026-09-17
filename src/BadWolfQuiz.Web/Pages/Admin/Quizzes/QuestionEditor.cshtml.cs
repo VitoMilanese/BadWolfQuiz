@@ -64,7 +64,8 @@ public sealed class QuestionEditorModel(
             AllPlayerQuestionCompatibility.ResolveStoredPresentationType(question);
         var wagerMode = QuestionWagerModes.GetMode(storedPresentationType);
         var presentationType =
-            QuestionWagerModes.GetContentPresentationType(storedPresentationType);
+            AllPlayerQuestionCompatibility.GetContentPresentationType(
+                storedPresentationType);
 
         Input = new InputModel
         {
@@ -75,7 +76,7 @@ public sealed class QuestionEditorModel(
             WagerMode = wagerMode,
             PresentationType = presentationType,
             AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
-                presentationType),
+                storedPresentationType),
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
@@ -147,6 +148,15 @@ public sealed class QuestionEditorModel(
             AllPlayerQuestionCompatibility.ResolvePostedPresentationType(
                 Input.PresentationType,
                 Input.AllPlayerMode);
+        var isAllPlayerMultipleChoiceOnDemand =
+            Input.PresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
+        if (isAllPlayerMultipleChoiceOnDemand)
+        {
+            Input.IsSpecial = false;
+            Input.ExcludeFromRandomWagerSelection = true;
+        }
+
         if (Input.PresentationType != QuestionPresentationType.Standard)
         {
             Input.WagerMode = QuestionWagerMode.Normal;
@@ -188,7 +198,9 @@ public sealed class QuestionEditorModel(
             }
         }
 
-        if (Input.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice)
+        if (Input.PresentationType is
+            QuestionPresentationType.AllPlayerMultipleChoice or
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand)
         {
             ValidateAllPlayerMultipleChoiceAnswerOptions();
         }
@@ -249,9 +261,12 @@ public sealed class QuestionEditorModel(
         question.IsSpecial =
             Input.PresentationType != QuestionPresentationType.FourClues &&
             Input.PresentationType != QuestionPresentationType.HostMultipleChoice &&
+            !isAllPlayerMultipleChoiceOnDemand &&
             Input.IsSpecial;
         question.ExcludeFromRandomWagerSelection =
-            isHostMultipleChoice || Input.ExcludeFromRandomWagerSelection;
+            isHostMultipleChoice ||
+            isAllPlayerMultipleChoiceOnDemand ||
+            Input.ExcludeFromRandomWagerSelection;
         question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers;
         question.BuzzModeOverride = question.IsSpecial || isAllPlayer
             ? BuzzActivationMode.Disabled
@@ -454,7 +469,9 @@ public sealed class QuestionEditorModel(
             entity.SortOrder = inputBlock.SortOrder;
             entity.BlockType = inputBlock.BlockType;
             entity.TextContent = isAnswerOptionsMarker
-                ? Input.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice
+                ? Input.PresentationType is
+                        QuestionPresentationType.AllPlayerMultipleChoice or
+                        QuestionPresentationType.AllPlayerMultipleChoiceOnDemand
                     ? AnswerOptionsBlockContract.StoreOptionState(
                         answerLayout.Options.Count,
                         AnswerOptionsBlockContract.ParseCorrectOptionIndexes(

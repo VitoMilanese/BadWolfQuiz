@@ -379,6 +379,7 @@ public sealed class DeferredGameMediaMiddleware(
         {
             var question = game.Session.Board.Questions.SingleOrDefault(item =>
                 item.SourceQuestionId == sourceQuestionId &&
+                item.IsAllPlayerQuestion &&
                 item.PresentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
                 item.Status is RuntimeQuestionStatus.Selected or
                     RuntimeQuestionStatus.Active or

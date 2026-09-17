@@ -138,9 +138,14 @@ public sealed class RuntimeQuestion
         RowIndex = rowIndex;
         Points = points;
         IsSpecial = isSpecial;
-        PresentationType = presentationType;
+        RevealAnswerOptionsOnDemand = presentationType ==
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
+        PresentationType = RevealAnswerOptionsOnDemand
+            ? QuestionPresentationType.AllPlayerMultipleChoice
+            : presentationType;
+        AreAllPlayerChoiceOptionsRevealed = !RevealAnswerOptionsOnDemand;
         AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
-        RevealedClueCount = presentationType == QuestionPresentationType.FourClues ? 2 : 0;
+        RevealedClueCount = PresentationType == QuestionPresentationType.FourClues ? 2 : 0;
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;
         _readOnlyAnswerAttempts = _answerAttempts.AsReadOnly();
@@ -175,9 +180,26 @@ public sealed class RuntimeQuestion
 
     public bool AllowAnswerRewardModifiers { get; }
 
-    public bool IsAllPlayerQuestion => PresentationType is
-        QuestionPresentationType.AllPlayerText or
-        QuestionPresentationType.AllPlayerMultipleChoice;
+    public bool RevealAnswerOptionsOnDemand { get; }
+
+    public bool AreAllPlayerChoiceOptionsRevealed { get; private set; }
+
+    public bool AllPlayerChoiceRevealLocked { get; private set; }
+
+    public bool CanRevealAllPlayerChoiceOptions =>
+        RevealAnswerOptionsOnDemand &&
+        !AreAllPlayerChoiceOptionsRevealed &&
+        !AllPlayerChoiceRevealLocked &&
+        !IsSpecial &&
+        Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active &&
+        BuzzerStatus != QuestionBuzzerStatus.Claimed &&
+        AnsweringPlayerId is null &&
+        _answerAttempts.Count == 0;
+
+    public bool IsAllPlayerQuestion =>
+        PresentationType == QuestionPresentationType.AllPlayerText ||
+        PresentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
+            AreAllPlayerChoiceOptionsRevealed;
 
     public bool IsHostMultipleChoice =>
         PresentationType == QuestionPresentationType.HostMultipleChoice;
@@ -265,7 +287,9 @@ public sealed class RuntimeQuestion
         _allPlayerWagers.ToArray(),
         IsHostMultipleChoice
             ? _remainingHostMultipleChoiceOptionIds.ToArray()
-            : null);
+            : null,
+        AreAllPlayerChoiceOptionsRevealed,
+        AllPlayerChoiceRevealLocked);
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -275,6 +299,12 @@ public sealed class RuntimeQuestion
         Wager = state.Wager;
         BuzzerStatus = state.BuzzerStatus;
         AnsweringPlayerId = state.AnsweringPlayerId;
+        AreAllPlayerChoiceOptionsRevealed =
+            !RevealAnswerOptionsOnDemand || state.AllPlayerChoiceOptionsRevealed;
+        AllPlayerChoiceRevealLocked = RevealAnswerOptionsOnDemand &&
+            (state.AllPlayerChoiceRevealLocked ||
+             state.BuzzerStatus == QuestionBuzzerStatus.Claimed ||
+             state.AnswerAttempts.Count > 0);
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues
             ? Math.Clamp(state.RevealedClueCount == 0 ? 2 : state.RevealedClueCount, 2, 4)
             : 0;
@@ -402,6 +432,20 @@ public sealed class RuntimeQuestion
         Status = RuntimeQuestionStatus.Active;
     }
 
+    internal void RevealAllPlayerChoiceOptions()
+    {
+        if (!CanRevealAllPlayerChoiceOptions)
+        {
+            throw new GameRuleViolationException(
+                "Answer options can no longer be revealed for this question.");
+        }
+
+        AreAllPlayerChoiceOptionsRevealed = true;
+        BuzzerStatus = QuestionBuzzerStatus.Closed;
+        AnsweringPlayerId = null;
+        Status = RuntimeQuestionStatus.Active;
+    }
+
     internal void ActivateBuzzer()
     {
         if (IsAllPlayerQuestion)
@@ -463,6 +507,10 @@ public sealed class RuntimeQuestion
 
         AnsweringPlayerId = playerId;
         BuzzerStatus = QuestionBuzzerStatus.Claimed;
+        if (RevealAnswerOptionsOnDemand)
+        {
+            AllPlayerChoiceRevealLocked = true;
+        }
     }
 
     internal QuestionAnswerAttempt JudgeAnswer(
@@ -532,6 +580,10 @@ public sealed class RuntimeQuestion
             appliedRewardModifier);
 
         _answerAttempts.Add(attempt);
+        if (RevealAnswerOptionsOnDemand)
+        {
+            AllPlayerChoiceRevealLocked = true;
+        }
 
         if (isCorrect || IsSpecial)
         {
@@ -722,6 +774,10 @@ public sealed class RuntimeQuestion
             judgedAtUtc);
 
         _answerAttempts.Add(attempt);
+        if (RevealAnswerOptionsOnDemand)
+        {
+            AllPlayerChoiceRevealLocked = true;
+        }
         return attempt;
     }
 

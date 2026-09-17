@@ -7,6 +7,7 @@ public static class AllPlayerQuestionCompatibility
 {
     public const string TextMode = "text";
     public const string MultipleChoiceMode = "multipleChoice";
+    public const string MultipleChoiceOnDemandMode = "multipleChoiceOnDemand";
 
     public static QuestionPresentationType ResolvePostedPresentationType(
         QuestionPresentationType presentationType,
@@ -15,6 +16,8 @@ public static class AllPlayerQuestionCompatibility
             TextMode => QuestionPresentationType.AllPlayerText,
             MultipleChoiceMode =>
                 QuestionPresentationType.AllPlayerMultipleChoice,
+            MultipleChoiceOnDemandMode =>
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand,
             _ => presentationType
         };
 
@@ -24,8 +27,16 @@ public static class AllPlayerQuestionCompatibility
             QuestionPresentationType.AllPlayerText => TextMode,
             QuestionPresentationType.AllPlayerMultipleChoice =>
                 MultipleChoiceMode,
+            QuestionPresentationType.AllPlayerMultipleChoiceOnDemand =>
+                MultipleChoiceOnDemandMode,
             _ => null
         };
+
+    public static QuestionPresentationType GetContentPresentationType(
+        QuestionPresentationType presentationType) =>
+        presentationType == QuestionPresentationType.AllPlayerMultipleChoiceOnDemand
+            ? QuestionPresentationType.AllPlayerMultipleChoice
+            : QuestionWagerModes.GetContentPresentationType(presentationType);
 
     public static QuestionPresentationType ResolveStoredPresentationType(
         QuizQuestion question)

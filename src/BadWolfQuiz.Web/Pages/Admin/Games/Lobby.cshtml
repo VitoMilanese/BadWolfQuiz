@@ -636,6 +636,7 @@
                             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
                     var isAllPlayerMultipleChoiceQuestion =
                         !isShowingAnswer &&
+                        Model.CurrentQuestion.IsAllPlayerQuestion &&
                         Model.CurrentQuestion.PresentationType ==
                             BadWolfQuiz.Game.Definitions.QuestionPresentationType.AllPlayerMultipleChoice;
                     var contentBlocks = isShowingAnswer
@@ -966,6 +967,19 @@
                                    value="@Model.CurrentQuestion.SourceQuestionId" />
                             <button class="button button-secondary" type="submit">
                                 @Localizer["GameBoard_NoCorrectAnswer"]
+                            </button>
+                        </form>
+                    }
+
+                    @if (Model.CurrentQuestion.CanRevealAllPlayerChoiceOptions)
+                    {
+                        <form method="post"
+                              asp-page-handler="RevealAllPlayerChoiceOptions">
+                            <input name="sourceQuestionId"
+                                   type="hidden"
+                                   value="@Model.CurrentQuestion.SourceQuestionId" />
+                            <button class="button button-secondary" type="submit">
+                                @Localizer["GameBoard_ShowAnswerOptions"]
                             </button>
                         </form>
                     }
