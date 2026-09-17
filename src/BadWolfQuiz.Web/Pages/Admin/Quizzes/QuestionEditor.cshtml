@@ -213,7 +213,7 @@
 
 
         <div id="wager-mode-setting"
-             hidden="@((Model.Input.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard && !isOnDemandChoice) ? "hidden" : null)">
+             hidden="@(Model.Input.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard ? "hidden" : null)">
             <label asp-for="Input.WagerMode">
                 @Localizer["Label_WagerMode"]
             </label>
@@ -662,8 +662,7 @@
             }
 
             const supportsWagerMode =
-                presentationTypeSelect?.value === "0" ||
-                isOnDemandChoice;
+                presentationTypeSelect?.value === "0";
             if (wagerModeSetting) {
                 wagerModeSetting.hidden = !supportsWagerMode;
             }
@@ -690,13 +689,18 @@
         function updateBuzzModeVisibility() {
             const isWagerQuestion =
                 wagerQuestionCheckbox?.checked ?? false;
+            const isOnDemandChoice =
+                presentationTypeSelect?.value === "3" &&
+                (onDemandChoiceCheckbox?.checked === true ||
+                 questionEditorForm?.dataset.onDemandChoice === "true");
+            const hideBuzzMode = isWagerQuestion && !isOnDemandChoice;
 
             if (buzzModeSetting) {
-                buzzModeSetting.hidden = isWagerQuestion;
+                buzzModeSetting.hidden = hideBuzzMode;
             }
 
             if (buzzModeSelect) {
-                buzzModeSelect.disabled = isWagerQuestion;
+                buzzModeSelect.disabled = hideBuzzMode;
             }
         }
 

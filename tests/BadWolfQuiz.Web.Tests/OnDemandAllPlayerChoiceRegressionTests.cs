@@ -38,7 +38,10 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("waitForEditorMount();", editorScript, StringComparison.Ordinal);
         Assert.Contains("form.dataset.multipleChoiceAnswerOptionsController", editorScript, StringComparison.Ordinal);
         Assert.DoesNotContain("window.badWolfMultipleChoiceAnswerOptionsEditorLoaded", editorScript, StringComparison.Ordinal);
-        Assert.Contains("const supportsWagerMode = type === \"0\" || onDemand", editorScript, StringComparison.Ordinal);
+        Assert.Contains("const supportsWagerMode = type === \"0\";", editorScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("type === \"0\" || onDemand", editorScript, StringComparison.Ordinal);
+        Assert.Contains("const hideBuzzMode = isWagerQuestion && !isOnDemandChoice", editor, StringComparison.Ordinal);
+        Assert.Contains("Model.Input.PresentationType != BadWolfQuiz.Game.Definitions.QuestionPresentationType.Standard ? \"hidden\" : null", editor, StringComparison.Ordinal);
         Assert.Contains("wagerModeSetting.hidden = !supportsWagerMode", editorScript, StringComparison.Ordinal);
         Assert.Contains("answerRewardModifierSetting.hidden = onDemand", editorScript, StringComparison.Ordinal);
         Assert.Contains("answerRewardModifierCheckbox.checked = false", editorScript, StringComparison.Ordinal);

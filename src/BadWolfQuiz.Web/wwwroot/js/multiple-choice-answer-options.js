@@ -600,7 +600,7 @@
                 excludeCheckbox.checked = true;
             }
 
-            const supportsWagerMode = type === "0" || onDemand;
+            const supportsWagerMode = type === "0";
             if (wagerModeSetting instanceof HTMLElement) {
                 wagerModeSetting.hidden = !supportsWagerMode;
             }
