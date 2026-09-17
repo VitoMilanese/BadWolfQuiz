@@ -66,22 +66,29 @@ public sealed class QuestionEditorModel(
         var presentationType =
             AllPlayerQuestionCompatibility.GetContentPresentationType(
                 storedPresentationType);
+        var isAllPlayerMultipleChoiceOnDemand =
+            storedPresentationType ==
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand;
 
         Input = new InputModel
         {
             Id = question.Id,
             QuizId = question.Category.Round.QuizId,
             RoundId = question.Category.Round.Id,
-            IsSpecial = question.IsSpecial,
-            WagerMode = wagerMode,
+            IsSpecial =
+                !isAllPlayerMultipleChoiceOnDemand && question.IsSpecial,
+            WagerMode = isAllPlayerMultipleChoiceOnDemand
+                ? QuestionWagerMode.Normal
+                : wagerMode,
             PresentationType = presentationType,
             AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
                 storedPresentationType),
-            RevealAnswerOptionsOnDemand = storedPresentationType ==
-                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand,
+            RevealAnswerOptionsOnDemand = isAllPlayerMultipleChoiceOnDemand,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
-            AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
+            AllowAnswerRewardModifiers =
+                !isAllPlayerMultipleChoiceOnDemand &&
+                question.AllowAnswerRewardModifiers,
             BuzzModeOverride = question.BuzzModeOverride,
             BuzzDelaySeconds = question.BuzzDelaySeconds,
             Tags = question.Tags.OrderBy(x => x.Name, StringComparer.CurrentCultureIgnoreCase)
@@ -168,7 +175,9 @@ public sealed class QuestionEditorModel(
         if (isAllPlayerMultipleChoiceOnDemand)
         {
             Input.IsSpecial = false;
+            Input.WagerMode = QuestionWagerMode.Normal;
             Input.ExcludeFromRandomWagerSelection = true;
+            Input.AllowAnswerRewardModifiers = false;
         }
 
         if (Input.PresentationType != QuestionPresentationType.Standard)
@@ -281,7 +290,9 @@ public sealed class QuestionEditorModel(
             isHostMultipleChoice ||
             isAllPlayerMultipleChoiceOnDemand ||
             Input.ExcludeFromRandomWagerSelection;
-        question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers;
+        question.AllowAnswerRewardModifiers =
+            !isAllPlayerMultipleChoiceOnDemand &&
+            Input.AllowAnswerRewardModifiers;
         question.BuzzModeOverride = question.IsSpecial || isAllPlayer
             ? BuzzActivationMode.Disabled
             : Input.BuzzModeOverride;

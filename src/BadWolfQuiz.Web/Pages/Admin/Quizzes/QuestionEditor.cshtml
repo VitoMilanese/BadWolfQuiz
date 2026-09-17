@@ -622,8 +622,20 @@
         const wagerModeSelect =
             document.getElementById("Input_WagerMode");
 
+        const onDemandChoiceCheckbox =
+            document.querySelector("[data-all-player-choice-on-demand]");
+
+        const answerRewardModifierSetting =
+            document.querySelector(".answer-reward-modifier-setting");
+
+        const answerRewardModifierCheckbox =
+            document.getElementById("Input_AllowAnswerRewardModifiers");
+
         function updateQuestionTypeUi() {
             const isFourClues = presentationTypeSelect?.value === "1";
+            const isOnDemandChoice =
+                presentationTypeSelect?.value === "3" &&
+                onDemandChoiceCheckbox?.checked === true;
             document.getElementById("four-clues-help").hidden = !isFourClues;
             document.querySelectorAll(".wager-question-setting").forEach(
                 element => element.hidden = isFourClues);
@@ -636,8 +648,18 @@
             if (wagerModeSetting) {
                 wagerModeSetting.hidden = !supportsWagerMode;
             }
-            if (!supportsWagerMode && wagerModeSelect) {
-                wagerModeSelect.value = "0";
+            if (wagerModeSelect) {
+                wagerModeSelect.disabled = false;
+                if (!supportsWagerMode) {
+                    wagerModeSelect.value = "0";
+                }
+            }
+
+            if (answerRewardModifierSetting) {
+                answerRewardModifierSetting.hidden = isOnDemandChoice;
+            }
+            if (isOnDemandChoice && answerRewardModifierCheckbox) {
+                answerRewardModifierCheckbox.checked = false;
             }
 
             updateBuzzModeVisibility();
@@ -659,6 +681,14 @@
         wagerQuestionCheckbox?.addEventListener(
             "change",
             updateBuzzModeVisibility);
+
+        onDemandChoiceCheckbox?.addEventListener(
+            "change",
+            updateQuestionTypeUi);
+
+        document.addEventListener(
+            "badwolf:question-editor-on-demand-synced",
+            updateQuestionTypeUi);
 
         presentationTypeSelect?.addEventListener("change", async () => {
             updateQuestionTypeUi();

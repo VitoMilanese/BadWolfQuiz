@@ -267,6 +267,8 @@
             modeInput instanceof HTMLInputElement) {
             onDemandCheckbox.checked =
                 modeInput.value === "multipleChoiceOnDemand";
+            document.dispatchEvent(new CustomEvent(
+                "badwolf:question-editor-on-demand-synced"));
         }
         const saveStatus = document.querySelector("[data-question-save-status]");
         let standardBuzzMode = buzzSelect instanceof HTMLSelectElement
@@ -565,9 +567,11 @@
                 if (buzzSetting) {
                     buzzSetting.hidden = false;
                 }
-                if (previousAllPlayer &&
-                    buzzSelect instanceof HTMLSelectElement) {
-                    buzzSelect.value = standardBuzzMode;
+                if (buzzSelect instanceof HTMLSelectElement) {
+                    buzzSelect.disabled = false;
+                    if (previousAllPlayer) {
+                        buzzSelect.value = standardBuzzMode;
+                    }
                 }
             }
 

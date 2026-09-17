@@ -20,6 +20,14 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
     }
 
     [Fact]
+    public void Snapshot_forces_reward_modifiers_off_for_on_demand_choice()
+    {
+        var question = CreateQuestion(allowAnswerRewardModifiers: true);
+
+        Assert.False(question.AllowAnswerRewardModifiers);
+    }
+
+    [Fact]
     public void Question_starts_with_regular_buzzer_and_reveal_halves_value()
     {
         var session = CreateSession();
@@ -52,7 +60,7 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
     }
 
     [Fact]
-    public void Current_buzzer_claim_does_not_block_reveal_and_claimant_is_excluded()
+    public void Current_buzzer_claim_does_not_block_reveal_and_claimant_remains_eligible()
     {
         var session = CreateSession();
         var rose = session.AddPlayer("Rose");
@@ -69,7 +77,7 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
         Assert.True(question.CanRevealAllPlayerChoiceOptions);
         session.RevealAllPlayerChoiceOptions(100);
 
-        Assert.Contains(rose.Id, question.AllPlayerChoiceExcludedPlayerIds);
+        Assert.DoesNotContain(rose.Id, question.AllPlayerChoiceExcludedPlayerIds);
         Assert.Null(question.AnsweringPlayerId);
         Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
         Assert.Equal(100, question.CorrectAnswerValue);
@@ -111,6 +119,7 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
             session.ActivateQuestionBuzzer(100);
         }
         session.ClaimQuestionBuzzer(100, rose.Id);
+        session.JudgeQuestionAnswer(100, rose.Id, false);
         session.RevealAllPlayerChoiceOptions(100);
 
         var restored = GameSession.Restore(
@@ -136,7 +145,9 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
         return GameSession.Create(quiz);
     }
 
-    private static QuizQuestionSnapshot CreateQuestion(bool isSpecial = false) => new(
+    private static QuizQuestionSnapshot CreateQuestion(
+        bool isSpecial = false,
+        bool allowAnswerRewardModifiers = false) => new(
         100,
         10,
         0,
@@ -146,7 +157,8 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
         excludeFromRandomWagerSelection: false,
         questionBlocks: [TextBlock(1, "Question")],
         answerBlocks: [TextBlock(10, "A"), TextBlock(11, "B")],
-        presentationType: QuestionPresentationType.AllPlayerMultipleChoiceOnDemand);
+        presentationType: QuestionPresentationType.AllPlayerMultipleChoiceOnDemand,
+        allowAnswerRewardModifiers: allowAnswerRewardModifiers);
 
     private static ContentBlockSnapshot TextBlock(int id, string text) => new(
         id,

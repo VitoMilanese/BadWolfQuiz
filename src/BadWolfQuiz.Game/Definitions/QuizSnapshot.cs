@@ -372,7 +372,10 @@ public sealed class QuizQuestionSnapshot
             presentationType == QuestionPresentationType.HostMultipleChoice ||
             presentationType == QuestionPresentationType.AllPlayerMultipleChoiceOnDemand ||
             excludeFromRandomWagerSelection;
-        AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
+        AllowAnswerRewardModifiers =
+            presentationType !=
+                QuestionPresentationType.AllPlayerMultipleChoiceOnDemand &&
+            allowAnswerRewardModifiers;
         CategoryTitle = string.IsNullOrWhiteSpace(categoryTitle)
             ? sourceCategoryId.ToString()
             : categoryTitle.Trim();

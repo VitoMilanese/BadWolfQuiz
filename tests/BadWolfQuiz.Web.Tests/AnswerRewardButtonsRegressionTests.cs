@@ -48,8 +48,12 @@ public sealed class AnswerRewardButtonsRegressionTests
             italian);
 
         Assert.Contains("public bool AllowAnswerRewardModifiers { get; set; }", entity);
-        Assert.Contains("AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers", model);
-        Assert.Contains("question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers", model);
+        Assert.Contains(
+            "AllowAnswerRewardModifiers =\n                !isAllPlayerMultipleChoiceOnDemand &&\n                question.AllowAnswerRewardModifiers",
+            model);
+        Assert.Contains(
+            "question.AllowAnswerRewardModifiers =\n            !isAllPlayerMultipleChoiceOnDemand &&\n            Input.AllowAnswerRewardModifiers",
+            model);
     }
 
     [Fact]

@@ -27,10 +27,18 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("onDemandCheckbox.addEventListener", editorScript, StringComparison.Ordinal);
         Assert.Contains("specialCheckbox.checked = false", editorScript, StringComparison.Ordinal);
         Assert.Contains("excludeCheckbox.checked = true", editorScript, StringComparison.Ordinal);
+        Assert.Contains("buzzSelect.disabled = false", editorScript, StringComparison.Ordinal);
+        Assert.Contains("badwolf:question-editor-on-demand-synced", editorScript, StringComparison.Ordinal);
+        Assert.Contains("answerRewardModifierSetting.hidden = isOnDemandChoice", editor, StringComparison.Ordinal);
+        Assert.Contains("answerRewardModifierCheckbox.checked = false", editor, StringComparison.Ordinal);
+        Assert.Contains("Input.AllowAnswerRewardModifiers = false", editorModel, StringComparison.Ordinal);
+        Assert.Contains("!isAllPlayerMultipleChoiceOnDemand &&", editorModel, StringComparison.Ordinal);
         Assert.Contains("CanRevealAllPlayerChoiceOptions", lobby, StringComparison.Ordinal);
         Assert.Contains("GameBoard_ShowAnswerOptions", lobby, StringComparison.Ordinal);
         Assert.Contains("OnPostRevealAllPlayerChoiceOptionsAsync", lobbyModel, StringComparison.Ordinal);
         Assert.Contains("AllPlayerChoiceExcludedPlayerIds", runtime, StringComparison.Ordinal);
+        Assert.Contains(".Where(attempt => !attempt.IsCorrect)", runtime, StringComparison.Ordinal);
+        Assert.DoesNotContain("_allPlayerChoiceExcludedPlayerIds.Add(answeringPlayerId)", runtime, StringComparison.Ordinal);
         Assert.DoesNotContain("AllPlayerChoiceRevealLocked", runtime, StringComparison.Ordinal);
         Assert.Contains("Math.Max(1, Points / 2)", runtime, StringComparison.Ordinal);
         Assert.Contains("AllPlayerChoiceExcludedPlayerIds", state, StringComparison.Ordinal);

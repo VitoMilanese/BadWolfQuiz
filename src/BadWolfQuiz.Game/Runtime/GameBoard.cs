@@ -146,7 +146,8 @@ public sealed class RuntimeQuestion
             ? QuestionPresentationType.AllPlayerMultipleChoice
             : presentationType;
         AreAllPlayerChoiceOptionsRevealed = !RevealAnswerOptionsOnDemand;
-        AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
+        AllowAnswerRewardModifiers =
+            !RevealAnswerOptionsOnDemand && allowAnswerRewardModifiers;
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues ? 2 : 0;
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;
@@ -446,13 +447,9 @@ public sealed class RuntimeQuestion
         _allPlayerChoiceExcludedPlayerIds.Clear();
         _allPlayerChoiceExcludedPlayerIds.AddRange(
             _answerAttempts
+                .Where(attempt => !attempt.IsCorrect)
                 .Select(attempt => attempt.PlayerId)
                 .Distinct());
-        if (AnsweringPlayerId is { } answeringPlayerId &&
-            !_allPlayerChoiceExcludedPlayerIds.Contains(answeringPlayerId))
-        {
-            _allPlayerChoiceExcludedPlayerIds.Add(answeringPlayerId);
-        }
 
         AreAllPlayerChoiceOptionsRevealed = true;
         BuzzerStatus = QuestionBuzzerStatus.Closed;
