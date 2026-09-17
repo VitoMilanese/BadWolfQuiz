@@ -273,6 +273,7 @@
                 hintCheckbox instanceof HTMLInputElement &&
                 hintCheckbox.checked;
             hintTab.hidden = !visible;
+            hintTab.style.display = visible ? "" : "none";
             if (!visible && hintTab.getAttribute("aria-selected") === "true") {
                 selectTab("question");
             }
