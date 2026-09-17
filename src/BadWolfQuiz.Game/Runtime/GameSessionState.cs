@@ -45,7 +45,9 @@ public sealed record RuntimeQuestionState(
     IReadOnlyList<Wager>? AllPlayerWagers = null,
     IReadOnlyList<int>? RemainingHostMultipleChoiceOptionIds = null,
     bool AllPlayerChoiceOptionsRevealed = false,
-    IReadOnlyList<GamePlayerId>? AllPlayerChoiceExcludedPlayerIds = null);
+    IReadOnlyList<GamePlayerId>? AllPlayerChoiceExcludedPlayerIds = null,
+    int HintCount = 0,
+    int RevealedHintCount = 0);
 
 public sealed record FinalQuestionState(
     FinalQuestionStatus Status,

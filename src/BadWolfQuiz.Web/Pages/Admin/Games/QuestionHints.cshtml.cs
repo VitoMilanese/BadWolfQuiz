@@ -1,0 +1,120 @@
+using BadWolfQuiz.Game.Runtime;
+using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
+namespace BadWolfQuiz.Web.Pages.Admin.Games;
+
+public sealed class QuestionHintsModel(
+    QuizDbContext db,
+    GameSessionRegistry sessionRegistry,
+    CurrentHost currentHost) : PageModel
+{
+    public async Task<IActionResult> OnPostAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var hints = await QuestionHintGameplayData.LoadAsync(
+            db,
+            game.Session.Quiz.SourceQuizId,
+            sourceQuestionId,
+            cancellationToken);
+        if (hints.Count == 0)
+        {
+            return RedirectToPage("/Admin/Games/Lobby", new { id });
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.SourceQuestionId == sourceQuestionId);
+            if (question is null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                question.RevealNextHint(hints.Count);
+                game.MarkPersistenceChanged();
+            }
+            catch (GameRuleViolationException)
+            {
+                // A stale/repeated request should simply return the host to the game.
+            }
+        }
+
+        return RedirectToPage("/Admin/Games/Lobby", new { id });
+    }
+
+    public async Task<IActionResult> OnGetContentBlockAsync(
+        Guid id,
+        int sourceQuestionId,
+        int sourceContentBlockId,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        var question = game.Session.Board.Questions.SingleOrDefault(item =>
+            item.SourceQuestionId == sourceQuestionId);
+        if (question is null || question.RevealedHintCount <= 0)
+        {
+            return NotFound();
+        }
+
+        var hints = await QuestionHintGameplayData.LoadAsync(
+            db,
+            game.Session.Quiz.SourceQuizId,
+            sourceQuestionId,
+            cancellationToken);
+        var revealedHintIds = hints
+            .Take(Math.Min(question.RevealedHintCount, hints.Count))
+            .Select(item => item.Id)
+            .ToHashSet();
+        if (!revealedHintIds.Contains(sourceContentBlockId))
+        {
+            return NotFound();
+        }
+
+        var block = await db.QuestionHintContentBlocks
+            .AsNoTracking()
+            .Where(item =>
+                item.Id == sourceContentBlockId &&
+                item.QuizQuestionId == sourceQuestionId &&
+                item.Question.Category.Round.QuizId ==
+                    game.Session.Quiz.SourceQuizId)
+            .Select(item => new
+            {
+                item.FileData,
+                item.FileContentType
+            })
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (block?.FileData is null ||
+            block.FileData.Length == 0 ||
+            string.IsNullOrWhiteSpace(block.FileContentType))
+        {
+            return NotFound();
+        }
+
+        Response.Headers.CacheControl = "no-store";
+        return File(block.FileData, block.FileContentType);
+    }
+}

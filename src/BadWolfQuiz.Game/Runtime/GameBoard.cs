@@ -211,6 +211,39 @@ public sealed class RuntimeQuestion
         RevealedClueCount < 4 &&
         Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
 
+    public int HintCount { get; private set; }
+
+    public int RevealedHintCount { get; private set; }
+
+    public bool CanRevealHint =>
+        !IsSpecial &&
+        PresentationType == QuestionPresentationType.Standard &&
+        HintCount > 0 &&
+        RevealedHintCount < HintCount &&
+        Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
+
+    public int HintRewardDiscountPercentage =>
+        HintCount > 0 && RevealedHintCount > 0
+            ? CalculateHintDiscountPercentage(HintCount, RevealedHintCount)
+            : 0;
+
+    public int HintRewardValue
+    {
+        get
+        {
+            var discountPercentage = HintRewardDiscountPercentage;
+            if (discountPercentage == 0)
+            {
+                return Points;
+            }
+
+            var discountValue = (int)Math.Round(
+                Points * discountPercentage / 100.0,
+                MidpointRounding.AwayFromZero);
+            return Math.Max(1, Points - discountValue);
+        }
+    }
+
     public int HostMultipleChoiceOriginalOptionCount =>
         IsHostMultipleChoice ? AnswerBlocks.Count : 0;
 
@@ -255,8 +288,11 @@ public sealed class RuntimeQuestion
             : PresentationType == QuestionPresentationType.FourClues
                 ? RevealedClueCount switch { 3 => Points / 2, 4 => Points / 4, _ => Points }
                 : IsHostMultipleChoice
-                ? HostMultipleChoiceRewardValue
-                : Points;
+                    ? HostMultipleChoiceRewardValue
+                    : PresentationType == QuestionPresentationType.Standard &&
+                      HintRewardDiscountPercentage > 0
+                        ? HintRewardValue
+                        : Points;
 
     public IReadOnlyList<ContentBlockSnapshot> QuestionBlocks { get; }
 
@@ -292,7 +328,9 @@ public sealed class RuntimeQuestion
             ? _remainingHostMultipleChoiceOptionIds.ToArray()
             : null,
         AreAllPlayerChoiceOptionsRevealed,
-        _allPlayerChoiceExcludedPlayerIds.ToArray());
+        _allPlayerChoiceExcludedPlayerIds.ToArray(),
+        HintCount,
+        RevealedHintCount);
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -311,6 +349,19 @@ public sealed class RuntimeQuestion
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues
             ? Math.Clamp(state.RevealedClueCount == 0 ? 2 : state.RevealedClueCount, 2, 4)
             : 0;
+        if (!IsSpecial && PresentationType == QuestionPresentationType.Standard)
+        {
+            HintCount = Math.Clamp(state.HintCount, 0, 4);
+            RevealedHintCount = Math.Clamp(
+                state.RevealedHintCount,
+                0,
+                HintCount);
+        }
+        else
+        {
+            HintCount = 0;
+            RevealedHintCount = 0;
+        }
         _answerAttempts.Clear();
         _answerAttempts.AddRange(state.AnswerAttempts);
         _allPlayerWagers.Clear();
@@ -499,6 +550,38 @@ public sealed class RuntimeQuestion
         }
 
         RevealedClueCount++;
+    }
+
+    public void RevealNextHint(int availableHintCount)
+    {
+        if (availableHintCount is < 1 or > 4)
+        {
+            throw new GameRuleViolationException(
+                "A standard question can expose between one and four hints.");
+        }
+
+        if (IsSpecial ||
+            PresentationType != QuestionPresentationType.Standard ||
+            Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active)
+        {
+            throw new GameRuleViolationException(
+                "Hints can only be revealed for an active standard question.");
+        }
+
+        if (HintCount != availableHintCount)
+        {
+            HintCount = availableHintCount;
+            RevealedHintCount = Math.Min(RevealedHintCount, HintCount);
+        }
+
+        if (RevealedHintCount >= HintCount)
+        {
+            throw new GameRuleViolationException(
+                "All hints for this question are already visible.");
+        }
+
+        RevealedHintCount++;
     }
 
     internal void ClaimBuzzer(GamePlayerId playerId)
@@ -753,6 +836,46 @@ public sealed class RuntimeQuestion
         var progress = 50.0 * (remainingOptionCount - 3) /
             (originalOptionCount - 3);
         return 50 + (int)Math.Ceiling(progress);
+    }
+
+    public static int CalculateHintDiscountPercentage(
+        int totalHintCount,
+        int revealedHintCount)
+    {
+        if (totalHintCount is < 1 or > 4)
+        {
+            throw new ArgumentOutOfRangeException(nameof(totalHintCount));
+        }
+
+        if (revealedHintCount is < 0 || revealedHintCount > totalHintCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(revealedHintCount));
+        }
+
+        if (revealedHintCount == 0)
+        {
+            return 0;
+        }
+
+        return totalHintCount switch
+        {
+            1 => 50,
+            2 => revealedHintCount == 1 ? 25 : 50,
+            3 => revealedHintCount switch
+            {
+                1 => 16,
+                2 => 33,
+                _ => 50
+            },
+            4 => revealedHintCount switch
+            {
+                1 => 12,
+                2 => 25,
+                3 => 37,
+                _ => 50
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(totalHintCount))
+        };
     }
 
     internal QuestionAnswerAttempt AddHistoricalAttempt(
