@@ -1235,22 +1235,49 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
             }
         };
 
+        const getHostChoicesRenderKey = state => JSON.stringify({
+            sourceQuestionId: state.sourceQuestionId,
+            phase: state.phase,
+            mode: state.mode,
+            options: (state.options ?? []).map(option => [
+                option.id,
+                option.kind,
+                option.text ?? "",
+                option.imageUrl ?? ""
+            ])
+        });
+
         const renderHostChoices = (board, state) => {
-            removeHostChoices(board);
             if (state.phase !== "answering" ||
                 state.mode !== "multipleChoice") {
+                removeHostChoices(board);
                 return;
             }
 
             const presentation = board.querySelector(".question-presentation");
-            if (!presentation ||
-                presentation.querySelector("[data-all-player-server-preview]")) {
+            if (!presentation) {
+                removeHostChoices(board);
                 return;
             }
 
+            if (presentation.querySelector("[data-all-player-server-preview]")) {
+                removeHostChoices(board);
+                return;
+            }
+
+            const renderKey = getHostChoicesRenderKey(state);
+            const existingPreview = presentation.querySelector(
+                "[data-all-player-client-preview]");
+            if (existingPreview instanceof HTMLElement &&
+                existingPreview.dataset.renderKey === renderKey) {
+                return;
+            }
+
+            removeHostChoices(board);
             const preview = document.createElement("section");
             preview.className = "all-player-host-choice-preview";
             preview.dataset.allPlayerClientPreview = "true";
+            preview.dataset.renderKey = renderKey;
             preview.tabIndex = 0;
             preview.setAttribute("aria-label", text.answerOptions);
             const closeForm = board.querySelector(
@@ -1608,8 +1635,11 @@ html.all-player-multiple-choice-answer-layout .host-game-board .answer-presentat
                 return;
             }
 
+            const answeringSelector = state.mode === "multipleChoice"
+                ? ".question-presentation [data-all-player-server-preview]"
+                : ".question-presentation";
             if (state.phase === "answering" &&
-                requestRefresh(state, ".question-presentation")) {
+                requestRefresh(state, answeringSelector)) {
                 return;
             }
             if (state.phase === "closed" &&

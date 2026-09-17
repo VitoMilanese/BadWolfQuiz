@@ -38,6 +38,16 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("isChoiceExcluded", endpoint, StringComparison.Ordinal);
         Assert.Contains("isChoiceExcluded", playerScript, StringComparison.Ordinal);
         Assert.Contains("buzzerAlreadyUsed", playerScript, StringComparison.Ordinal);
+        Assert.Contains("const answeringSelector = state.mode === \"multipleChoice\"", playerScript, StringComparison.Ordinal);
+        Assert.Contains(".question-presentation [data-all-player-server-preview]", playerScript, StringComparison.Ordinal);
+        Assert.Contains("getHostChoicesRenderKey", playerScript, StringComparison.Ordinal);
+        Assert.Contains("preview.dataset.renderKey = renderKey", playerScript, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "const renderHostChoices = (board, state) => {\n            removeHostChoices(board);",
+            playerScript,
+            StringComparison.Ordinal);
+        Assert.Contains("data-all-player-review-action", lobby, StringComparison.Ordinal);
+        Assert.Contains("AllPlayer_ReviewAnswersNow", lobby, StringComparison.Ordinal);
         Assert.Contains("item.IsAllPlayerQuestion", registration, StringComparison.Ordinal);
     }
 
