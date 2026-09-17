@@ -1,0 +1,36 @@
+name: Temporary issue 691 wager mode visibility fix
+
+on:
+  push:
+    branches:
+      - feature/691-on-demand-answer-options
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply wager mode visibility fix
+        run: python3 .github/temp-691-wager-mode-visibility.py
+      - name: Run focused editor regressions
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~OnDemandAllPlayerChoiceRegressionTests|FullyQualifiedName~AnonymousSharedWagerEditorUiRegressionTests"
+      - name: Run full web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+      - name: Commit tested fix and remove temporary files
+        shell: bash
+        run: |
+          rm .github/workflows/temp-691-wager-mode-visibility.yml
+          rm .github/temp-691-wager-mode-visibility.py
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add -A
+          git commit -m "Show Wager mode for normal all-player choice questions"
+          git push origin HEAD:feature/691-on-demand-answer-options
