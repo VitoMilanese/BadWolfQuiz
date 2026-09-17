@@ -90,15 +90,14 @@ public sealed class QuestionHintControlsTagHelper(QuizDbContext db) : TagHelper
 
     private static void AppendActionButton(
         TagHelperOutput output,
-        string formAction,
+        string actionUrl,
         string label,
         string specificCssClass,
         string iconMarkup)
     {
         var button = new TagBuilder("button");
-        button.Attributes["type"] = "submit";
-        button.Attributes["formmethod"] = "post";
-        button.Attributes["formaction"] = formAction;
+        button.Attributes["type"] = "button";
+        button.Attributes["data-question-hint-action-url"] = actionUrl;
         button.Attributes["title"] = label;
         button.Attributes["aria-label"] = label;
         button.AddCssClass("button");
@@ -238,20 +237,31 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
         style.Attributes["data-question-hints-styles"] = string.Empty;
         style.InnerHtml.AppendHtml("""
 .question-hint-action-button {
-    width: 2.8rem;
-    min-width: 2.8rem;
-    height: 2.8rem;
-    padding: 0.55rem;
-    margin-inline-start: 0.45rem;
-    display: inline-grid;
-    place-items: center;
-    flex: 0 0 auto;
+    width: 2.25rem;
+    min-width: 2.25rem;
+    max-width: 2.25rem;
+    height: 2.25rem;
+    min-height: 2.25rem;
+    max-height: 2.25rem;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 2.25rem;
+    box-sizing: border-box;
+    line-height: 1;
 }
 
 .question-hint-action-icon {
-    width: 1.35rem;
-    height: 1.35rem;
+    width: 1.05rem;
+    height: 1.05rem;
     display: block;
+    flex: 0 0 auto;
+}
+
+.question-hint-reveal-button .question-hint-action-icon {
+    transform: translateY(-0.04rem);
 }
 
 .question-presentation:has(> .question-hints-panel) {

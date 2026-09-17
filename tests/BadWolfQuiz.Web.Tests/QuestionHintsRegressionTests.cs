@@ -81,6 +81,44 @@ public sealed class QuestionHintsRegressionTests
     }
 
     [Fact]
+    public void Gameplay_hint_controls_use_registered_dedicated_client_actions()
+    {
+        var imports = ReadWebFile("Pages", "_ViewImports.cshtml");
+        var controls = ReadWebFile("TagHelpers", "QuestionHintGameplayTagHelpers.cs");
+        var assets = ReadWebFile(
+            "TagHelpers",
+            "QuestionHintGameplayClientAssetsTagHelper.cs");
+
+        Assert.Contains(
+            "QuestionHintGameplayClientAssetsTagHelper",
+            imports,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "button.Attributes[\"type\"] = \"button\"",
+            controls,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "data-question-hint-action-url",
+            controls,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "button.Attributes[\"formaction\"]",
+            controls,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "target.dataset.questionHintActionUrl",
+            assets,
+            StringComparison.Ordinal);
+        Assert.Contains("setBusy(true)", assets, StringComparison.Ordinal);
+        Assert.Contains("}, true);", assets, StringComparison.Ordinal);
+        Assert.Contains("margin: 0 !important;", assets, StringComparison.Ordinal);
+        Assert.Contains(
+            ".host-game-board > .message.message-error",
+            assets,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Ef_model_has_cascading_hint_block_relationship()
     {
         var options = new DbContextOptionsBuilder<QuizDbContext>()

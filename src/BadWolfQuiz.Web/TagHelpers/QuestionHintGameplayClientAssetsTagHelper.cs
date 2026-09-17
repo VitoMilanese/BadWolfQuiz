@@ -49,45 +49,51 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         style.Attributes["data-question-hint-client-styles"] = string.Empty;
         style.InnerHtml.AppendHtml("""
 .question-hint-action-button {
-    width: 2.45rem !important;
-    min-width: 2.45rem !important;
-    height: 2.45rem;
-    min-height: 2.45rem;
+    width: 2.25rem !important;
+    min-width: 2.25rem !important;
+    max-width: 2.25rem !important;
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    max-height: 2.25rem !important;
     padding: 0 !important;
-    margin-inline-start: 0.35rem;
+    margin: 0 !important;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    flex: 0 0 auto;
+    flex: 0 0 2.25rem;
     box-sizing: border-box;
     line-height: 1;
 }
 
 .question-hint-action-icon {
     display: block;
-    width: 1.15rem;
-    height: 1.15rem;
+    width: 1.05rem;
+    height: 1.05rem;
     flex: 0 0 auto;
     overflow: visible;
 }
 
 .question-hint-reveal-button .question-hint-action-icon {
-    transform: translateY(-0.05rem);
+    transform: translateY(-0.04rem);
 }
 
 .question-hint-action-button:disabled {
-    opacity: 0.45;
+    opacity: 0.42;
     cursor: wait;
+    filter: saturate(0.6);
 }
 
 .host-game-board > .message.message-error {
-    min-height: 2.5rem;
-    margin: 0.55rem 0.65rem 0;
-    padding-block: 0.55rem;
+    position: relative;
+    z-index: 1;
+    min-height: 2.75rem;
+    margin: 0.75rem 0.65rem 0 !important;
+    padding: 0.65rem 0.8rem !important;
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    line-height: 1.25;
+    line-height: 1.3;
+    overflow: visible;
 }
 
 .host-game-board > .message.message-error[hidden] {
@@ -121,6 +127,16 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         }
     };
 
+    const hideError = () => {
+        const error = document.getElementById("game-board-error");
+        if (!error) {
+            return;
+        }
+
+        error.hidden = true;
+        error.textContent = "";
+    };
+
     const showError = message => {
         const error = document.getElementById("game-board-error");
         if (!error) {
@@ -151,18 +167,21 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         }
 
         const form = target.form;
-        if (!(form instanceof HTMLFormElement)) {
+        const actionUrl = target.dataset.questionHintActionUrl;
+        if (!(form instanceof HTMLFormElement) || !actionUrl) {
             return;
         }
 
         event.preventDefault();
         event.stopPropagation();
         setBusy(true);
+        hideError();
 
         try {
-            const response = await fetch(target.formAction || form.action, {
-                method: (target.formMethod || form.method || "post").toUpperCase(),
+            const response = await fetch(actionUrl, {
+                method: "POST",
                 body: new FormData(form),
+                credentials: "same-origin",
                 headers: {
                     "Accept": "application/json, text/html",
                     "X-Requested-With": "XMLHttpRequest"
@@ -185,7 +204,7 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         } finally {
             setBusy(false);
         }
-    });
+    }, true);
 })();
 """);
         return script;
