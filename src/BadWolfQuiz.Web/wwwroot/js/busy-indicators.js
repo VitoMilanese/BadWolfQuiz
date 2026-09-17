@@ -230,6 +230,23 @@
         });
     };
 
+    const lockDeleteUnfinishedGameDialogButtons = form => {
+        if (handlerName(form) !== "deleteunfinishedgame") {
+            return;
+        }
+
+        const dialog = form.closest("dialog");
+        if (!dialog) {
+            return;
+        }
+
+        lockedDialogButtons = [...dialog.querySelectorAll("button")]
+            .map(button => ({ button, wasDisabled: button.disabled }));
+        lockedDialogButtons.forEach(({ button }) => {
+            button.disabled = true;
+        });
+    };
+
     const lockEditorRenameDialogControls = form => {
         const dialog = form.closest("dialog");
         if (!dialog) {
@@ -507,7 +524,8 @@
         if (isQuizzesIndex(currentPath)) {
             return handler === "creategame" ||
                 handler === "continuegame" ||
-                handler === "import";
+                handler === "import" ||
+                handler === "deleteunfinishedgame";
         }
 
         if (currentPath === routes.publicQuizzes) {
@@ -755,6 +773,7 @@ return [...document.querySelectorAll("dialog[open]")]
         lockedForm = form;
         form.dataset.busyLocked = "true";
         lockAddRoundDialogButtons(form);
+        lockDeleteUnfinishedGameDialogButtons(form);
         lockQuizImportControl(form);
         lockQuizCreateSubmitter(submitter);
         show();

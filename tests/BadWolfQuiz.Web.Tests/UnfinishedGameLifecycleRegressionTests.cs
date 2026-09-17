@@ -22,7 +22,14 @@ public sealed class UnfinishedGameLifecycleRegressionTests
             "Admin",
             "Quizzes",
             "Index.cshtml.cs"));
-        var quizListScript = File.ReadAllText(Path.Combine(
+        var busyIndicatorScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "busy-indicators.js"));
+        var descriptionLinkScript = File.ReadAllText(Path.Combine(
             root,
             "src",
             "BadWolfQuiz.Web",
@@ -63,13 +70,16 @@ public sealed class UnfinishedGameLifecycleRegressionTests
             StringComparison.Ordinal);
         Assert.True(unfinishedDelete >= 0 && quizDelete > unfinishedDelete);
 
-        Assert.Contains("#deleteUnfinishedGameDialog form", quizListScript, StringComparison.Ordinal);
-        Assert.Contains("deleteUnfinishedForm.dataset.submitting === 'true'", quizListScript, StringComparison.Ordinal);
-        Assert.Contains("event.preventDefault();", quizListScript, StringComparison.Ordinal);
-        Assert.Contains("event.stopImmediatePropagation();", quizListScript, StringComparison.Ordinal);
-        Assert.Contains("deleteUnfinishedForm.querySelectorAll('button')", quizListScript, StringComparison.Ordinal);
-        Assert.Contains("button.disabled = true;", quizListScript, StringComparison.Ordinal);
-        Assert.Contains("window.BadWolfBusy?.show?.();", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("handler === \"deleteunfinishedgame\"", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("lockDeleteUnfinishedGameDialogButtons(form)", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("form.closest(\"dialog\")", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("dialog.querySelectorAll(\"button\")", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("button.disabled = true", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("form.dataset.busyLocked = \"true\"", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault();", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation();", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.Contains("show();", busyIndicatorScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("deleteUnfinishedForm", descriptionLinkScript, StringComparison.Ordinal);
 
         Assert.Contains("OnPostDeleteUnfinishedGameAsync", pageModel, StringComparison.Ordinal);
         Assert.Contains("activeGameStore.RemoveAsync", pageModel, StringComparison.Ordinal);
