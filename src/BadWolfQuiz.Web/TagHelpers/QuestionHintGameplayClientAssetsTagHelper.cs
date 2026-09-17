@@ -99,7 +99,7 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
     width: min(100%, 84rem);
     max-height: min(34dvh, 20rem);
     margin: clamp(0.55rem, 1vh, 0.9rem) auto 0;
-    padding: clamp(0.7rem, 1.1vw, 1rem);
+    padding: clamp(0.55rem, 0.9vw, 0.8rem);
     overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid var(--line);
@@ -107,21 +107,6 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
     background: var(--panel-2);
     box-shadow: 0 -0.8rem 2rem rgb(0 0 0 / 12%);
     animation: question-hints-panel-rise 180ms ease-out both;
-}
-
-.question-hints-panel-handle {
-    display: block;
-    width: 3.2rem;
-    height: 0.28rem;
-    margin: 0 auto 0.45rem;
-    border-radius: 999px;
-    background: var(--line);
-}
-
-.question-hints-panel-title {
-    display: block;
-    margin-bottom: 0.55rem;
-    text-align: center;
 }
 
 .question-hints-grid {
@@ -202,6 +187,7 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
 
     window.badWolfQuestionHintControlsInitialized = true;
     const selector = ".question-hint-action-button";
+    let latestRevealState = null;
 
     const setBusy = busy => {
         for (const button of document.querySelectorAll(selector)) {
@@ -255,9 +241,14 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         item.append(caption);
     };
 
+    const findQuestionPresentation = sourceQuestionId => {
+        const blocks = document.querySelector(
+            `[data-host-gameplay-view] .question-presentation [data-source-question-id="${sourceQuestionId}"]`);
+        return blocks?.closest(".question-presentation") ?? null;
+    };
+
     const renderHintPanel = payload => {
-        const presentation = document.querySelector(
-            "[data-host-gameplay-view] .question-presentation");
+        const presentation = findQuestionPresentation(payload?.sourceQuestionId);
         if (!presentation || !Array.isArray(payload?.revealedHints)) {
             return;
         }
@@ -265,17 +256,8 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
         const panel = document.createElement("section");
         panel.className = "question-hints-panel player-all-player-panel";
         panel.dataset.questionHintsPanel = "";
+        panel.dataset.sourceQuestionId = payload.sourceQuestionId.toString();
         panel.setAttribute("aria-label", payload.hintsLabel ?? "Hints");
-
-        const handle = document.createElement("span");
-        handle.className = "question-hints-panel-handle";
-        handle.setAttribute("aria-hidden", "true");
-        panel.append(handle);
-
-        const title = document.createElement("strong");
-        title.className = "question-hints-panel-title";
-        title.textContent = `${payload.hintsLabel ?? "Hints"} ${payload.revealedHintCount}/${payload.totalHintCount}`;
-        panel.append(title);
 
         const grid = document.createElement("div");
         grid.className = "question-hints-grid";
@@ -316,7 +298,11 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
     };
 
     const syncButtons = payload => {
-        if (!payload || payload.revealedHintCount >= payload.totalHintCount) {
+        if (!payload || !findQuestionPresentation(payload.sourceQuestionId)) {
+            return;
+        }
+
+        if (payload.revealedHintCount >= payload.totalHintCount) {
             for (const button of document.querySelectorAll(selector)) {
                 button.remove();
             }
@@ -333,6 +319,41 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
             button.setAttribute("aria-label", payload.showAnotherHintLabel);
         }
     };
+
+    const syncReward = payload => {
+        const presentation = findQuestionPresentation(payload?.sourceQuestionId);
+        const heading = presentation?.querySelector("[data-question-heading]");
+        if (!heading || !Number.isFinite(payload?.rewardValue)) {
+            return;
+        }
+
+        heading.dataset.currentReward = payload.rewardValue.toString();
+        const template = heading.dataset.rewardTemplate;
+        if (template) {
+            heading.textContent = template.replace(
+                "__REWARD__",
+                payload.rewardValue.toString());
+        }
+    };
+
+    const applyRevealState = payload => {
+        renderHintPanel(payload);
+        syncButtons(payload);
+        syncReward(payload);
+    };
+
+    document.addEventListener("badwolf:host-gameplay-updated", () => {
+        if (!latestRevealState) {
+            return;
+        }
+
+        if (!findQuestionPresentation(latestRevealState.sourceQuestionId)) {
+            latestRevealState = null;
+            return;
+        }
+
+        applyRevealState(latestRevealState);
+    });
 
     document.addEventListener("click", async event => {
         const target = event.target instanceof Element
@@ -374,8 +395,8 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
                 throw new Error("Question hint reveal returned no state.");
             }
 
-            renderHintPanel(payload);
-            syncButtons(payload);
+            latestRevealState = payload;
+            applyRevealState(payload);
         } catch (error) {
             console.error("Question hint reveal failed.", error);
             showError(error?.message ?? "Question hint reveal failed.");

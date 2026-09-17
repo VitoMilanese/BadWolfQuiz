@@ -156,17 +156,9 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
         panel.AddCssClass("question-hints-panel");
         panel.AddCssClass("player-all-player-panel");
         panel.Attributes["data-question-hints-panel"] = string.Empty;
+        panel.Attributes["data-source-question-id"] =
+            question.SourceQuestionId.ToString(CultureInfo.InvariantCulture);
         panel.Attributes["aria-label"] = strings.Hints;
-
-        var handle = new TagBuilder("span");
-        handle.AddCssClass("question-hints-panel-handle");
-        handle.Attributes["aria-hidden"] = "true";
-        panel.InnerHtml.AppendHtml(handle);
-
-        var heading = new TagBuilder("strong");
-        heading.AddCssClass("question-hints-panel-title");
-        heading.InnerHtml.Append($"{strings.Hints} {revealedCount}/{hints.Count}");
-        panel.InnerHtml.AppendHtml(heading);
 
         var grid = new TagBuilder("div");
         grid.AddCssClass("question-hints-grid");
@@ -280,7 +272,7 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
     width: min(100%, 84rem);
     max-height: min(34dvh, 20rem);
     margin: clamp(0.55rem, 1vh, 0.9rem) auto 0;
-    padding: clamp(0.7rem, 1.1vw, 1rem);
+    padding: clamp(0.55rem, 0.9vw, 0.8rem);
     overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid var(--line);
@@ -288,21 +280,6 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
     background: var(--panel-2);
     box-shadow: 0 -0.8rem 2rem rgb(0 0 0 / 12%);
     animation: question-hints-panel-rise 180ms ease-out both;
-}
-
-.question-hints-panel-handle {
-    display: block;
-    width: 3.2rem;
-    height: 0.28rem;
-    margin: 0 auto 0.45rem;
-    border-radius: 999px;
-    background: var(--line);
-}
-
-.question-hints-panel-title {
-    display: block;
-    margin-bottom: 0.55rem;
-    text-align: center;
 }
 
 .question-hints-grid {

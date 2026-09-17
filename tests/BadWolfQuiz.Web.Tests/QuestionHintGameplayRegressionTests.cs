@@ -24,6 +24,8 @@ public sealed class QuestionHintGameplayRegressionTests
         Assert.Contains("question-hints-panel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("question-presentation:has(> .question-hints-panel)", tagHelper, StringComparison.Ordinal);
         Assert.Contains("animation: question-hints-panel-rise", tagHelper, StringComparison.Ordinal);
+        Assert.DoesNotContain("question-hints-panel-handle", tagHelper, StringComparison.Ordinal);
+        Assert.DoesNotContain("question-hints-panel-title", tagHelper, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -72,6 +74,8 @@ public sealed class QuestionHintGameplayRegressionTests
         Assert.Contains("revealedHints", page, StringComparison.Ordinal);
         Assert.Contains("revealedHintCount", page, StringComparison.Ordinal);
         Assert.Contains("totalHintCount = hints.Count", page, StringComparison.Ordinal);
+        Assert.Contains("sourceQuestionId", page, StringComparison.Ordinal);
+        Assert.Contains("rewardValue = question.CorrectAnswerValue", page, StringComparison.Ordinal);
         Assert.Contains("question.RevealedHintCount <= 0", page, StringComparison.Ordinal);
         Assert.Contains("Take(Math.Min(question.RevealedHintCount, hints.Count))", page, StringComparison.Ordinal);
         Assert.Contains("Response.Headers.CacheControl = \"no-store\"", page, StringComparison.Ordinal);
@@ -88,8 +92,14 @@ public sealed class QuestionHintGameplayRegressionTests
 
         Assert.Contains("renderHintPanel(payload)", assets, StringComparison.Ordinal);
         Assert.Contains("syncButtons(payload)", assets, StringComparison.Ordinal);
+        Assert.Contains("syncReward(payload)", assets, StringComparison.Ordinal);
         Assert.Contains("payload.revealedHints", assets, StringComparison.Ordinal);
         Assert.Contains("data-question-hints-panel", assets, StringComparison.Ordinal);
+        Assert.Contains("latestRevealState", assets, StringComparison.Ordinal);
+        Assert.Contains("badwolf:host-gameplay-updated", assets, StringComparison.Ordinal);
+        Assert.Contains("applyRevealState(latestRevealState)", assets, StringComparison.Ordinal);
+        Assert.DoesNotContain("question-hints-panel-handle", assets, StringComparison.Ordinal);
+        Assert.DoesNotContain("question-hints-panel-title", assets, StringComparison.Ordinal);
         Assert.Contains("event.stopImmediatePropagation()", assets, StringComparison.Ordinal);
         Assert.Contains("setBusy(true)", assets, StringComparison.Ordinal);
         Assert.Contains("Accept\": \"application/json", assets, StringComparison.Ordinal);

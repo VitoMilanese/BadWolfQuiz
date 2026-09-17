@@ -65,6 +65,7 @@ public sealed class QuestionHintsModel(
         }
 
         int revealedHintCount;
+        int rewardValue;
         lock (game)
         {
             var question = game.Session.Board.Questions.SingleOrDefault(item =>
@@ -94,6 +95,7 @@ public sealed class QuestionHintsModel(
             revealedHintCount = Math.Min(
                 question.RevealedHintCount,
                 hints.Count);
+            rewardValue = question.CorrectAnswerValue;
         }
 
         var strings = QuestionHintStrings.Current;
@@ -124,8 +126,10 @@ public sealed class QuestionHintsModel(
 
         return new JsonResult(new
         {
+            sourceQuestionId,
             totalHintCount = hints.Count,
             revealedHintCount,
+            rewardValue,
             hintsLabel = strings.Hints,
             showAnotherHintLabel = strings.ShowAnotherHint,
             revealedHints
