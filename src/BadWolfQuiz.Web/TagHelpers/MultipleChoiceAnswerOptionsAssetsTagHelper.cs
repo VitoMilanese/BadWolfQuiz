@@ -25,8 +25,8 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             "<script>" +
             "window.badWolfHostMultipleChoiceBootstrapInitialized=true;" +
             "</script>" +
-            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.14\"></script>" +
-            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.14\" " +
+            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.15\"></script>" +
+            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.15\" " +
             $"data-saved-question-type=\"{(int)editor.Input.PresentationType}\"></script>" +
             "<script>window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();</script>" +
             "<script src=\"/js/multiple-correct-answer-options.js?v=461.1\"></script>" +

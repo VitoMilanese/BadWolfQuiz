@@ -146,8 +146,7 @@ public sealed class RuntimeQuestion
             ? QuestionPresentationType.AllPlayerMultipleChoice
             : presentationType;
         AreAllPlayerChoiceOptionsRevealed = !RevealAnswerOptionsOnDemand;
-        AllowAnswerRewardModifiers =
-            !RevealAnswerOptionsOnDemand && allowAnswerRewardModifiers;
+        AllowAnswerRewardModifiers = allowAnswerRewardModifiers;
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues ? 2 : 0;
         QuestionBlocks = questionBlocks;
         AnswerBlocks = answerBlocks;

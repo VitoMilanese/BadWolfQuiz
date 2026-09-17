@@ -85,9 +85,6 @@
         margin: 0;
         color: var(--muted);
     }
-    .question-editor[data-on-demand-choice="true"] .answer-reward-modifier-setting {
-        display: none !important;
-    }
 </style>
 
 <form method="post" class="question-editor" enctype="multipart/form-data"
@@ -244,8 +241,7 @@
             </select>
         </div>
 
-        <label class="checkbox-row answer-reward-modifier-setting"
-               hidden="@(isOnDemandChoice ? "hidden" : null)">
+        <label class="checkbox-row answer-reward-modifier-setting">
             <input asp-for="Input.AllowAnswerRewardModifiers" />
             <span>
                 <strong>@Localizer["Label_AllowAnswerRewardModifiers"]</strong>
@@ -681,13 +677,10 @@
             }
 
             if (answerRewardModifierSetting) {
-                answerRewardModifierSetting.hidden = isOnDemandChoice;
+                answerRewardModifierSetting.hidden = false;
             }
             if (answerRewardModifierCheckbox) {
-                answerRewardModifierCheckbox.disabled = isOnDemandChoice;
-                if (isOnDemandChoice) {
-                    answerRewardModifierCheckbox.checked = false;
-                }
+                answerRewardModifierCheckbox.disabled = false;
             }
 
             updateBuzzModeVisibility();

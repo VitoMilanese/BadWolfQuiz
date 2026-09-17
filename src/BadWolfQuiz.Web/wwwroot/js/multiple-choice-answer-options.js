@@ -615,11 +615,10 @@
             }
 
             if (answerRewardModifierSetting instanceof HTMLElement) {
-                answerRewardModifierSetting.hidden = onDemand;
+                answerRewardModifierSetting.hidden = false;
             }
-            if (onDemand &&
-                answerRewardModifierCheckbox instanceof HTMLInputElement) {
-                answerRewardModifierCheckbox.checked = false;
+            if (answerRewardModifierCheckbox instanceof HTMLInputElement) {
+                answerRewardModifierCheckbox.disabled = false;
             }
 
             if (answerHeading instanceof HTMLHeadingElement) {

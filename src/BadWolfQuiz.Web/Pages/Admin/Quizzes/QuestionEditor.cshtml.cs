@@ -86,9 +86,7 @@ public sealed class QuestionEditorModel(
             RevealAnswerOptionsOnDemand = isAllPlayerMultipleChoiceOnDemand,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
-            AllowAnswerRewardModifiers =
-                !isAllPlayerMultipleChoiceOnDemand &&
-                question.AllowAnswerRewardModifiers,
+            AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
             BuzzModeOverride =
                 presentationType == QuestionPresentationType.AllPlayerMultipleChoice &&
                 !Enum.IsDefined(typeof(BuzzActivationMode), question.BuzzModeOverride)
@@ -181,7 +179,6 @@ public sealed class QuestionEditorModel(
             Input.IsSpecial = false;
             Input.WagerMode = QuestionWagerMode.Normal;
             Input.ExcludeFromRandomWagerSelection = true;
-            Input.AllowAnswerRewardModifiers = false;
         }
 
         if (Input.PresentationType != QuestionPresentationType.Standard)
@@ -294,9 +291,7 @@ public sealed class QuestionEditorModel(
             isHostMultipleChoice ||
             isAllPlayerMultipleChoiceOnDemand ||
             Input.ExcludeFromRandomWagerSelection;
-        question.AllowAnswerRewardModifiers =
-            !isAllPlayerMultipleChoiceOnDemand &&
-            Input.AllowAnswerRewardModifiers;
+        question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers;
         var disableBuzzMode =
             Input.PresentationType == QuestionPresentationType.AllPlayerText ||
             (question.IsSpecial && !isAllPlayerMultipleChoice);

@@ -39,7 +39,7 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("Model.Input.AllPlayerMode ==", editor, StringComparison.Ordinal);
         Assert.Contains("Model.Input.RevealAnswerOptionsOnDemand = isOnDemandChoice", editor, StringComparison.Ordinal);
         Assert.Contains("questionEditorForm?.dataset.onDemandChoice === \"true\"", editor, StringComparison.Ordinal);
-        Assert.Contains("answerRewardModifierCheckbox.disabled = isOnDemandChoice", editor, StringComparison.Ordinal);
+        Assert.Contains("answerRewardModifierCheckbox.disabled = false", editor, StringComparison.Ordinal);
         Assert.Contains("form.dataset.onDemandChoice = onDemand ? \"true\" : \"false\"", editorScript, StringComparison.Ordinal);
         Assert.Contains("waitForEditorMount();", editorScript, StringComparison.Ordinal);
         Assert.Contains("form.dataset.multipleChoiceAnswerOptionsController", editorScript, StringComparison.Ordinal);
@@ -52,12 +52,13 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("hidden=\"@(showWagerMode ? null : \"hidden\")\"", editor, StringComparison.Ordinal);
         Assert.Contains("presentationTypeSelect?.value === \"3\" && !isOnDemandChoice", editor, StringComparison.Ordinal);
         Assert.Contains("wagerModeSetting.hidden = !supportsWagerMode", editorScript, StringComparison.Ordinal);
-        Assert.Contains("answerRewardModifierSetting.hidden = onDemand", editorScript, StringComparison.Ordinal);
-        Assert.Contains("answerRewardModifierCheckbox.checked = false", editorScript, StringComparison.Ordinal);
-        Assert.Contains("hidden=\"@(isOnDemandChoice ? \"hidden\" : null)\"", editor, StringComparison.Ordinal);
+        Assert.Contains("answerRewardModifierSetting.hidden = false", editorScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("answerRewardModifierCheckbox.checked = false", editorScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("hidden=\"@(isOnDemandChoice ? \"hidden\" : null)\"", editor, StringComparison.Ordinal);
         Assert.Contains("isOnDemandChoice;", editor, StringComparison.Ordinal);
-        Assert.Contains("Input.AllowAnswerRewardModifiers = false", editorModel, StringComparison.Ordinal);
-        Assert.Contains("!isAllPlayerMultipleChoiceOnDemand &&", editorModel, StringComparison.Ordinal);
+        Assert.DoesNotContain("Input.AllowAnswerRewardModifiers = false", editorModel, StringComparison.Ordinal);
+        Assert.Contains("AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers", editorModel, StringComparison.Ordinal);
+        Assert.Contains("question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers", editorModel, StringComparison.Ordinal);
         Assert.Contains("CanRevealAllPlayerChoiceOptions", lobby, StringComparison.Ordinal);
         Assert.Contains("GameBoard_ShowAnswerOptions", lobby, StringComparison.Ordinal);
         Assert.Contains("OnPostRevealAllPlayerChoiceOptionsAsync", lobbyModel, StringComparison.Ordinal);

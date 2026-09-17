@@ -20,11 +20,11 @@ public sealed class OnDemandAllPlayerMultipleChoiceTests
     }
 
     [Fact]
-    public void Snapshot_forces_reward_modifiers_off_for_on_demand_choice()
+    public void Snapshot_preserves_reward_modifiers_for_on_demand_choice()
     {
         var question = CreateQuestion(allowAnswerRewardModifiers: true);
 
-        Assert.False(question.AllowAnswerRewardModifiers);
+        Assert.True(question.AllowAnswerRewardModifiers);
     }
 
     [Fact]
