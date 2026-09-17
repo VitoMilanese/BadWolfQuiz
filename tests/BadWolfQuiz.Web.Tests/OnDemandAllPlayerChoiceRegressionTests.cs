@@ -35,7 +35,7 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("wagerModeSetting.hidden = !supportsWagerMode", editorScript, StringComparison.Ordinal);
         Assert.Contains("answerRewardModifierSetting.hidden = onDemand", editorScript, StringComparison.Ordinal);
         Assert.Contains("answerRewardModifierCheckbox.checked = false", editorScript, StringComparison.Ordinal);
-        Assert.Contains("hidden=\"@(Model.Input.RevealAnswerOptionsOnDemand ? \"hidden\" : null)\"", editor, StringComparison.Ordinal);
+        Assert.Contains("hidden=\"@(isOnDemandChoice ? \"hidden\" : null)\"", editor, StringComparison.Ordinal);
         Assert.Contains("isOnDemandChoice;", editor, StringComparison.Ordinal);
         Assert.Contains("Input.AllowAnswerRewardModifiers = false", editorModel, StringComparison.Ordinal);
         Assert.Contains("!isAllPlayerMultipleChoiceOnDemand &&", editorModel, StringComparison.Ordinal);
