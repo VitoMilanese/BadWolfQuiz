@@ -33,7 +33,9 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
 
         output.PostContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=12\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/achievement-category-filter.css?v=2\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
+            "<script defer src=\"/js/achievement-category-filter.js?v=2\"></script>" +
             "<script defer src=\"/js/player-achievements.js?v=1\"></script>" +
             "<script defer src=\"/js/achievement-reset.js?v=1\"></script>");
     }
@@ -44,6 +46,7 @@ public sealed class PlayerAchievementsTagHelper(
     QuizDbContext db,
     GameSessionRegistry sessionRegistry,
     IStringLocalizer<AchievementResource> localizer,
+    IStringLocalizer<AchievementCategoryFilterResource> categoryFilterLocalizer,
     IOptions<FooterOptions> footerOptions,
     IAntiforgery antiforgery) : TagHelper
 {
@@ -180,17 +183,21 @@ public sealed class PlayerAchievementsTagHelper(
             html.Append("</div></div></div>");
         }
 
-        html.Append("<section class=\"player-achievements-panel\" aria-describedby=\"player-achievements-subtitle\">");
+        html.Append("<section class=\"player-achievements-panel\" data-achievement-category-filter-scope aria-describedby=\"player-achievements-subtitle\">");
         html.Append("<div class=\"player-achievements-heading\"><div>");
         html.Append("<span class=\"player-achievements-kicker\">BAD WOLF / MILESTONES</span>");
         html.Append("<p id=\"player-achievements-subtitle\">");
         html.Append(Encode(localizer["Achievements_Subtitle"].Value));
-        html.Append("</p></div><strong class=\"player-achievements-count\">");
+        html.Append("</p></div><div class=\"achievement-category-filter-actions\">");
+        AppendCategoryFilter(html);
+        html.Append("<strong class=\"player-achievements-count\" data-achievement-visible-count data-achievement-count-template=\"");
+        html.Append(Encode(localizer["Achievements_UnlockedCount"].Value));
+        html.Append("\">");
         html.Append(Encode(localizer[
             "Achievements_UnlockedCount",
             unlockedCount,
             achievements.Count].Value));
-        html.Append("</strong></div>");
+        html.Append("</strong></div></div>");
 
         html.Append("<div class=\"player-achievements-grid\">");
         foreach (var achievement in orderedAchievements)
@@ -207,6 +214,8 @@ public sealed class PlayerAchievementsTagHelper(
             html.Append(cardClasses);
             html.Append("\" data-achievement-code=\"");
             html.Append(Encode(achievement.Code));
+            html.Append("\" data-achievement-category=\"");
+            html.Append(Encode(PlayerAchievementCategoryCatalog.GetFilterValue(achievement.Code)));
             html.Append("\">");
             html.Append("<div class=\"player-achievement-card-top\">");
             if (lockedSecret)
@@ -275,6 +284,28 @@ public sealed class PlayerAchievementsTagHelper(
             antiforgeryFieldName,
             antiforgeryToken);
         return html.ToString();
+    }
+
+    private void AppendCategoryFilter(StringBuilder html)
+    {
+        html.Append("<label class=\"achievement-category-filter-control\"><span>");
+        html.Append(Encode(categoryFilterLocalizer["Label"].Value));
+        html.Append("</span><select data-achievement-category-filter>");
+        AppendCategoryOption(html, "all", "All");
+        AppendCategoryOption(html, "quizzes", "Quizzes");
+        AppendCategoryOption(html, "guess-what-i-play", "GuessWhatIPlay");
+        AppendCategoryOption(html, "word-rings", "WordRings");
+        AppendCategoryOption(html, "out-of-game", "OutOfGame");
+        html.Append("</select></label>");
+    }
+
+    private void AppendCategoryOption(StringBuilder html, string value, string resourceKey)
+    {
+        html.Append("<option value=\"");
+        html.Append(Encode(value));
+        html.Append("\">");
+        html.Append(Encode(categoryFilterLocalizer[resourceKey].Value));
+        html.Append("</option>");
     }
 
     private void AppendResetDialog(

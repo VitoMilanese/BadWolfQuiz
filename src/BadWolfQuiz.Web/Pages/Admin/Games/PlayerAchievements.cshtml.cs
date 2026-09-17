@@ -17,6 +17,7 @@ public sealed class PlayerAchievementsModel(
     GameSessionRegistry sessionRegistry,
     CurrentHost currentHost,
     IStringLocalizer<AchievementResource> localizer,
+    IStringLocalizer<AchievementCategoryFilterResource> categoryFilterLocalizer,
     IStringLocalizer<PlayerAchievementHistoryResource> historyLocalizer,
     IOptions<FooterOptions> footerOptions) : PageModel
 {
@@ -198,8 +199,18 @@ public sealed class PlayerAchievementsModel(
                 "Achievements_UnlockedCount",
                 unlockedCount,
                 achievements.Count].Value,
+            unlockedCountTemplate = localizer["Achievements_UnlockedCount"].Value,
             secretTitle = localizer["Achievements_SecretTitle"].Value,
             secretDescription = localizer["Achievements_SecretDescription"].Value,
+            categoryFilter = new
+            {
+                label = categoryFilterLocalizer["Label"].Value,
+                all = categoryFilterLocalizer["All"].Value,
+                quizzes = categoryFilterLocalizer["Quizzes"].Value,
+                guessWhatIPlay = categoryFilterLocalizer["GuessWhatIPlay"].Value,
+                wordRings = categoryFilterLocalizer["WordRings"].Value,
+                outOfGame = categoryFilterLocalizer["OutOfGame"].Value
+            },
             achievements = achievements.Select(item => new
             {
                 item.Code,
@@ -209,6 +220,7 @@ public sealed class PlayerAchievementsModel(
                 item.IsNewInCurrentGame,
                 item.Progress,
                 item.Target,
+                category = PlayerAchievementCategoryCatalog.GetFilterValue(item.Code),
                 name = localizer[$"{item.Code}_Name"].Value,
                 description = localizer[$"{item.Code}_Description"].Value
             })
