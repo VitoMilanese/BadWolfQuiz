@@ -1,0 +1,39 @@
+name: Temporary issue 691 all-player choice Button mode fix
+
+on:
+  push:
+    branches:
+      - feature/691-on-demand-answer-options
+    paths:
+      - .github/temp-691-all-player-choice-buzz-mode.py
+      - .github/workflows/temp-691-all-player-choice-buzz-mode.yml
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply Button mode fix
+        run: python3 .github/temp-691-all-player-choice-buzz-mode.py
+      - name: Run focused editor regressions
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~OnDemandAllPlayerChoiceRegressionTests|FullyQualifiedName~MultipleChoiceEditorStabilityRegressionTests|FullyQualifiedName~AnonymousSharedWagerEditorUiRegressionTests"
+      - name: Run full web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+      - name: Commit tested fix and remove temporary files
+        shell: bash
+        run: |
+          rm .github/workflows/temp-691-all-player-choice-buzz-mode.yml
+          rm .github/temp-691-all-player-choice-buzz-mode.py
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add -A
+          git commit -m "Keep Button mode available for all-player choice questions"
+          git push origin HEAD:feature/691-on-demand-answer-options
