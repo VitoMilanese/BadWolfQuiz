@@ -14,9 +14,6 @@ namespace BadWolfQuiz.Web.TagHelpers;
 [HtmlTargetElement("form", Attributes = "asp-page-handler")]
 public sealed class QuestionHintControlsTagHelper(QuizDbContext db) : TagHelper
 {
-    [HtmlAttributeName("asp-page-handler")]
-    public string? PageHandler { get; set; }
-
     [ViewContext]
     [HtmlAttributeNotBound]
     public ViewContext ViewContext { get; set; } = default!;
@@ -25,8 +22,12 @@ public sealed class QuestionHintControlsTagHelper(QuizDbContext db) : TagHelper
         TagHelperContext context,
         TagHelperOutput output)
     {
+        var pageHandler =
+            context.AllAttributes.TryGetAttribute("asp-page-handler", out var handlerAttribute)
+                ? handlerAttribute.Value?.ToString()
+                : null;
         if (!string.Equals(
-                PageHandler,
+                pageHandler,
                 "ResolveQuestion",
                 StringComparison.Ordinal) ||
             ViewContext.ViewData.Model is not LobbyModel
@@ -79,9 +80,6 @@ public sealed class QuestionHintControlsTagHelper(QuizDbContext db) : TagHelper
 [HtmlTargetElement("section", Attributes = "class")]
 public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
 {
-    [HtmlAttributeName("class")]
-    public string? CssClass { get; set; }
-
     [ViewContext]
     [HtmlAttributeNotBound]
     public ViewContext ViewContext { get; set; } = default!;
@@ -90,7 +88,11 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
         TagHelperContext context,
         TagHelperOutput output)
     {
-        if (!HasCssClass(CssClass, "question-presentation") ||
+        var cssClass =
+            context.AllAttributes.TryGetAttribute("class", out var classAttribute)
+                ? classAttribute.Value?.ToString()
+                : null;
+        if (!HasCssClass(cssClass, "question-presentation") ||
             ViewContext.ViewData.Model is not LobbyModel
             {
                 Game: { } game,
