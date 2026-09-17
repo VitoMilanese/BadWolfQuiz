@@ -54,7 +54,7 @@ public sealed class QuestionHintGameplayRegressionTests
     }
 
     [Fact]
-    public void Hint_reveal_endpoint_persists_runtime_state_and_protects_hidden_images()
+    public void Hint_reveal_endpoint_persists_runtime_state_and_returns_revealed_hint_state()
     {
         var page = ReadRepositoryFile(
             "src",
@@ -68,9 +68,33 @@ public sealed class QuestionHintGameplayRegressionTests
         Assert.Contains("question.RevealNextHint(hints.Count)", page, StringComparison.Ordinal);
         Assert.Contains("question.RevealAllHints(hints.Count)", page, StringComparison.Ordinal);
         Assert.Contains("game.MarkPersistenceChanged()", page, StringComparison.Ordinal);
+        Assert.Contains("return new JsonResult(new", page, StringComparison.Ordinal);
+        Assert.Contains("revealedHints", page, StringComparison.Ordinal);
+        Assert.Contains("revealedHintCount", page, StringComparison.Ordinal);
+        Assert.Contains("totalHintCount = hints.Count", page, StringComparison.Ordinal);
         Assert.Contains("question.RevealedHintCount <= 0", page, StringComparison.Ordinal);
         Assert.Contains("Take(Math.Min(question.RevealedHintCount, hints.Count))", page, StringComparison.Ordinal);
         Assert.Contains("Response.Headers.CacheControl = \"no-store\"", page, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Hint_client_renders_revealed_hints_without_full_gameplay_refresh()
+    {
+        var assets = ReadRepositoryFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "QuestionHintGameplayClientAssetsTagHelper.cs");
+
+        Assert.Contains("renderHintPanel(payload)", assets, StringComparison.Ordinal);
+        Assert.Contains("syncButtons(payload)", assets, StringComparison.Ordinal);
+        Assert.Contains("payload.revealedHints", assets, StringComparison.Ordinal);
+        Assert.Contains("data-question-hints-panel", assets, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation()", assets, StringComparison.Ordinal);
+        Assert.Contains("setBusy(true)", assets, StringComparison.Ordinal);
+        Assert.Contains("Accept\": \"application/json", assets, StringComparison.Ordinal);
+        Assert.DoesNotContain("BadWolfHostGameplay?.refresh", assets, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.location.reload()", assets, StringComparison.Ordinal);
     }
 
     [Fact]
