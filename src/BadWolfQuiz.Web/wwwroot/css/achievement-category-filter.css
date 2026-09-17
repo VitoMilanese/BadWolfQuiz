@@ -1,0 +1,69 @@
+.self-achievements-heading-actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.self-achievements-category-filter {
+    display: grid;
+    gap: 5px;
+    min-width: min(280px, 42vw);
+}
+
+.self-achievements-category-filter > span {
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 850;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.self-achievements-category-filter select {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 36px 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--panel-2) 90%, var(--bg));
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.self-achievements-category-filter select:hover {
+    border-color: color-mix(in srgb, var(--gold) 58%, var(--line));
+}
+
+.self-achievements-category-filter select:focus-visible {
+    outline: 2px solid var(--red-bright);
+    outline-offset: 2px;
+}
+
+.self-achievements-panel .player-achievement-card[hidden] {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .self-achievements-panel .player-achievements-heading {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .self-achievements-heading-actions {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    .self-achievements-category-filter {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .self-achievements-heading-actions .player-achievements-count {
+        align-self: flex-start;
+    }
+}
