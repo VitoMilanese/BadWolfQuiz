@@ -96,10 +96,12 @@ public sealed class QuestionHintGameplayClientAssetsTagHelper : TagHelper
     position: relative;
     z-index: 1;
     flex: 0 0 auto;
-    width: min(100%, 84rem);
+    width: calc(100% - clamp(1rem, 2vw, 2rem));
+    max-width: none;
     max-height: min(34dvh, 20rem);
     margin: clamp(0.55rem, 1vh, 0.9rem) auto 0;
     padding: clamp(0.55rem, 0.9vw, 0.8rem);
+    box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
     border: 1px solid var(--line);

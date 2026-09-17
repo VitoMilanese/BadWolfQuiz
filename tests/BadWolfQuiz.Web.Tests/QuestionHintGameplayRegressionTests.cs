@@ -26,6 +26,9 @@ public sealed class QuestionHintGameplayRegressionTests
         Assert.Contains("animation: question-hints-panel-rise", tagHelper, StringComparison.Ordinal);
         Assert.DoesNotContain("question-hints-panel-handle", tagHelper, StringComparison.Ordinal);
         Assert.DoesNotContain("question-hints-panel-title", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("width: calc(100% - clamp(1rem, 2vw, 2rem));", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("max-width: none;", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("box-sizing: border-box;", tagHelper, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -100,6 +103,9 @@ public sealed class QuestionHintGameplayRegressionTests
         Assert.Contains("applyRevealState(latestRevealState)", assets, StringComparison.Ordinal);
         Assert.DoesNotContain("question-hints-panel-handle", assets, StringComparison.Ordinal);
         Assert.DoesNotContain("question-hints-panel-title", assets, StringComparison.Ordinal);
+        Assert.Contains("width: calc(100% - clamp(1rem, 2vw, 2rem));", assets, StringComparison.Ordinal);
+        Assert.Contains("max-width: none;", assets, StringComparison.Ordinal);
+        Assert.Contains("box-sizing: border-box;", assets, StringComparison.Ordinal);
         Assert.Contains("event.stopImmediatePropagation()", assets, StringComparison.Ordinal);
         Assert.Contains("setBusy(true)", assets, StringComparison.Ordinal);
         Assert.Contains("Accept\": \"application/json", assets, StringComparison.Ordinal);
