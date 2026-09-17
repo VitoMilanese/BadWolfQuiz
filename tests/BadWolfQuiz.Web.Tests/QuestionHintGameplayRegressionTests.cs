@@ -22,6 +22,33 @@ public sealed class QuestionHintGameplayRegressionTests
     }
 
     [Fact]
+    public void Gameplay_tag_helpers_do_not_consume_global_layout_or_routing_attributes()
+    {
+        var tagHelper = ReadRepositoryFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "TagHelpers",
+            "QuestionHintGameplayTagHelpers.cs");
+
+        Assert.DoesNotContain(
+            "[HtmlAttributeName(\"class\")]",
+            tagHelper,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "[HtmlAttributeName(\"asp-page-handler\")]",
+            tagHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "context.AllAttributes.TryGetAttribute(\"class\"",
+            tagHelper,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "context.AllAttributes.TryGetAttribute(\"asp-page-handler\"",
+            tagHelper,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Hint_reveal_endpoint_persists_runtime_state_and_protects_hidden_images()
     {
         var page = ReadRepositoryFile(
