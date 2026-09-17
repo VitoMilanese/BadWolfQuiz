@@ -11,8 +11,60 @@
         ".host-game-board .final-question-panel .game-content-presentation .game-content-blocks:not(.four-clue-grid):not(.all-player-answer-grid)"
     ].join(",");
     const imageSelector = ":scope > .game-content-block > img.game-content-image";
+    const gameplayImageSelector = [
+        "img.game-content-image",
+        "img.final-question-transition-image",
+        ".all-player-choice-option img",
+        ".all-player-host-choice-option img"
+    ].join(",");
+    const gameplayImageRadius = "clamp(12px, 1.3vw, 20px)";
     const overflowTolerance = 2;
     let frameHandle = 0;
+
+    const applyGameplayImageCorners = image => {
+        if (!(image instanceof HTMLImageElement)) {
+            return;
+        }
+
+        image.style.setProperty(
+            "border-radius",
+            gameplayImageRadius,
+            "important");
+
+        if (!image.complete ||
+            image.naturalWidth <= 0 ||
+            image.naturalHeight <= 0) {
+            image.style.removeProperty("clip-path");
+            return;
+        }
+
+        const bounds = image.getBoundingClientRect();
+        if (bounds.width <= 0 || bounds.height <= 0) {
+            return;
+        }
+
+        const naturalRatio = image.naturalWidth / image.naturalHeight;
+        const boxRatio = bounds.width / bounds.height;
+        let horizontalInset = 0;
+        let verticalInset = 0;
+
+        if (boxRatio > naturalRatio) {
+            const paintedWidth = bounds.height * naturalRatio;
+            horizontalInset = Math.max(
+                0,
+                (bounds.width - paintedWidth) / 2);
+        } else if (boxRatio < naturalRatio) {
+            const paintedHeight = bounds.width / naturalRatio;
+            verticalInset = Math.max(
+                0,
+                (bounds.height - paintedHeight) / 2);
+        }
+
+        image.style.setProperty(
+            "clip-path",
+            `inset(${verticalInset}px ${horizontalInset}px ${verticalInset}px ${horizontalInset}px round ${gameplayImageRadius})`,
+            "important");
+    };
 
     const getMinimumImageHeight = () =>
         Math.max(120, Math.min(180, Math.round(window.innerHeight * 0.18)));
@@ -102,6 +154,8 @@
 
     const fitContainer = container => {
         const images = Array.from(container.querySelectorAll(imageSelector));
+        images.forEach(applyGameplayImageCorners);
+
         container.querySelectorAll(
             "img.game-content-image[data-game-content-fit-eligible='true']")
             .forEach(image => {
@@ -194,10 +248,16 @@
     const fitAll = () => {
         frameHandle = 0;
 
+        document.querySelectorAll(gameplayImageSelector)
+            .forEach(applyGameplayImageCorners);
+
         document.querySelectorAll(containerSelector).forEach(container => {
             fitContainer(container);
             observeContainer(container);
         });
+
+        document.querySelectorAll(gameplayImageSelector)
+            .forEach(applyGameplayImageCorners);
     };
 
     function scheduleFit() {
@@ -229,6 +289,7 @@
             image.dataset.gameContentFitState = "expanded";
             image.setAttribute("aria-pressed", "true");
             markReady(image);
+            scheduleFit();
             return;
         }
 
@@ -273,8 +334,15 @@
     });
 
     document.addEventListener("load", event => {
-        if (!(event.target instanceof HTMLImageElement) ||
-            !event.target.matches(".game-content-image")) {
+        if (!(event.target instanceof HTMLImageElement)) {
+            return;
+        }
+
+        if (event.target.matches(gameplayImageSelector)) {
+            applyGameplayImageCorners(event.target);
+        }
+
+        if (!event.target.matches(".game-content-image")) {
             return;
         }
 
@@ -285,6 +353,7 @@
 
         fitContainer(container);
         observeContainer(container);
+        applyGameplayImageCorners(event.target);
     }, true);
 
     document.addEventListener("badwolf:host-gameplay-updated", fitAll);

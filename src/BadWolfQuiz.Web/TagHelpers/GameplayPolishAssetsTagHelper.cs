@@ -46,7 +46,8 @@ public sealed class GameplayPolishAssetsTagHelper : TagHelper
         }
 
         output.PreContent.AppendHtml(
-            "<link rel=\"stylesheet\" href=\"/css/gameplay-polish.css?v=3\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/gameplay-polish.css?v=4\" />" +
+            "<script src=\"/js/game-content-viewport-fit.js?v=8\"></script>" +
             "<script src=\"/js/gameplay-polish.js?v=3\"></script>");
     }
 }

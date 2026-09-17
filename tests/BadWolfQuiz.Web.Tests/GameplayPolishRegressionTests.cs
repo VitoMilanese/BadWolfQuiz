@@ -49,7 +49,7 @@ public sealed class GameplayPolishRegressionTests
             "Attributes = \"data-host-gameplay-view\"",
             helper,
             StringComparison.Ordinal);
-        Assert.Contains("gameplay-polish.css?v=3", helper, StringComparison.Ordinal);
+        Assert.Contains("gameplay-polish.css?v=4", helper, StringComparison.Ordinal);
         Assert.Contains("gameplay-polish.js?v=3", helper, StringComparison.Ordinal);
         Assert.Contains(
             "output.Attributes.SetAttribute(\"data-final-status\", \"lobby\")",

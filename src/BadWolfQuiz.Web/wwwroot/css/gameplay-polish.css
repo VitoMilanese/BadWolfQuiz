@@ -1,5 +1,13 @@
 /* Browser-review polish shared by the first-round intro, player buzzer, and host scoreboard. */
 
+/* Use the exact same corner treatment as round/category intro images. */
+.game-content-image,
+.all-player-choice-option img,
+.all-player-host-choice-option img,
+.final-question-transition-image {
+    border-radius: clamp(12px, 1.3vw, 20px) !important;
+}
+
 /* Keep the current first-round intro visible while Start/Skip waits for the server.
    The existing inline intro animation used to finish before the POST completed,
    leaving an empty stage for the remainder of the request. */
