@@ -1,6 +1,8 @@
 using BadWolfQuiz.Game.Runtime;
 using BadWolfQuiz.Web.Data;
+using BadWolfQuiz.Web.Models;
 using BadWolfQuiz.Web.Services;
+using BadWolfQuiz.Web.TagHelpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -53,9 +55,16 @@ public sealed class QuestionHintsModel(
             cancellationToken);
         if (hints.Count == 0)
         {
-            return RedirectToPage("/Admin/Games/Lobby", new { id });
+            return new JsonResult(new
+            {
+                error = "No hints are available for this question."
+            })
+            {
+                StatusCode = StatusCodes.Status409Conflict
+            };
         }
 
+        int revealedHintCount;
         lock (game)
         {
             var question = game.Session.Board.Questions.SingleOrDefault(item =>
@@ -79,11 +88,48 @@ public sealed class QuestionHintsModel(
             }
             catch (GameRuleViolationException)
             {
-                // A stale/repeated request should simply return the host to the game.
+                // A stale/repeated request should return the current hint state.
             }
+
+            revealedHintCount = Math.Min(
+                question.RevealedHintCount,
+                hints.Count);
         }
 
-        return RedirectToPage("/Admin/Games/Lobby", new { id });
+        var strings = QuestionHintStrings.Current;
+        var revealedHints = hints
+            .Take(revealedHintCount)
+            .Select(hint => new
+            {
+                id = hint.Id,
+                blockType = hint.BlockType == ContentBlockType.Image
+                    ? "image"
+                    : "text",
+                textContent = hint.TextContent?.Trim(),
+                topCaption = hint.TopCaption?.Trim(),
+                bottomCaption = hint.BottomCaption?.Trim(),
+                imageUrl = hint.BlockType == ContentBlockType.Image
+                    ? Url.Page(
+                        "/Admin/Games/QuestionHints",
+                        "ContentBlock",
+                        new
+                        {
+                            id,
+                            sourceQuestionId,
+                            sourceContentBlockId = hint.Id
+                        })
+                    : null
+            })
+            .ToArray();
+
+        return new JsonResult(new
+        {
+            totalHintCount = hints.Count,
+            revealedHintCount,
+            hintsLabel = strings.Hints,
+            showAnotherHintLabel = strings.ShowAnotherHint,
+            revealedHints
+        });
     }
 
     public async Task<IActionResult> OnGetContentBlockAsync(
