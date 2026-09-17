@@ -1,0 +1,69 @@
+name: Temporary issue 691 follow-up retry
+
+on:
+  push:
+    branches:
+      - feature/691-on-demand-answer-options
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Apply corrected follow-up patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/temp-691-followup.yml').read_text(encoding='utf-8')
+          marker = "          python3 - <<'PY'\n"
+          start = workflow.index(marker) + len(marker)
+          end = workflow.index("\n          PY\n", start)
+          source = workflow[start:end]
+          source = "\n".join(
+              line[10:] if line.startswith("          ") else line
+              for line in source.splitlines())
+
+          old = '''replace_once(p,
+              \'\'\'        var allSubmitted = AllCurrentPlayersSubmitted(game, question);\\n        var phase = isWagering\'\'\',
+              \'\'\'        var allSubmitted = AllCurrentPlayersSubmitted(game, question);\\n        var isChoiceExcluded =\\n            question.RevealAnswerOptionsOnDemand &&\\n            question.AreAllPlayerChoiceOptionsRevealed &&\\n            question.AllPlayerChoiceExcludedPlayerIds.Contains(player.Id);\\n        var phase = isWagering\'\'\')'''
+          new = '''replace_once(p,
+              \'\'\'        var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;\\n        var review = isText ? GetTextReview(game, question) : null;\\n        var allSubmitted = AllCurrentPlayersSubmitted(game, question);\\n        var phase = isWagering\'\'\',
+              \'\'\'        var isText = question.PresentationType == QuestionPresentationType.AllPlayerText;\\n        var review = isText ? GetTextReview(game, question) : null;\\n        var allSubmitted = AllCurrentPlayersSubmitted(game, question);\\n        var isChoiceExcluded =\\n            question.RevealAnswerOptionsOnDemand &&\\n            question.AreAllPlayerChoiceOptionsRevealed &&\\n            question.AllPlayerChoiceExcludedPlayerIds.Contains(player.Id);\\n        var phase = isWagering\'\'\')'''
+          if source.count(old) != 1:
+              raise RuntimeError(f'Expected one patch-script target, found {source.count(old)}')
+          source = source.replace(old, new, 1)
+          exec(compile(source, '<issue-691-followup>', 'exec'))
+          PY
+
+      - name: Run focused game tests
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release --filter FullyQualifiedName~OnDemandAllPlayerMultipleChoiceTests
+
+      - name: Run focused web tests
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~OnDemandAllPlayerChoiceRegressionTests|FullyQualifiedName~MultipleChoiceEditorStabilityRegressionTests|FullyQualifiedName~MandatoryAllPlayerQuestionRegressionTests"
+
+      - name: Run full game test suite
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release
+
+      - name: Run full web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+
+      - name: Commit tested follow-up and remove temporary workflows
+        if: success()
+        shell: bash
+        run: |
+          rm .github/workflows/temp-691-followup.yml
+          rm .github/workflows/temp-691-rerun.yml
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add -A
+          git commit -m "Refine on-demand all-player answer reveal"
+          git push origin HEAD:feature/691-on-demand-answer-options
