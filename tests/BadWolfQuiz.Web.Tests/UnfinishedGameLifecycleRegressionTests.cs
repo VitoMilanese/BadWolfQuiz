@@ -22,6 +22,13 @@ public sealed class UnfinishedGameLifecycleRegressionTests
             "Admin",
             "Quizzes",
             "Index.cshtml.cs"));
+        var quizListScript = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "js",
+            "quiz-description-link.js"));
         var launcher = File.ReadAllText(Path.Combine(
             root,
             "src",
@@ -56,6 +63,14 @@ public sealed class UnfinishedGameLifecycleRegressionTests
             StringComparison.Ordinal);
         Assert.True(unfinishedDelete >= 0 && quizDelete > unfinishedDelete);
 
+        Assert.Contains("#deleteUnfinishedGameDialog form", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("deleteUnfinishedForm.dataset.submitting === 'true'", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("event.preventDefault();", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("event.stopImmediatePropagation();", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("deleteUnfinishedForm.querySelectorAll('button')", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("button.disabled = true;", quizListScript, StringComparison.Ordinal);
+        Assert.Contains("window.BadWolfBusy?.show?.();", quizListScript, StringComparison.Ordinal);
+
         Assert.Contains("OnPostDeleteUnfinishedGameAsync", pageModel, StringComparison.Ordinal);
         Assert.Contains("activeGameStore.RemoveAsync", pageModel, StringComparison.Ordinal);
         Assert.Contains("bool replaceUnfinished", pageModel, StringComparison.Ordinal);
@@ -71,6 +86,14 @@ public sealed class UnfinishedGameLifecycleRegressionTests
         var deleteHandler = pageModel[deleteHandlerStart..nextHandlerStart];
         Assert.DoesNotContain("IsArchived =", deleteHandler, StringComparison.Ordinal);
         Assert.DoesNotContain("SaveChangesAsync", deleteHandler, StringComparison.Ordinal);
+        Assert.Contains("snapshot is not null", deleteHandler, StringComparison.Ordinal);
+        Assert.Contains("activeGameAvailability.CanResume(snapshot)", deleteHandler, StringComparison.Ordinal);
+        Assert.Contains("await activeGameStore.RemoveAsync", deleteHandler, StringComparison.Ordinal);
+        Assert.DoesNotContain("if (!await activeGameStore.RemoveAsync", deleteHandler, StringComparison.Ordinal);
+        Assert.DoesNotContain("snapshot is null ||", deleteHandler, StringComparison.Ordinal);
+        Assert.Equal(
+            1,
+            deleteHandler.Split("return NotFound();", StringSplitOptions.None).Length - 1);
 
         Assert.Contains(
             "sessionRegistry.Create(snapshot, settings);",

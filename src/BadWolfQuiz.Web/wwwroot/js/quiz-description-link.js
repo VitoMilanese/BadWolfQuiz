@@ -96,4 +96,19 @@
             }
         });
     });
+
+    const deleteUnfinishedForm = document.querySelector('#deleteUnfinishedGameDialog form');
+    deleteUnfinishedForm?.addEventListener('submit', event => {
+        if (deleteUnfinishedForm.dataset.submitting === 'true') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return;
+        }
+
+        deleteUnfinishedForm.dataset.submitting = 'true';
+        deleteUnfinishedForm.querySelectorAll('button').forEach(button => {
+            button.disabled = true;
+        });
+        window.BadWolfBusy?.show?.();
+    });
 })();
