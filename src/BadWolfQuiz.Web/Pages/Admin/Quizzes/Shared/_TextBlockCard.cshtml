@@ -1,5 +1,20 @@
 ﻿@model BadWolfQuiz.Web.Pages.Admin.Quizzes.ContentBlockInputModel
+@{
+    var isHintBlock = ViewData.TemplateInfo.HtmlFieldPrefix.StartsWith(
+        "Input.HintBlocks[",
+        StringComparison.Ordinal);
+}
 
-<textarea asp-for="TextContent"
-          class="form-control"
-          rows="6"></textarea>
+@if (isHintBlock)
+{
+    <textarea asp-for="TextContent"
+              class="form-control"
+              rows="6"
+              maxlength="30"></textarea>
+}
+else
+{
+    <textarea asp-for="TextContent"
+              class="form-control"
+              rows="6"></textarea>
+}
