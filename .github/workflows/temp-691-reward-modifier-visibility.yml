@@ -1,0 +1,40 @@
+name: Temporary issue 691 reward modifier visibility
+
+on:
+  push:
+    branches:
+      - feature/691-on-demand-answer-options
+
+permissions:
+  contents: write
+
+jobs:
+  implement-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Apply reward modifier visibility fix
+        run: python3 .github/temp-691-reward-modifier-visibility.py
+      - name: Run focused game regression
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release --filter "FullyQualifiedName~OnDemandAllPlayerMultipleChoiceTests"
+      - name: Run focused web regressions
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release --filter "FullyQualifiedName~OnDemandAllPlayerChoiceRegressionTests|FullyQualifiedName~AnswerRewardButtonsRegressionTests|FullyQualifiedName~MultipleChoiceEditorStabilityRegressionTests"
+      - name: Run full game test suite
+        run: dotnet test tests/BadWolfQuiz.Game.Tests/BadWolfQuiz.Game.Tests.csproj --configuration Release
+      - name: Run full web test suite
+        run: dotnet test tests/BadWolfQuiz.Web.Tests/BadWolfQuiz.Web.Tests.csproj --configuration Release
+      - name: Commit tested fix and remove temporary files
+        shell: bash
+        run: |
+          rm .github/workflows/temp-691-reward-modifier-visibility.yml
+          rm .github/temp-691-reward-modifier-visibility.py
+          git config user.name "Vitalii Hanych"
+          git config user.email "64318287+VitoMilanese@users.noreply.github.com"
+          git add -A
+          git commit -m "Keep reward modifier setting available for on-demand choice"
+          git push origin HEAD:feature/691-on-demand-answer-options
