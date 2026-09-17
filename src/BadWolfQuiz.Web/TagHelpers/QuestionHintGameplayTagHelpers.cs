@@ -26,10 +26,10 @@ public sealed class QuestionHintControlsTagHelper(QuizDbContext db) : TagHelper
             context.AllAttributes.TryGetAttribute("asp-page-handler", out var handlerAttribute)
                 ? handlerAttribute.Value?.ToString()
                 : null;
-        if (!string.Equals(
-                pageHandler,
-                "ResolveQuestion",
-                StringComparison.Ordinal) ||
+        var isHintControlHost =
+            string.Equals(pageHandler, "ResolveQuestion", StringComparison.Ordinal) ||
+            string.Equals(pageHandler, "JudgeQuestionAnswer", StringComparison.Ordinal);
+        if (!isHintControlHost ||
             ViewContext.ViewData.Model is not LobbyModel
             {
                 Game: { } game,
@@ -61,18 +61,52 @@ public sealed class QuestionHintControlsTagHelper(QuizDbContext db) : TagHelper
         }
 
         var strings = QuestionHintStrings.Current;
+        var actionBase = $"/Admin/Games/QuestionHints?id={game.Session.Id.Value:D}";
+        AppendActionButton(
+            output,
+            actionBase,
+            revealedCount == 0 ? strings.ShowHint : strings.ShowAnotherHint,
+            "question-hint-reveal-button",
+            """
+            <svg class="question-hint-action-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6"></path>
+                <path d="M10 22h4"></path>
+                <path d="M8.5 15.5C7 14.4 6 12.6 6 10.5a6 6 0 1 1 12 0c0 2.1-1 3.9-2.5 5L15 16H9l-.5-.5Z"></path>
+            </svg>
+            """);
+        AppendActionButton(
+            output,
+            $"{actionBase}&handler=All",
+            strings.ShowAllHints,
+            "question-hint-reveal-all-button",
+            """
+            <svg class="question-hint-action-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 2 8 4-8 4-8-4 8-4Z"></path>
+                <path d="m4 10 8 4 8-4"></path>
+                <path d="m4 14 8 4 8-4"></path>
+            </svg>
+            """);
+    }
+
+    private static void AppendActionButton(
+        TagHelperOutput output,
+        string formAction,
+        string label,
+        string specificCssClass,
+        string iconMarkup)
+    {
         var button = new TagBuilder("button");
         button.Attributes["type"] = "submit";
         button.Attributes["formmethod"] = "post";
-        button.Attributes["formaction"] =
-            $"/Admin/Games/QuestionHints?id={game.Session.Id.Value:D}";
+        button.Attributes["formaction"] = formAction;
+        button.Attributes["title"] = label;
+        button.Attributes["aria-label"] = label;
         button.AddCssClass("button");
         button.AddCssClass("button-secondary");
-        button.AddCssClass("question-hint-reveal-button");
-        button.InnerHtml.Append(
-            revealedCount == 0
-                ? strings.ShowHint
-                : strings.ShowAnotherHint);
+        button.AddCssClass("icon-button");
+        button.AddCssClass("question-hint-action-button");
+        button.AddCssClass(specificCssClass);
+        button.InnerHtml.AppendHtml(iconMarkup);
         output.PostContent.AppendHtml(button);
     }
 }
@@ -203,8 +237,21 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
         var style = new TagBuilder("style");
         style.Attributes["data-question-hints-styles"] = string.Empty;
         style.InnerHtml.AppendHtml("""
-.question-hint-reveal-button {
-    margin-inline-start: 0.55rem;
+.question-hint-action-button {
+    width: 2.8rem;
+    min-width: 2.8rem;
+    height: 2.8rem;
+    padding: 0.55rem;
+    margin-inline-start: 0.45rem;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+}
+
+.question-hint-action-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: block;
 }
 
 .question-presentation:has(> .question-hints-panel) {
@@ -293,17 +340,6 @@ public sealed class QuestionHintPanelTagHelper(QuizDbContext db) : TagHelper
     from { transform: translateY(1.25rem); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
-
-@media (max-width: 640px) {
-    .question-hint-reveal-button {
-        margin-inline-start: 0;
-        margin-top: 0.5rem;
-    }
-
-    .question-hints-grid {
-        grid-template-columns: 1fr;
-    }
-}
 """);
         return style;
     }
@@ -337,6 +373,7 @@ internal static class QuestionHintTagHelperData
 internal sealed record QuestionHintStrings(
     string ShowHint,
     string ShowAnotherHint,
+    string ShowAllHints,
     string Hints)
 {
     internal static QuestionHintStrings Current =>
@@ -345,18 +382,22 @@ internal sealed record QuestionHintStrings(
             "uk" => new(
                 "Показати підказку",
                 "Показати ще одну підказку",
+                "Показати всі підказки",
                 "Підказки"),
             "it" => new(
                 "Mostra suggerimento",
                 "Mostra un altro suggerimento",
+                "Mostra tutti i suggerimenti",
                 "Suggerimenti"),
             "ru" => new(
                 "Показати підказку",
                 "Показати ще одну підказку",
+                "Показати всі підказки",
                 "Підказки"),
             _ => new(
                 "Show hint",
                 "Show another hint",
+                "Show all hints",
                 "Hints")
         };
 }

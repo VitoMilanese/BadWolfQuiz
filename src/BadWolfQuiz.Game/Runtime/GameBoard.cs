@@ -222,25 +222,27 @@ public sealed class RuntimeQuestion
         RevealedHintCount < HintCount &&
         Status is RuntimeQuestionStatus.Selected or RuntimeQuestionStatus.Active;
 
-    public int HintRewardDiscountPercentage =>
+    public decimal HintRewardDiscountPercentage =>
         HintCount > 0 && RevealedHintCount > 0
             ? CalculateHintDiscountPercentage(HintCount, RevealedHintCount)
-            : 0;
+            : 0m;
 
     public int HintRewardValue
     {
         get
         {
             var discountPercentage = HintRewardDiscountPercentage;
-            if (discountPercentage == 0)
+            if (discountPercentage == 0m)
             {
                 return Points;
             }
 
-            var discountValue = (int)Math.Round(
-                Points * discountPercentage / 100.0,
-                MidpointRounding.AwayFromZero);
-            return Math.Max(1, Points - discountValue);
+            var rewardPercentage = 100m - discountPercentage;
+            return Math.Max(
+                1,
+                (int)Math.Round(
+                    Points * rewardPercentage / 100m,
+                    MidpointRounding.AwayFromZero));
         }
     }
 
@@ -290,7 +292,7 @@ public sealed class RuntimeQuestion
                 : IsHostMultipleChoice
                     ? HostMultipleChoiceRewardValue
                     : PresentationType == QuestionPresentationType.Standard &&
-                      HintRewardDiscountPercentage > 0
+                      HintRewardDiscountPercentage > 0m
                         ? HintRewardValue
                         : Points;
 
@@ -468,7 +470,10 @@ public sealed class RuntimeQuestion
                 "This player has already submitted a wager for the current question.");
         }
 
-        _allPlayerWagers.Add(new Wager(playerId, amount, submittedAtUtc));
+        _allPlayerWagers.Add(new Wager(
+            playerId,
+            amount,
+            submittedAtUtc));
     }
 
     internal void BeginAllPlayerAnswering()
@@ -554,6 +559,32 @@ public sealed class RuntimeQuestion
 
     public void RevealNextHint(int availableHintCount)
     {
+        PrepareHintReveal(availableHintCount);
+
+        if (RevealedHintCount >= HintCount)
+        {
+            throw new GameRuleViolationException(
+                "All hints for this question are already visible.");
+        }
+
+        RevealedHintCount++;
+    }
+
+    public void RevealAllHints(int availableHintCount)
+    {
+        PrepareHintReveal(availableHintCount);
+
+        if (RevealedHintCount >= HintCount)
+        {
+            throw new GameRuleViolationException(
+                "All hints for this question are already visible.");
+        }
+
+        RevealedHintCount = HintCount;
+    }
+
+    private void PrepareHintReveal(int availableHintCount)
+    {
         if (availableHintCount is < 1 or > 4)
         {
             throw new GameRuleViolationException(
@@ -574,14 +605,6 @@ public sealed class RuntimeQuestion
             HintCount = availableHintCount;
             RevealedHintCount = Math.Min(RevealedHintCount, HintCount);
         }
-
-        if (RevealedHintCount >= HintCount)
-        {
-            throw new GameRuleViolationException(
-                "All hints for this question are already visible.");
-        }
-
-        RevealedHintCount++;
     }
 
     internal void ClaimBuzzer(GamePlayerId playerId)
@@ -838,7 +861,7 @@ public sealed class RuntimeQuestion
         return 50 + (int)Math.Ceiling(progress);
     }
 
-    public static int CalculateHintDiscountPercentage(
+    public static decimal CalculateHintDiscountPercentage(
         int totalHintCount,
         int revealedHintCount)
     {
@@ -854,25 +877,25 @@ public sealed class RuntimeQuestion
 
         if (revealedHintCount == 0)
         {
-            return 0;
+            return 0m;
         }
 
         return totalHintCount switch
         {
-            1 => 50,
-            2 => revealedHintCount == 1 ? 25 : 50,
+            1 => 50m,
+            2 => revealedHintCount == 1 ? 25m : 50m,
             3 => revealedHintCount switch
             {
-                1 => 16,
-                2 => 33,
-                _ => 50
+                1 => 16.67m,
+                2 => 33.34m,
+                _ => 50m
             },
             4 => revealedHintCount switch
             {
-                1 => 12,
-                2 => 25,
-                3 => 37,
-                _ => 50
+                1 => 12.5m,
+                2 => 25m,
+                3 => 37.5m,
+                _ => 50m
             },
             _ => throw new ArgumentOutOfRangeException(nameof(totalHintCount))
         };

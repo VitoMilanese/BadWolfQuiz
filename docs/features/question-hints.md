@@ -13,7 +13,12 @@ Standard questions can optionally contain from one to four hint blocks. Hint blo
 
 ## Host gameplay
 
-For an active ordinary Standard question with at least one non-empty hint, the host controls next to `No correct answer` include `Show hint`. After the first hint has been revealed, the action changes to `Show another hint` while unrevealed hints remain.
+For an active ordinary Standard question with at least one non-empty hint, the host gets two compact icon actions alongside the normal question controls:
+
+- reveal the next hint;
+- reveal every remaining hint at once.
+
+The same hint actions stay available after a player claims the buzzer. Revealing one hint or all hints does not release the buzzer, stop the player's answer attempt, or finish the question; the player keeps answering until the host judges the answer as correct/incorrect (or uses `x2` / `1/2` when those modifiers are enabled).
 
 Revealed hints are shown in a persistent panel at the bottom of the question presentation. The panel stays open, is part of the normal layout rather than covering the question, and can contain both text and images.
 
@@ -25,18 +30,18 @@ Hint penalties are always calculated from the question's original point value, n
 
 | Total non-empty hints | Revealed | Reduction |
 | ---: | ---: | ---: |
-| 4 | 1 | 12% |
+| 4 | 1 | 12.5% |
 | 4 | 2 | 25% |
-| 4 | 3 | 37% |
+| 4 | 3 | 37.5% |
 | 4 | 4 | 50% |
-| 3 | 1 | 16% |
-| 3 | 2 | 33% |
+| 3 | 1 | 16.67% |
+| 3 | 2 | 33.34% |
 | 3 | 3 | 50% |
 | 2 | 1 | 25% |
 | 2 | 2 | 50% |
 | 1 | 1 | 50% |
 
-The point reduction is rounded to the nearest whole point using midpoint-away-from-zero rounding. The remaining reward is never lower than 1 point.
+The resulting reward is rounded to the nearest whole point using midpoint-away-from-zero rounding and is never lower than 1 point.
 
 Incorrect regular answers continue to use the question's original point value for the normal incorrect-answer penalty; hints reduce only the reward for a correct answer.
 
@@ -44,4 +49,4 @@ Incorrect regular answers continue to use the question's original point value fo
 
 The runtime stores both the total hint count used for the current question and the number of hints already revealed. Active-game persistence therefore keeps the visible-hint count and reduced correct-answer value across host refreshes and game recovery.
 
-Wager questions and other non-Standard presentation types do not expose the hint reveal action.
+Wager questions and other non-Standard presentation types do not expose the hint reveal actions.

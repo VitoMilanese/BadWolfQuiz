@@ -12,10 +12,15 @@ public sealed class QuestionHintGameplayRegressionTests
             "QuestionHintGameplayTagHelpers.cs");
 
         Assert.Contains("ResolveQuestion", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("JudgeQuestionAnswer", tagHelper, StringComparison.Ordinal);
         Assert.Contains("QuestionPresentationType.Standard", tagHelper, StringComparison.Ordinal);
         Assert.Contains("question-hint-reveal-button", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("question-hint-reveal-all-button", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("icon-button", tagHelper, StringComparison.Ordinal);
         Assert.Contains("Показати підказку", tagHelper, StringComparison.Ordinal);
         Assert.Contains("Показати ще одну підказку", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("Показати всі підказки", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("handler=All", tagHelper, StringComparison.Ordinal);
         Assert.Contains("question-hints-panel", tagHelper, StringComparison.Ordinal);
         Assert.Contains("question-presentation:has(> .question-hints-panel)", tagHelper, StringComparison.Ordinal);
         Assert.Contains("animation: question-hints-panel-rise", tagHelper, StringComparison.Ordinal);
@@ -59,7 +64,9 @@ public sealed class QuestionHintGameplayRegressionTests
             "Games",
             "QuestionHints.cshtml.cs");
 
+        Assert.Contains("OnPostAllAsync", page, StringComparison.Ordinal);
         Assert.Contains("question.RevealNextHint(hints.Count)", page, StringComparison.Ordinal);
+        Assert.Contains("question.RevealAllHints(hints.Count)", page, StringComparison.Ordinal);
         Assert.Contains("game.MarkPersistenceChanged()", page, StringComparison.Ordinal);
         Assert.Contains("question.RevealedHintCount <= 0", page, StringComparison.Ordinal);
         Assert.Contains("Take(Math.Min(question.RevealedHintCount, hints.Count))", page, StringComparison.Ordinal);

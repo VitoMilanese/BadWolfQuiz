@@ -12,9 +12,30 @@ public sealed class QuestionHintsModel(
     GameSessionRegistry sessionRegistry,
     CurrentHost currentHost) : PageModel
 {
-    public async Task<IActionResult> OnPostAsync(
+    public Task<IActionResult> OnPostAsync(
         Guid id,
         int sourceQuestionId,
+        CancellationToken cancellationToken) =>
+        RevealAsync(
+            id,
+            sourceQuestionId,
+            revealAll: false,
+            cancellationToken);
+
+    public Task<IActionResult> OnPostAllAsync(
+        Guid id,
+        int sourceQuestionId,
+        CancellationToken cancellationToken) =>
+        RevealAsync(
+            id,
+            sourceQuestionId,
+            revealAll: true,
+            cancellationToken);
+
+    private async Task<IActionResult> RevealAsync(
+        Guid id,
+        int sourceQuestionId,
+        bool revealAll,
         CancellationToken cancellationToken)
     {
         var game = sessionRegistry.FindOwned(
@@ -46,7 +67,14 @@ public sealed class QuestionHintsModel(
 
             try
             {
-                question.RevealNextHint(hints.Count);
+                if (revealAll)
+                {
+                    question.RevealAllHints(hints.Count);
+                }
+                else
+                {
+                    question.RevealNextHint(hints.Count);
+                }
                 game.MarkPersistenceChanged();
             }
             catch (GameRuleViolationException)
