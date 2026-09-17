@@ -138,3 +138,11 @@ replace(
     """        Assert.Contains(\"AllPlayerChoiceExcludedPlayerIds\", runtime, StringComparison.Ordinal);\n        Assert.DoesNotContain(\"AllPlayerChoiceRevealLocked\", runtime, StringComparison.Ordinal);\n""",
     """        Assert.Contains(\"AllPlayerChoiceExcludedPlayerIds\", runtime, StringComparison.Ordinal);\n        Assert.Contains(\".Where(attempt => !attempt.IsCorrect)\", runtime, StringComparison.Ordinal);\n        Assert.DoesNotContain(\"_allPlayerChoiceExcludedPlayerIds.Add(answeringPlayerId)\", runtime, StringComparison.Ordinal);\n        Assert.DoesNotContain(\"AllPlayerChoiceRevealLocked\", runtime, StringComparison.Ordinal);\n""",
 )
+
+# The existing reward-button regression used exact one-line assignments. Keep it
+# checking persistence, but account for the intentional on-demand guard.
+replace(
+    "tests/BadWolfQuiz.Web.Tests/AnswerRewardButtonsRegressionTests.cs",
+    """        Assert.Contains(\"AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers\", model);\n        Assert.Contains(\"question.AllowAnswerRewardModifiers = Input.AllowAnswerRewardModifiers\", model);\n""",
+    """        Assert.Contains(\n            \"AllowAnswerRewardModifiers =\\n                !isAllPlayerMultipleChoiceOnDemand &&\\n                question.AllowAnswerRewardModifiers\",\n            model);\n        Assert.Contains(\n            \"question.AllowAnswerRewardModifiers =\\n            !isAllPlayerMultipleChoiceOnDemand &&\\n            Input.AllowAnswerRewardModifiers\",\n            model);\n""",
+)
