@@ -629,7 +629,7 @@ public sealed class RuntimeQuestion
         GamePlayerId playerId,
         bool isCorrect,
         DateTimeOffset judgedAtUtc,
-        int? correctAnswerValue = null,
+        int? currentCorrectAnswerValue = null,
         AnswerRewardModifier rewardModifier = AnswerRewardModifier.Normal)
     {
         if (IsHostMultipleChoice)
@@ -670,7 +670,7 @@ public sealed class RuntimeQuestion
         var value = IsSpecial
             ? Wager?.Amount ?? throw new GameRuleViolationException(
                 "A wager question cannot be judged before its wager is accepted.")
-            : correctAnswerValue ?? CorrectAnswerValue;
+            : currentCorrectAnswerValue ?? CorrectAnswerValue;
 
         var appliedRewardModifier = isCorrect
             ? rewardModifier
