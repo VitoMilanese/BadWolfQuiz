@@ -225,7 +225,8 @@
             </select>
         </div>
 
-        <label class="checkbox-row answer-reward-modifier-setting">
+        <label class="checkbox-row answer-reward-modifier-setting"
+               hidden="@(Model.Input.RevealAnswerOptionsOnDemand ? "hidden" : null)">
             <input asp-for="Input.AllowAnswerRewardModifiers" />
             <span>
                 <strong>@Localizer["Label_AllowAnswerRewardModifiers"]</strong>
@@ -644,7 +645,8 @@
             }
 
             const supportsWagerMode =
-                presentationTypeSelect?.value === "0";
+                presentationTypeSelect?.value === "0" ||
+                isOnDemandChoice;
             if (wagerModeSetting) {
                 wagerModeSetting.hidden = !supportsWagerMode;
             }

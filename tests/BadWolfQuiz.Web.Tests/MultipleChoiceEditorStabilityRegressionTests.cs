@@ -45,8 +45,8 @@ public sealed class MultipleChoiceEditorStabilityRegressionTests
             guard,
             StringComparison.Ordinal);
 
-        var guardAsset = "multiple-choice-answer-options-guard.js?v=382.9";
-        var controllerAsset = "multiple-choice-answer-options.js?v=382.9";
+        var guardAsset = "multiple-choice-answer-options-guard.js?v=382.10";
+        var controllerAsset = "multiple-choice-answer-options.js?v=382.10";
         Assert.Contains(guardAsset, tagHelper, StringComparison.Ordinal);
         Assert.Contains(controllerAsset, tagHelper, StringComparison.Ordinal);
         Assert.True(
@@ -56,6 +56,8 @@ public sealed class MultipleChoiceEditorStabilityRegressionTests
             "badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver",
             tagHelper,
             StringComparison.Ordinal);
+        Assert.Contains("document.readyState==='loading'", tagHelper, StringComparison.Ordinal);
+        Assert.Contains("window.setTimeout(finish,0)", tagHelper, StringComparison.Ordinal);
     }
 
     [Fact]

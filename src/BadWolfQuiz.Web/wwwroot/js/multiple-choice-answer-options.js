@@ -9,13 +9,14 @@
 
     // This controller owns only the Question Editor integration. The existing
     // all-player and host-selected scripts still own their gameplay clients.
-    form.dataset.allPlayerEditorInitialized = "true";
-    window.badWolfHostMultipleChoiceInitialized = true;
-
-    if (window.badWolfMultipleChoiceAnswerOptionsEditorLoaded) {
+    // Scope initialization to the concrete editor form so a later editor mount
+    // in the same browser window is initialized without requiring a hard refresh.
+    if (form.dataset.multipleChoiceAnswerOptionsController) {
         return;
     }
-    window.badWolfMultipleChoiceAnswerOptionsEditorLoaded = true;
+    form.dataset.multipleChoiceAnswerOptionsController = "pending";
+    form.dataset.allPlayerEditorInitialized = "true";
+    window.badWolfHostMultipleChoiceInitialized = true;
 
     const savedQuestionType = loader?.dataset.savedQuestionType ?? "";
     const culture = (document.documentElement.lang || "en").toLowerCase();
@@ -83,8 +84,9 @@
                     addFailed: "Could not add answer option."
                 };
 
-    const style = document.createElement("style");
-    style.id = "multiple-choice-answer-options-editor-styles";
+    if (!document.getElementById("multiple-choice-answer-options-editor-styles")) {
+        const style = document.createElement("style");
+        style.id = "multiple-choice-answer-options-editor-styles";
     style.textContent = `
 .content-block-card[data-block-type="AnswerOptions"] {
     border-color: color-mix(in srgb, var(--gold) 58%, var(--line));
@@ -119,7 +121,8 @@
     color: var(--muted);
 }
 `;
-    document.head.appendChild(style);
+        document.head.appendChild(style);
+    }
 
     const isChoiceType = value => value === "3" || value === "4";
     const isAllPlayerChoice = value => value === "3";
@@ -205,10 +208,10 @@
     };
 
     const initialize = () => {
-        const select = document.getElementById("Input_PresentationType");
-        const modeInput = document.getElementById("Input_AllPlayerMode");
-        const questionSection = document.getElementById("question-blocks");
-        const answerSection = document.getElementById("answer-blocks");
+        const select = form.querySelector("#Input_PresentationType");
+        const modeInput = form.querySelector("#Input_AllPlayerMode");
+        const questionSection = form.querySelector("#question-blocks");
+        const answerSection = form.querySelector("#answer-blocks");
         if (!(select instanceof HTMLSelectElement) ||
             !(answerSection instanceof HTMLElement)) {
             return;
@@ -251,14 +254,20 @@
         hostHelp.hidden = true;
         typePanel?.append(textHelp, choiceHelp, hostHelp);
 
-        const buzzSetting = document.getElementById("buzz-mode-setting");
-        const buzzSelect = document.getElementById("Input_BuzzModeOverride");
-        const specialCheckbox = document.getElementById("Input_IsSpecial");
-        const excludeCheckbox = document.getElementById(
-            "Input_ExcludeFromRandomWagerSelection");
-        const onDemandSetting = document.querySelector(
+        const buzzSetting = form.querySelector("#buzz-mode-setting");
+        const buzzSelect = form.querySelector("#Input_BuzzModeOverride");
+        const specialCheckbox = form.querySelector("#Input_IsSpecial");
+        const excludeCheckbox = form.querySelector(
+            "#Input_ExcludeFromRandomWagerSelection");
+        const wagerModeSetting = form.querySelector("#wager-mode-setting");
+        const wagerModeSelect = form.querySelector("#Input_WagerMode");
+        const answerRewardModifierSetting = form.querySelector(
+            ".answer-reward-modifier-setting");
+        const answerRewardModifierCheckbox = form.querySelector(
+            "#Input_AllowAnswerRewardModifiers");
+        const onDemandSetting = form.querySelector(
             "[data-all-player-choice-on-demand-setting]");
-        const onDemandCheckbox = document.querySelector(
+        const onDemandCheckbox = form.querySelector(
             "[data-all-player-choice-on-demand]");
         if (onDemandSetting instanceof HTMLElement) {
             typePanel?.append(onDemandSetting);
@@ -270,7 +279,7 @@
             document.dispatchEvent(new CustomEvent(
                 "badwolf:question-editor-on-demand-synced"));
         }
-        const saveStatus = document.querySelector("[data-question-save-status]");
+        const saveStatus = form.querySelector("[data-question-save-status]");
         let standardBuzzMode = buzzSelect instanceof HTMLSelectElement
             ? buzzSelect.value
             : "0";
@@ -588,6 +597,25 @@
                 excludeCheckbox.checked = true;
             }
 
+            const supportsWagerMode = type === "0" || onDemand;
+            if (wagerModeSetting instanceof HTMLElement) {
+                wagerModeSetting.hidden = !supportsWagerMode;
+            }
+            if (wagerModeSelect instanceof HTMLSelectElement) {
+                wagerModeSelect.disabled = false;
+                if (!supportsWagerMode) {
+                    wagerModeSelect.value = "0";
+                }
+            }
+
+            if (answerRewardModifierSetting instanceof HTMLElement) {
+                answerRewardModifierSetting.hidden = onDemand;
+            }
+            if (onDemand &&
+                answerRewardModifierCheckbox instanceof HTMLInputElement) {
+                answerRewardModifierCheckbox.checked = false;
+            }
+
             if (answerHeading instanceof HTMLHeadingElement) {
                 answerHeading.textContent =
                     answerHeading.dataset.standardHeading ?? answerHeading.textContent;
@@ -892,9 +920,47 @@
         }
     };
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initialize, { once: true });
-    } else {
+    const start = () => {
+        if (form.dataset.multipleChoiceAnswerOptionsController === "initialized") {
+            return true;
+        }
+
+        const select = form.querySelector("#Input_PresentationType");
+        const answerSection = form.querySelector("#answer-blocks");
+        if (!(select instanceof HTMLSelectElement) ||
+            !(answerSection instanceof HTMLElement)) {
+            return false;
+        }
+
+        form.dataset.multipleChoiceAnswerOptionsController = "initialized";
         initialize();
+        return true;
+    };
+
+    const waitForEditorMount = () => {
+        if (start()) {
+            return;
+        }
+
+        const mountObserver = new MutationObserver(() => {
+            if (start()) {
+                mountObserver.disconnect();
+            }
+        });
+        mountObserver.observe(form, { childList: true, subtree: true });
+        window.setTimeout(() => {
+            if (start()) {
+                mountObserver.disconnect();
+            }
+        }, 0);
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            waitForEditorMount,
+            { once: true });
+    } else {
+        waitForEditorMount();
     }
 })();

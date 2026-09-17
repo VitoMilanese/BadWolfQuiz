@@ -29,8 +29,14 @@ public sealed class OnDemandAllPlayerChoiceRegressionTests
         Assert.Contains("excludeCheckbox.checked = true", editorScript, StringComparison.Ordinal);
         Assert.Contains("buzzSelect.disabled = false", editorScript, StringComparison.Ordinal);
         Assert.Contains("badwolf:question-editor-on-demand-synced", editorScript, StringComparison.Ordinal);
-        Assert.Contains("answerRewardModifierSetting.hidden = isOnDemandChoice", editor, StringComparison.Ordinal);
-        Assert.Contains("answerRewardModifierCheckbox.checked = false", editor, StringComparison.Ordinal);
+        Assert.Contains("form.dataset.multipleChoiceAnswerOptionsController", editorScript, StringComparison.Ordinal);
+        Assert.DoesNotContain("window.badWolfMultipleChoiceAnswerOptionsEditorLoaded", editorScript, StringComparison.Ordinal);
+        Assert.Contains("const supportsWagerMode = type === \"0\" || onDemand", editorScript, StringComparison.Ordinal);
+        Assert.Contains("wagerModeSetting.hidden = !supportsWagerMode", editorScript, StringComparison.Ordinal);
+        Assert.Contains("answerRewardModifierSetting.hidden = onDemand", editorScript, StringComparison.Ordinal);
+        Assert.Contains("answerRewardModifierCheckbox.checked = false", editorScript, StringComparison.Ordinal);
+        Assert.Contains("hidden=\"@(Model.Input.RevealAnswerOptionsOnDemand ? \"hidden\" : null)\"", editor, StringComparison.Ordinal);
+        Assert.Contains("isOnDemandChoice;", editor, StringComparison.Ordinal);
         Assert.Contains("Input.AllowAnswerRewardModifiers = false", editorModel, StringComparison.Ordinal);
         Assert.Contains("!isAllPlayerMultipleChoiceOnDemand &&", editorModel, StringComparison.Ordinal);
         Assert.Contains("CanRevealAllPlayerChoiceOptions", lobby, StringComparison.Ordinal);

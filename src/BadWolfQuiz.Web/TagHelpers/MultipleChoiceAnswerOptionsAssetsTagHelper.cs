@@ -25,12 +25,13 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             "<script>" +
             "window.badWolfHostMultipleChoiceBootstrapInitialized=true;" +
             "</script>" +
-            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.9\"></script>" +
-            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.9\" " +
+            "<script src=\"/js/multiple-choice-answer-options-guard.js?v=382.10\"></script>" +
+            $"<script src=\"/js/multiple-choice-answer-options.js?v=382.10\" " +
             $"data-saved-question-type=\"{(int)editor.Input.PresentationType}\"></script>" +
             "<script src=\"/js/multiple-correct-answer-options.js?v=461.1\"></script>" +
             "<script>" +
-            "document.addEventListener('DOMContentLoaded',()=>{" +
+            "(()=>{" +
+            "const finish=()=>{" +
             "window.badWolfMultipleChoiceAnswerOptionsRestoreMutationObserver?.();" +
             "window.setTimeout(()=>{" +
             "const s=document.querySelector('[data-question-save-status]');" +
@@ -42,7 +43,11 @@ public sealed class MultipleChoiceAnswerOptionsAssetsTagHelper : TagHelper
             "s.hidden=p.h;s.textContent=p.t;s.className=p.c;s.style.display=p.d;" +
             "},0);" +
             "},0);" +
-            "},{once:true});" +
+            "};" +
+            "if(document.readyState==='loading'){" +
+            "document.addEventListener('DOMContentLoaded',finish,{once:true});" +
+            "}else{window.setTimeout(finish,0);}" +
+            "})();" +
             "</script>");
     }
 }
