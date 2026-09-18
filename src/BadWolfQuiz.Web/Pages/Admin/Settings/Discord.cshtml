@@ -280,6 +280,77 @@
     <script>
         (() => {
             const root = document.querySelector("[data-discord-settings]");
+            const oauthCompleted = @(Model.OAuthCompleted ? "true" : "false");
+            const oauthMessageType = "badwolfquiz:discord-oauth-completed";
+            const oauthChannelName = "badwolfquiz:discord-oauth";
+            const oauthStorageKey = "badwolfquiz:discord-oauth-completed";
+            let oauthRefreshScheduled = false;
+            let oauthChannel = null;
+
+            const refreshAfterOAuth = () => {
+                if (oauthCompleted || oauthRefreshScheduled) {
+                    return;
+                }
+
+                oauthRefreshScheduled = true;
+                window.location.reload();
+            };
+
+            if ("BroadcastChannel" in window) {
+                oauthChannel = new BroadcastChannel(oauthChannelName);
+                oauthChannel.addEventListener("message", event => {
+                    if (event.data?.type === oauthMessageType) {
+                        refreshAfterOAuth();
+                    }
+                });
+                window.addEventListener(
+                    "pagehide",
+                    () => oauthChannel?.close(),
+                    { once: true });
+            }
+
+            window.addEventListener("storage", event => {
+                if (event.key === oauthStorageKey && event.newValue) {
+                    refreshAfterOAuth();
+                }
+            });
+
+            window.addEventListener("message", event => {
+                if (event.origin === window.location.origin &&
+                    event.data?.type === oauthMessageType) {
+                    refreshAfterOAuth();
+                }
+            });
+
+            if (oauthCompleted) {
+                const payload = {
+                    type: oauthMessageType,
+                    completedAt: Date.now()
+                };
+
+                oauthChannel?.postMessage(payload);
+
+                try {
+                    localStorage.setItem(
+                        oauthStorageKey,
+                        `${payload.completedAt}:${Math.random()}`);
+                } catch {
+                    // BroadcastChannel/postMessage still provide cross-tab fallbacks.
+                }
+
+                try {
+                    window.opener?.postMessage(payload, window.location.origin);
+                } catch {
+                    // The opener may be unavailable because of browser isolation.
+                }
+
+                const cleanUrl = new URL(window.location.href);
+                cleanUrl.searchParams.delete("oauthCompleted");
+                history.replaceState(history.state, "", cleanUrl);
+
+                window.setTimeout(() => window.close(), 250);
+            }
+
             const guild = root?.querySelector("[data-discord-guild]");
             const channel = root?.querySelector("[data-discord-channel]");
             const status = root?.querySelector("[data-discord-status]");

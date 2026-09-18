@@ -62,6 +62,54 @@ public sealed class DiscordSettingsRestyleRegressionTests
     }
 
     [Fact]
+    public void Successful_oauth_refreshes_the_already_open_settings_context()
+    {
+        var markup = ReadWebFile("Pages", "Admin", "Settings", "Discord.cshtml");
+        var model = ReadWebFile("Pages", "Admin", "Settings", "Discord.cshtml.cs");
+
+        Assert.Contains(
+            "public bool OAuthCompleted { get; set; }",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "oauthCompleted = true",
+            model,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "const oauthMessageType = \"badwolfquiz:discord-oauth-completed\";",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "new BroadcastChannel(oauthChannelName)",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.addEventListener(\"storage\"",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.addEventListener(\"message\"",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.opener?.postMessage(payload, window.location.origin)",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.location.reload();",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "window.setTimeout(() => window.close(), 250);",
+            markup,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "history.replaceState(history.state, \"\", cleanUrl);",
+            markup,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Dynamic_channel_auto_mute_and_test_behavior_remain_wired()
     {
         var markup = ReadWebFile("Pages", "Admin", "Settings", "Discord.cshtml");
