@@ -405,7 +405,7 @@ public sealed class QuizSnapshotFactoryTests
         Assert.Contains($"Question #{question.Id}", exception.Message);
         Assert.Contains(question.Category.Title, exception.Message);
         Assert.Contains($"row {question.RowIndex}", exception.Message);
-        Assert.Contains("2 to 4", exception.Message);
+        Assert.Contains("two to four", exception.Message);
     }
 
 }

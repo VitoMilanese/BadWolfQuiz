@@ -94,7 +94,7 @@ public sealed class QuizSnapshotFactory
         if (!pointsByRow.TryGetValue(question.RowIndex, out var points))
         {
             throw new InvalidOperationException(
-                $"Question #{question.Id} in round \"{question.Category.Round.Title}\", category \"{question.Category.Title}\" references missing point row {question.RowIndex}.");
+                $"Question #{question.Id} in round \"{question.Category.Round.Title}\", category \"{question.Category.Title}\" references missing row {question.RowIndex} in the point table.");
         }
 
         var presentationType =
