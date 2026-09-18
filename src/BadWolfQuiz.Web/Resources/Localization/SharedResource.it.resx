@@ -987,6 +987,12 @@
   <data name="PlayerGame_SkipQuestion" xml:space="preserve">
     <value>Salta</value>
   </data>
+  <data name="PlayerGame_MoveSkipControlsDown" xml:space="preserve">
+    <value>Sposta i controlli Salta sotto il buzzer</value>
+  </data>
+  <data name="PlayerGame_MoveSkipControlsUp" xml:space="preserve">
+    <value>Sposta i controlli Salta sotto il nome del giocatore</value>
+  </data>
   <data name="GameBoard_PlayerProposesSkip" xml:space="preserve">
     <value>Propone di saltare la domanda</value>
   </data>

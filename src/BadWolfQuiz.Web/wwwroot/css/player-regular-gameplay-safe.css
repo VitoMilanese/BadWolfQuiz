@@ -332,25 +332,56 @@
     box-shadow: 0 24px 56px rgb(0 0 0 / 30%);
 }
 
-.player-lobby > .player-skip-question[hidden] {
+.player-lobby .player-skip-controls[hidden] {
     display: none !important;
 }
 
-.player-lobby > .player-skip-question:not([hidden]) {
+.player-lobby > .player-skip-controls:not([hidden]) {
     grid-column: 1 / -1;
-    width: fit-content;
-    min-width: min(12rem, 100%);
-    min-height: 44px;
+    width: min(22rem, 100%);
     margin: 0.35rem 0 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
     justify-self: start;
     align-self: start;
+}
+
+.player-lobby .player-skip-controls > .player-skip-question {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px;
+    margin: 0;
     font-weight: 850;
 }
 
+.player-lobby .player-skip-controls > .player-skip-position-toggle {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.player-lobby > .player-buzzer-panel > .player-skip-controls:not([hidden]) {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
 @media (max-width: 900px) {
-    .player-lobby > .player-skip-question:not([hidden]) {
+    .player-lobby > .player-skip-controls:not([hidden]) {
         width: 100%;
-        min-width: 0;
         margin-top: 0.25rem;
     }
 }

@@ -49,12 +49,25 @@
         @Model.CurrentPlayer.Name
     </p>
 
-    <button id="player-skip-question"
-            class="button button-secondary player-skip-question"
-            type="button"
-            hidden>
-        @Localizer["PlayerGame_SkipQuestion"]
-    </button>
+    <div id="player-skip-controls"
+         class="player-skip-controls"
+         data-position="top"
+         hidden>
+        <button id="player-skip-question"
+                class="button button-secondary player-skip-question"
+                type="button">
+            @Localizer["PlayerGame_SkipQuestion"]
+        </button>
+        <button id="player-skip-position-toggle"
+                class="button button-secondary player-skip-position-toggle"
+                type="button"
+                data-move-down-label="@Localizer["PlayerGame_MoveSkipControlsDown"]"
+                data-move-up-label="@Localizer["PlayerGame_MoveSkipControlsUp"]"
+                title="@Localizer["PlayerGame_MoveSkipControlsDown"]"
+                aria-label="@Localizer["PlayerGame_MoveSkipControlsDown"]">
+            <span data-player-skip-position-icon aria-hidden="true">↓</span>
+        </button>
+    </div>
 
     <dialog id="player-lobby-action-menu"
             class="player-lobby-action-menu"
@@ -651,8 +664,16 @@
             const warning = document.getElementById("activity-warning");
             const rejoinWarning = document.getElementById("rejoin-warning");
             const buzzerButton = document.getElementById("player-buzzer");
+            const skipQuestionControls =
+                document.getElementById("player-skip-controls");
             const skipQuestionButton =
                 document.getElementById("player-skip-question");
+            const skipPositionToggle =
+                document.getElementById("player-skip-position-toggle");
+            const skipPositionIcon =
+                skipPositionToggle?.querySelector("[data-player-skip-position-icon]");
+            const playerNameLine = lobby?.querySelector(".player-name-line");
+            const buzzerPanel = lobby?.querySelector(".player-buzzer-panel");
             const buzzerStatus = document.getElementById("player-buzzer-status");
             const timerPanel = document.getElementById("game-timer");
             const timerValue = document.getElementById("game-timer-value");
@@ -692,7 +713,55 @@
             const currentPlayerStorageKey =
                 `badwolfquiz:${gameCode}:current-player`;
             const transitionStorageKey = `${storageKey}:transition`;
+            const skipControlsPositionKey =
+                `${storageKey}:skip-controls-position`;
             const bootstrapToken = lobby.dataset.accessToken;
+
+            const applySkipControlsPosition = (position, persist = false) => {
+                if (!skipQuestionControls) {
+                    return;
+                }
+
+                const moveToBottom =
+                    position === "bottom" &&
+                    buzzerPanel instanceof HTMLElement;
+
+                if (moveToBottom) {
+                    buzzerPanel.append(skipQuestionControls);
+                } else if (playerNameLine instanceof HTMLElement) {
+                    playerNameLine.insertAdjacentElement(
+                        "afterend",
+                        skipQuestionControls);
+                }
+
+                const normalizedPosition = moveToBottom ? "bottom" : "top";
+                skipQuestionControls.dataset.position = normalizedPosition;
+
+                if (skipPositionToggle) {
+                    const label = moveToBottom
+                        ? skipPositionToggle.dataset.moveUpLabel
+                        : skipPositionToggle.dataset.moveDownLabel;
+                    if (label) {
+                        skipPositionToggle.title = label;
+                        skipPositionToggle.setAttribute("aria-label", label);
+                    }
+                }
+
+                if (skipPositionIcon) {
+                    skipPositionIcon.textContent = moveToBottom ? "↑" : "↓";
+                }
+
+                if (persist) {
+                    localStorage.setItem(
+                        skipControlsPositionKey,
+                        normalizedPosition);
+                }
+            };
+
+            applySkipControlsPosition(
+                localStorage.getItem(skipControlsPositionKey) === "bottom"
+                    ? "bottom"
+                    : "top");
 
             const clearStoredPlayerAccess = () => {
                 localStorage.removeItem(storageKey);
@@ -1107,8 +1176,11 @@
                     buzzerButton.classList.toggle("player-buzzer-open", canBuzz);
                 }
 
+                if (skipQuestionControls) {
+                    skipQuestionControls.hidden = !canProposeSkip;
+                }
+
                 if (skipQuestionButton) {
-                    skipQuestionButton.hidden = !canProposeSkip;
                     skipQuestionButton.disabled = !canProposeSkip;
                 }
 
@@ -1294,13 +1366,26 @@
                 }
 
                 const sourceQuestionId = skipProposalQuestionId;
-                skipQuestionButton.hidden = true;
+                if (skipQuestionControls) {
+                    skipQuestionControls.hidden = true;
+                }
                 skipQuestionButton.disabled = true;
                 connection.invoke("ProposeQuestionSkip", sourceQuestionId)
                     .catch(error => {
+                        if (skipQuestionControls) {
+                            skipQuestionControls.hidden = false;
+                        }
                         skipQuestionButton.disabled = false;
                         console.error(error);
                     });
+            });
+
+            skipPositionToggle?.addEventListener("click", () => {
+                const nextPosition =
+                    skipQuestionControls?.dataset.position === "bottom"
+                        ? "top"
+                        : "bottom";
+                applySkipControlsPosition(nextPosition, true);
             });
 
             document.addEventListener("click", event => {
@@ -1320,9 +1405,13 @@
             });
 
             connection.on("QuestionSkipProposalRejected", () => {
-                if (skipQuestionButton && skipProposalQuestionId !== null) {
-                    skipQuestionButton.hidden = false;
-                    skipQuestionButton.disabled = false;
+                if (skipProposalQuestionId !== null) {
+                    if (skipQuestionControls) {
+                        skipQuestionControls.hidden = false;
+                    }
+                    if (skipQuestionButton) {
+                        skipQuestionButton.disabled = false;
+                    }
                 }
             });
 
