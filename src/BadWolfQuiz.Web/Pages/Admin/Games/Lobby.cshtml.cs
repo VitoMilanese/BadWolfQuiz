@@ -1159,8 +1159,27 @@ public sealed class LobbyModel(
         }
         catch (GameRuleViolationException)
         {
-            TempData["ErrorMessage"] =
+            var errorMessage =
                 localizer["GameBoard_CancelBuzzerPressRejected"].Value;
+
+            if (IsAjaxRequest())
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = errorMessage
+                });
+            }
+
+            TempData["ErrorMessage"] = errorMessage;
+        }
+
+        if (IsAjaxRequest())
+        {
+            return new JsonResult(new
+            {
+                success = true
+            });
         }
 
         return RedirectToPage(new { id });

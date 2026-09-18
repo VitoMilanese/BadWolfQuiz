@@ -63,6 +63,16 @@ public sealed class BuzzerRaceLiveRegressionTests
             "cancelBuzzerClaimForm.hidden = update.status !== \"claimed\";",
             markup);
         Assert.Contains(
+            "cancelBuzzerClaimForm?.addEventListener(\"submit\", async event =>",
+            markup);
+        Assert.Contains("event.preventDefault();", markup);
+        Assert.Contains(
+            "await submitGameControl(\n                        cancelBuzzerClaimForm,",
+            markup);
+        Assert.Contains(
+            ".closest(\"details\")\n                        ?.removeAttribute(\"open\")",
+            markup);
+        Assert.Contains(
             "OnPostCancelBuzzerClaimAsync(",
             pageModel);
         Assert.Contains(
@@ -70,6 +80,15 @@ public sealed class BuzzerRaceLiveRegressionTests
             pageModel);
         Assert.Contains("await BroadcastBuzzerAsync(game", pageModel);
         Assert.Contains("await BroadcastTimerAsync(game", pageModel);
+        Assert.Contains(
+            "if (IsAjaxRequest())",
+            pageModel);
+        Assert.Contains(
+            "return new JsonResult(new",
+            pageModel);
+        Assert.Contains(
+            "return BadRequest(new",
+            pageModel);
         Assert.Contains(
             "public RuntimeQuestion? CancelCurrentQuestionBuzzerClaim(",
             registry);

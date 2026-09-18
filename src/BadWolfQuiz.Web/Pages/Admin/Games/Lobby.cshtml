@@ -5380,6 +5380,23 @@
                 });
             }
 
+            cancelBuzzerClaimForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+
+                try {
+                    await submitGameControl(
+                        cancelBuzzerClaimForm,
+                        event.submitter);
+                    cancelBuzzerClaimForm.hidden = true;
+                    cancelBuzzerClaimForm
+                        .closest("details")
+                        ?.removeAttribute("open");
+                } catch (error) {
+                    console.error(error);
+                    showGameBoardError(error.message);
+                }
+            });
+
             const handleGameControlError = error => {
                 console.error(error);
                 window.alert(error.message);
