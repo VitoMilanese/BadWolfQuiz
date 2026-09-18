@@ -65,22 +65,33 @@
                         aria-label="@Localizer["Button_Close"]">×</button>
             </div>
 
-            <button class="player-lobby-game-code-copy"
-                    type="button"
-                    data-copy-player-join-link
-                    data-player-join-link="@joinUrl"
-                    data-copied-label="@Localizer["GameBoard_JoinCopied"]"
-                    title="@Localizer["GameBoard_CopyJoinLink"]"
-                    aria-label="@Localizer["GameBoard_CopyJoinLink"]">
-                <span class="player-lobby-game-code-copy-icon" aria-hidden="true">🔗</span>
-                <span class="player-lobby-game-code-copy-text">
-                    <span>@Localizer["Label_GameCode"]</span>
-                    <strong>@Model.Game.PublicCode</strong>
-                </span>
+            <div class="player-lobby-game-code-card">
+                <button class="player-lobby-game-code-copy"
+                        type="button"
+                        data-copy-player-game-code
+                        data-player-game-code="@Model.Game.PublicCode"
+                        data-copied-label="@Localizer["GameBoard_JoinCopied"]"
+                        title="@Localizer["GameBoard_CopyJoinCode"]"
+                        aria-label="@Localizer["GameBoard_CopyJoinCode"]">
+                    <span class="player-lobby-game-code-copy-icon" aria-hidden="true">⧉</span>
+                    <span class="player-lobby-game-code-copy-text">
+                        <span>@Localizer["Label_GameCode"]</span>
+                        <strong>@Model.Game.PublicCode</strong>
+                    </span>
+                </button>
+                <button class="player-lobby-join-link-copy"
+                        type="button"
+                        data-copy-player-join-link
+                        data-player-join-link="@joinUrl"
+                        data-copied-label="@Localizer["GameBoard_JoinCopied"]"
+                        title="@Localizer["GameBoard_CopyJoinLink"]"
+                        aria-label="@Localizer["GameBoard_CopyJoinLink"]">
+                    <span aria-hidden="true">🔗</span>
+                </button>
                 <span class="player-lobby-game-code-copy-status"
                       data-player-join-copy-status
                       aria-live="polite"></span>
-            </button>
+            </div>
 
             <nav class="player-lobby-action-menu-list"
                  aria-label="@Localizer["PlayerMenu_Title"]">
@@ -131,7 +142,10 @@
                     <a class="button button-secondary" asp-page="/Account/ChangePassword">@Localizer["Account_ChangePassword"]</a>
                 }
 
-                <a class="button button-secondary" asp-page="/Join/Index">@Localizer["Button_Join"]</a>
+                <a class="button button-secondary"
+                   asp-page="/Join/Index"
+                   target="_blank"
+                   rel="noopener noreferrer">@Localizer["Button_Join"]</a>
                 @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
                 {
                     <a class="button button-secondary"
@@ -139,8 +153,14 @@
                        target="_blank"
                        rel="noopener noreferrer">@Localizer["Menu_PlayWithUs"]</a>
                 }
-                <a class="button button-secondary" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
-                <a class="button button-secondary" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+                <a class="button button-secondary"
+                   asp-page="/Faq"
+                   target="_blank"
+                   rel="noopener noreferrer">@Localizer["Menu_FAQ"]</a>
+                <a class="button button-secondary"
+                   asp-page="/AskQuestion"
+                   target="_blank"
+                   rel="noopener noreferrer">@Localizer["Menu_AskQuestion"]</a>
 
                 @if (isAuthenticated)
                 {
@@ -150,7 +170,10 @@
                 }
                 else
                 {
-                    <a class="button button-secondary" asp-page="/Account/Login">@Localizer["Account_HostSignIn"]</a>
+                    <a class="button button-secondary"
+                       asp-page="/Account/Login"
+                       target="_blank"
+                       rel="noopener noreferrer">@Localizer["Account_HostSignIn"]</a>
                 }
             </nav>
 

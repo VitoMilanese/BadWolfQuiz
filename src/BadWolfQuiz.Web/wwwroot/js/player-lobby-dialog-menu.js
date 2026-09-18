@@ -3,6 +3,7 @@
     const menu = document.querySelector("[data-player-lobby-action-menu]");
     const panel = menu?.querySelector(".player-lobby-action-menu-panel");
     const closeButton = menu?.querySelector("[data-close-player-lobby-menu]");
+    const copyGameCodeButton = menu?.querySelector("[data-copy-player-game-code]");
     const copyJoinLinkButton = menu?.querySelector("[data-copy-player-join-link]");
     const copyJoinStatus = menu?.querySelector("[data-player-join-copy-status]");
 
@@ -154,19 +155,18 @@
         }
     };
 
-    copyJoinLinkButton?.addEventListener("click", async () => {
-        const joinUrl = copyJoinLinkButton.dataset.playerJoinLink?.trim();
-        if (!joinUrl) {
+    const copyMenuValue = async (button, value) => {
+        if (!(button instanceof HTMLButtonElement) || !value) {
             return;
         }
 
         try {
-            await copyText(joinUrl);
+            await copyText(value);
         } catch {
             return;
         }
 
-        const copiedLabel = copyJoinLinkButton.dataset.copiedLabel?.trim();
+        const copiedLabel = button.dataset.copiedLabel?.trim();
         if (!(copyJoinStatus instanceof HTMLElement) || !copiedLabel) {
             return;
         }
@@ -180,6 +180,18 @@
             copyStatusTimer = null;
             copyJoinStatus.textContent = "";
         }, 1600);
+    };
+
+    copyGameCodeButton?.addEventListener("click", () => {
+        copyMenuValue(
+            copyGameCodeButton,
+            copyGameCodeButton.dataset.playerGameCode?.trim());
+    });
+
+    copyJoinLinkButton?.addEventListener("click", () => {
+        copyMenuValue(
+            copyJoinLinkButton,
+            copyJoinLinkButton.dataset.playerJoinLink?.trim());
     });
 
     trigger.addEventListener("click", openMenu);
