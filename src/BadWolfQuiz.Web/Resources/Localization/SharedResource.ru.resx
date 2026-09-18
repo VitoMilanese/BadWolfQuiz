@@ -228,6 +228,12 @@
   <data name="Button_CloseBuzz" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="GameBoard_CancelBuzzerPress" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="GameBoard_CancelBuzzerPressRejected" xml:space="preserve">
+    <value>Україна</value>
+  </data>
   <data name="Menu_Home" xml:space="preserve">
     <value>Україна</value>
   </data>

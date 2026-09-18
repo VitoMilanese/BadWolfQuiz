@@ -21,6 +21,87 @@ public sealed class BuzzerRaceLiveRegressionTests
     }
 
     [Fact]
+    public void Host_tools_can_cancel_current_buzzer_claim_and_reopen_it_live()
+    {
+        var root = FindRepositoryRoot();
+        var markup = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml"));
+        var pageModel = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml.cs"));
+        var registry = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Services",
+            "GameSessionRegistry.cs"));
+        var ukrainian = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Resources",
+            "Localization",
+            "SharedResource.uk.resx"));
+
+        Assert.Contains("asp-page-handler=\"CancelBuzzerClaim\"", markup);
+        Assert.Contains("data-cancel-buzzer-claim-form", markup);
+        Assert.Contains(
+            "QuestionBuzzerStatus.Claimed ? \"hidden\" : null",
+            markup);
+        Assert.Contains(
+            "cancelBuzzerClaimForm.hidden = update.status !== \"claimed\";",
+            markup);
+        Assert.Contains(
+            "cancelBuzzerClaimForm?.addEventListener(\"submit\", async event =>",
+            markup);
+        Assert.Contains("event.preventDefault();", markup);
+        Assert.Contains(
+            "await submitGameControl(\n                        cancelBuzzerClaimForm,",
+            markup);
+        Assert.Contains(
+            "data-host-tools-dialog-dismiss",
+            markup);
+        Assert.DoesNotContain(
+            ".closest(\"details\")",
+            markup);
+        Assert.Contains(
+            "OnPostCancelBuzzerClaimAsync(",
+            pageModel);
+        Assert.Contains(
+            "CancelCurrentQuestionBuzzerClaim(game.PublicCode)",
+            pageModel);
+        Assert.Contains("await BroadcastBuzzerAsync(game", pageModel);
+        Assert.Contains("await BroadcastTimerAsync(game", pageModel);
+        Assert.Contains(
+            "if (IsAjaxRequest())",
+            pageModel);
+        Assert.Contains(
+            "return new JsonResult(new",
+            pageModel);
+        Assert.Contains(
+            "return BadRequest(new",
+            pageModel);
+        Assert.Contains(
+            "public RuntimeQuestion? CancelCurrentQuestionBuzzerClaim(",
+            registry);
+        Assert.Contains("game.BuzzerRace = null;", registry);
+        Assert.Contains(
+            "<value>Скасувати натискання буззера</value>",
+            ukrainian);
+    }
+
+    [Fact]
     public void ExistingOneSecondLatePressWindowRemainsUnchanged()
     {
         var root = FindRepositoryRoot();

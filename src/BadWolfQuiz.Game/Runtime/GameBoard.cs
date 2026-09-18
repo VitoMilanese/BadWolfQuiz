@@ -636,6 +636,38 @@ public sealed class RuntimeQuestion
         BuzzerStatus = QuestionBuzzerStatus.Claimed;
     }
 
+    internal GamePlayerId CancelBuzzerClaim()
+    {
+        if (BuzzerStatus != QuestionBuzzerStatus.Claimed ||
+            AnsweringPlayerId is not { } playerId)
+        {
+            throw new GameRuleViolationException(
+                "Only a claimed buzzer can be cancelled.");
+        }
+
+        AnsweringPlayerId = null;
+        BuzzerStatus = QuestionBuzzerStatus.Open;
+        return playerId;
+    }
+
+    internal void RestoreSkipProposal(GamePlayerId playerId)
+    {
+        if (IsSpecial ||
+            IsAllPlayerQuestion ||
+            Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active ||
+            AnsweringPlayerId == playerId ||
+            _answerAttempts.Any(attempt => attempt.PlayerId == playerId))
+        {
+            return;
+        }
+
+        if (!_skipProposalPlayerIds.Contains(playerId))
+        {
+            _skipProposalPlayerIds.Add(playerId);
+        }
+    }
+
     internal void ProposeSkip(GamePlayerId playerId)
     {
         if (IsSpecial ||

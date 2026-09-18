@@ -7128,3 +7128,266 @@ body.youtube-auto-expanded-open {
         font-size: 0.9rem;
     }
 }
+
+
+/* Host tools dialog */
+.host-tools-dialog {
+    width: min(820px, calc(100vw - 28px));
+    max-height: calc(100dvh - 28px);
+    overflow: visible;
+}
+
+.host-tools-dialog::backdrop {
+    background:
+        radial-gradient(circle at 50% 20%, rgba(15, 90, 165, 0.18), transparent 36rem),
+        rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(8px);
+}
+
+.host-tools-dialog-card {
+    max-height: calc(100dvh - 28px);
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background:
+        linear-gradient(145deg, var(--panel-2), var(--panel-gradient-end));
+    box-shadow:
+        0 28px 90px rgba(0, 0, 0, 0.62),
+        0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+}
+
+.host-tools-dialog .dialog-heading {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    align-items: center;
+    margin: 0;
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--line);
+    background:
+        linear-gradient(180deg, var(--panel-2), var(--panel));
+}
+
+.host-tools-dialog-title {
+    min-width: 0;
+}
+
+.host-tools-dialog-title h2 {
+    margin: 3px 0 0;
+    font-size: clamp(1.45rem, 2.5vw, 1.9rem);
+    letter-spacing: -0.025em;
+}
+
+.host-tools-kicker {
+    display: block;
+    color: var(--gold);
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+}
+
+.host-tools-dialog .dialog-close {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--panel);
+}
+
+.host-tools-dialog-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+    max-height: calc(100dvh - 122px);
+    padding: 18px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.host-tools-action-form {
+    display: contents;
+}
+
+.host-tools-action-form[hidden],
+.host-tools-action[hidden] {
+    display: none !important;
+}
+
+.host-tools-action {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 74px;
+    margin: 0;
+    padding: 13px 15px;
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: center;
+    gap: 13px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    background:
+        linear-gradient(145deg, var(--panel), var(--panel-2));
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.16),
+        0 1px 0 rgba(255, 255, 255, 0.025) inset;
+    transition:
+        transform 140ms ease,
+        border-color 140ms ease,
+        background 140ms ease,
+        box-shadow 140ms ease;
+}
+
+.host-tools-action::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background:
+        linear-gradient(110deg, transparent 45%, rgba(255, 255, 255, 0.035));
+    content: "";
+}
+
+.host-tools-action:hover,
+.host-tools-action:focus-visible {
+    z-index: 1;
+    border-color: var(--gold);
+    background:
+        linear-gradient(145deg, var(--panel-2), var(--panel));
+    transform: translateY(-2px);
+    box-shadow:
+        0 14px 34px rgba(0, 0, 0, 0.28),
+        0 0 0 1px rgba(242, 177, 52, 0.08) inset;
+    outline: none;
+}
+
+.host-tools-action:active {
+    transform: translateY(0);
+}
+
+.host-tools-action:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.host-tools-action-icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--panel-2);
+    color: var(--gold);
+    font-size: 1.22rem;
+    font-weight: 950;
+    line-height: 1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.host-tools-action-label {
+    min-width: 0;
+    color: var(--text);
+    font-size: 0.98rem;
+    font-weight: 850;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.host-tools-action-wide,
+.host-tools-action-warning,
+.host-tools-action-danger {
+    grid-column: 1 / -1;
+}
+
+.host-tools-action-warning {
+    border-color: rgba(255, 176, 32, 0.52);
+    background:
+        linear-gradient(145deg, rgba(255, 176, 32, 0.10), var(--panel));
+}
+
+.host-tools-action-warning .host-tools-action-icon {
+    border-color: rgba(255, 176, 32, 0.58);
+    background: rgba(255, 176, 32, 0.11);
+    color: #ffc45a;
+}
+
+.host-tools-action-warning:hover,
+.host-tools-action-warning:focus-visible {
+    border-color: #ffc45a;
+}
+
+.host-tools-action-danger {
+    border-color: rgba(239, 35, 60, 0.48);
+    background:
+        linear-gradient(145deg, rgba(239, 35, 60, 0.09), var(--panel));
+}
+
+.host-tools-action-danger .host-tools-action-icon {
+    border-color: rgba(239, 35, 60, 0.58);
+    background: rgba(239, 35, 60, 0.11);
+    color: #ff7f88;
+}
+
+.host-tools-action-danger:hover,
+.host-tools-action-danger:focus-visible {
+    border-color: #ff6b78;
+}
+
+@media (max-width: 640px) {
+    .host-tools-dialog {
+        width: calc(100vw - 14px);
+        max-height: calc(100dvh - 14px);
+    }
+
+    .host-tools-dialog-card {
+        max-height: calc(100dvh - 14px);
+        border-radius: 18px;
+    }
+
+    .host-tools-dialog .dialog-heading {
+        padding: 17px 17px 14px;
+    }
+
+    .host-tools-dialog-actions {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        max-height: calc(100dvh - 102px);
+        padding: 12px;
+    }
+
+    .host-tools-action {
+        min-height: 62px;
+        grid-template-columns: 40px minmax(0, 1fr);
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+    }
+
+    .host-tools-action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        font-size: 1.08rem;
+    }
+
+    .host-tools-action-wide,
+    .host-tools-action-warning,
+    .host-tools-action-danger {
+        grid-column: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .host-tools-action {
+        transition: none;
+    }
+}

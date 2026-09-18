@@ -228,6 +228,12 @@
   <data name="Button_CloseBuzz" xml:space="preserve">
     <value>Disattiva pulsante</value>
   </data>
+  <data name="GameBoard_CancelBuzzerPress" xml:space="preserve">
+    <value>Annulla pressione del buzzer</value>
+  </data>
+  <data name="GameBoard_CancelBuzzerPressRejected" xml:space="preserve">
+    <value>La pressione del buzzer non può più essere annullata.</value>
+  </data>
   <data name="Menu_Home" xml:space="preserve">
     <value>Home</value>
   </data>

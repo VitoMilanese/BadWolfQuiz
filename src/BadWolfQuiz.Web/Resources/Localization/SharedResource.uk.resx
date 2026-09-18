@@ -228,6 +228,12 @@
   <data name="Button_CloseBuzz" xml:space="preserve">
     <value>Деактивувати кнопку</value>
   </data>
+  <data name="GameBoard_CancelBuzzerPress" xml:space="preserve">
+    <value>Скасувати натискання буззера</value>
+  </data>
+  <data name="GameBoard_CancelBuzzerPressRejected" xml:space="preserve">
+    <value>Натискання буззера вже неможливо скасувати.</value>
+  </data>
   <data name="Menu_Home" xml:space="preserve">
     <value>Головна</value>
   </data>

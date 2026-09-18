@@ -228,6 +228,12 @@
   <data name="Button_CloseBuzz" xml:space="preserve">
     <value>Close buzzer</value>
   </data>
+  <data name="GameBoard_CancelBuzzerPress" xml:space="preserve">
+    <value>Cancel buzzer press</value>
+  </data>
+  <data name="GameBoard_CancelBuzzerPressRejected" xml:space="preserve">
+    <value>The buzzer press can no longer be cancelled.</value>
+  </data>
   <data name="Menu_Home" xml:space="preserve">
     <value>Home</value>
   </data>

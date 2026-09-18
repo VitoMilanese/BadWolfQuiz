@@ -29,95 +29,11 @@
             </h2>
             @if (!Model.IsRoundSummaryVisible)
             {
-                <details class="action-menu board-action-menu">
-                <summary class="button button-secondary action-menu-trigger">
+                <button class="button button-secondary host-tools-trigger"
+                        type="button"
+                        data-open-host-tools-dialog>
                     @Localizer["Menu_Tools"]
-                </summary>
-                <div class="action-menu-popover">
-                    <a class="action-menu-item"
-                       asp-page="/Admin/Games/PlayerAchievements"
-                       asp-route-id="@Model.Game.Session.Id.Value"
-                       data-achievement-history-open
-                       onclick="if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}">
-                        @AchievementHistoryLocalizer["History_Open"]
-                    </a>
-
-                    @if (Model.CurrentQuestion is null)
-                    {
-                        <a class="action-menu-item"
-                            asp-page="/Admin/Games/AnswerHistory"
-                            asp-route-id="@Model.Game.Session.Id.Value">
-                            @Localizer["AnswerHistory_Open"]
-                        </a>
-
-                        <form method="post" asp-page-handler="RandomActivePlayer">
-                            <button class="action-menu-item"
-                                    type="submit"
-                                    disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
-                                @Localizer["GameBoard_RandomActivePlayer"]
-                            </button>
-                        </form>
-                    }
-
-                    <button class="action-menu-item"
-                            type="button"
-                            data-open-previous-round-dialog
-                            hidden="@(!Model.Game.Session.HasPreviousUnfinishedRound ? "hidden" : null)">
-                        @Localizer["GameBoard_PreviousRound"]
-                    </button>
-
-                    <form id="force-advance-round-form"
-                            method="post"
-                            asp-page-handler="ForceAdvanceRound"
-                            hidden="@(!Model.Game.Session.HasNextUnfinishedRound ? "hidden" : null)">
-                        <button class="action-menu-item"
-                                type="button"
-                                data-open-force-advance-round-dialog>
-                            @Localizer["GameBoard_NextRound"]
-                        </button>
-                    </form>
-
-                    @if (Model.Game.Session.Quiz.FinalQuestion is not null)
-                    {
-                        <form id="force-advance-final-form"
-                              method="post"
-                              asp-page-handler="PrepareFinalQuestionLeaderboard">
-                            <button class="action-menu-item"
-                                    type="button"
-                                    data-open-force-advance-final-dialog>
-                                @Localizer["FinalQuestion_Advance"]
-                            </button>
-                        </form>
-                    }
-
-                    <a class="action-menu-item"
-                       asp-page="/Admin/Games/AnswerKey"
-                       asp-route-id="@Model.Game.Session.Id.Value"
-                       target="_blank"
-                       rel="noopener">
-                        @Localizer["AnswerKey_Open"]
-                    </a>
-
-                    <button class="action-menu-item"
-                            type="button"
-                            data-open-join-code>
-                        @Localizer["GameBoard_ShowJoinCode"]
-                    </button>
-
-                    <button class="action-menu-item"
-                            type="button"
-                            data-open-blocked-players>
-                        @Localizer["GameBoard_ManageBlockedPlayers"]
-                    </button>
-
-                    <button class="action-menu-item"
-                            type="button"
-                            data-open-game-settings>
-                        @Localizer["GameSettings_LobbyTitle"]
-                    </button>
-
-                </div>
-                </details>
+                </button>
             }
             }
             <button class="button button-secondary icon-button"
@@ -129,6 +45,152 @@
             </button>
         </div>
     }
+}
+
+@if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Running &&
+    !Model.IsRoundSummaryVisible)
+{
+    <dialog id="host-tools-dialog"
+            class="app-dialog host-tools-dialog"
+            data-host-tools-dialog
+            aria-labelledby="host-tools-dialog-title">
+        <div class="dialog-card host-tools-dialog-card">
+            <div class="dialog-heading">
+                <div class="host-tools-dialog-title">
+                    <span class="host-tools-kicker">BAD WOLF QUIZ</span>
+                    <h2 id="host-tools-dialog-title">@Localizer["Menu_Tools"]</h2>
+                </div>
+                <button class="dialog-close"
+                        type="button"
+                        data-close-host-tools-dialog
+                        aria-label="@Localizer["Button_Close"]">×</button>
+            </div>
+
+            <div class="host-tools-dialog-actions">
+                @if (Model.CurrentQuestion is null)
+                {
+                    <a class="host-tools-action"
+                       asp-page="/Admin/Games/AnswerHistory"
+                       asp-route-id="@Model.Game.Session.Id.Value"
+                       data-host-tools-dialog-dismiss>
+                        <span class="host-tools-action-icon" aria-hidden="true">≡</span>
+                        <span class="host-tools-action-label">@Localizer["AnswerHistory_Open"]</span>
+                    </a>
+                }
+
+                <form id="force-advance-round-form"
+                      class="host-tools-action-form"
+                      method="post"
+                      asp-page-handler="ForceAdvanceRound"
+                      hidden="@(!Model.Game.Session.HasNextUnfinishedRound ? "hidden" : null)">
+                    <button class="host-tools-action"
+                            type="button"
+                            data-host-tools-dialog-dismiss
+                            data-open-force-advance-round-dialog>
+                        <span class="host-tools-action-icon" aria-hidden="true">→</span>
+                        <span class="host-tools-action-label">@Localizer["GameBoard_NextRound"]</span>
+                    </button>
+                </form>
+
+                <a class="host-tools-action"
+                   asp-page="/Admin/Games/AnswerKey"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   target="_blank"
+                   rel="noopener"
+                   data-host-tools-dialog-dismiss>
+                    <span class="host-tools-action-icon" aria-hidden="true">✓</span>
+                    <span class="host-tools-action-label">@Localizer["AnswerKey_Open"]</span>
+                </a>
+
+                @if (Model.Game.Session.Quiz.FinalQuestion is not null)
+                {
+                    <form id="force-advance-final-form"
+                          class="host-tools-action-form"
+                          method="post"
+                          asp-page-handler="PrepareFinalQuestionLeaderboard">
+                        <button class="host-tools-action"
+                                type="button"
+                                data-host-tools-dialog-dismiss
+                                data-open-force-advance-final-dialog>
+                            <span class="host-tools-action-icon" aria-hidden="true">◆</span>
+                            <span class="host-tools-action-label">@Localizer["FinalQuestion_Advance"]</span>
+                        </button>
+                    </form>
+                }
+
+                <button class="host-tools-action"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-blocked-players>
+                    <span class="host-tools-action-icon" aria-hidden="true">⊘</span>
+                    <span class="host-tools-action-label">@Localizer["GameBoard_ManageBlockedPlayers"]</span>
+                </button>
+
+                <button class="host-tools-action"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-join-code>
+                    <span class="host-tools-action-icon" aria-hidden="true">#</span>
+                    <span class="host-tools-action-label">@Localizer["GameBoard_ShowJoinCode"]</span>
+                </button>
+
+                <a class="host-tools-action"
+                   asp-page="/Admin/Games/PlayerAchievements"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   data-host-tools-dialog-dismiss
+                   data-achievement-history-open
+                   onclick="if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}">
+                    <span class="host-tools-action-icon" aria-hidden="true">★</span>
+                    <span class="host-tools-action-label">@AchievementHistoryLocalizer["History_Open"]</span>
+                </a>
+
+                @if (Model.CurrentQuestion is null)
+                {
+                    <form class="host-tools-action-form"
+                          method="post"
+                          asp-page-handler="RandomActivePlayer">
+                        <button class="host-tools-action"
+                                type="submit"
+                                data-host-tools-dialog-dismiss
+                                disabled="@(Model.Game.Session.IsActivePlayerChangeLocked ? "disabled" : null)">
+                            <span class="host-tools-action-icon" aria-hidden="true">⌁</span>
+                            <span class="host-tools-action-label">@Localizer["GameBoard_RandomActivePlayer"]</span>
+                        </button>
+                    </form>
+                }
+
+                <button class="host-tools-action"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-previous-round-dialog
+                        hidden="@(!Model.Game.Session.HasPreviousUnfinishedRound ? "hidden" : null)">
+                    <span class="host-tools-action-icon" aria-hidden="true">←</span>
+                    <span class="host-tools-action-label">@Localizer["GameBoard_PreviousRound"]</span>
+                </button>
+
+                <form class="host-tools-action-form"
+                      method="post"
+                      asp-page-handler="CancelBuzzerClaim"
+                      data-cancel-buzzer-claim-form
+                      hidden="@(Model.CurrentQuestion?.BuzzerStatus != BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Claimed ? "hidden" : null)">
+                    <button class="host-tools-action host-tools-action-warning"
+                            type="submit"
+                            data-host-tools-dialog-dismiss>
+                        <span class="host-tools-action-icon" aria-hidden="true">↶</span>
+                        <span class="host-tools-action-label">@Localizer["GameBoard_CancelBuzzerPress"]</span>
+                    </button>
+                </form>
+
+                <button class="host-tools-action host-tools-action-wide"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-game-settings>
+                    <span class="host-tools-action-icon" aria-hidden="true">⚙</span>
+                    <span class="host-tools-action-label">@Localizer["GameSettings_LobbyTitle"]</span>
+                </button>
+            </div>
+        </div>
+    </dialog>
 }
 
 @if (Model.Game.Session.Status == BadWolfQuiz.Game.Runtime.GameSessionStatus.Lobby)
@@ -3794,6 +3856,7 @@
 </script>
 
 @section Scripts {
+    <script src="~/js/host-tools-dialog.js" asp-append-version="true"></script>
     <script src="~/js/webcam-streams.js" asp-append-version="true"></script>
     <script src="~/js/discord-media-state.js" asp-append-version="true"></script>
     <script src="~/js/discord-media-mute.js" asp-append-version="true"></script>
@@ -5103,6 +5166,8 @@
             const questionSelectionForms = document.querySelectorAll(".question-selection-form");
             const gameBoardError = document.getElementById("game-board-error");
             let revealClueForm = document.querySelector("[data-reveal-clue-form]");
+            const cancelBuzzerClaimForm =
+                document.querySelector("[data-cancel-buzzer-claim-form]");
             let questionClues = document.querySelector("[data-question-clues]");
             let questionHeading = document.querySelector("[data-question-heading]");
 
@@ -5368,6 +5433,20 @@
                     }
                 });
             }
+
+            cancelBuzzerClaimForm?.addEventListener("submit", async event => {
+                event.preventDefault();
+
+                try {
+                    await submitGameControl(
+                        cancelBuzzerClaimForm,
+                        event.submitter);
+                    cancelBuzzerClaimForm.hidden = true;
+                } catch (error) {
+                    console.error(error);
+                    showGameBoardError(error.message);
+                }
+            });
 
             const handleGameControlError = error => {
                 console.error(error);
@@ -6107,6 +6186,10 @@
             connection.on("BuzzerStateChanged", update => {
                 buzzerState = update;
                 applyBuzzerPlayerStates();
+
+                if (cancelBuzzerClaimForm) {
+                    cancelBuzzerClaimForm.hidden = update.status !== "claimed";
+                }
 
                 if (revealClueForm) {
                     revealClueForm.hidden =

@@ -34,14 +34,14 @@ public sealed class RestartGameToolsTagHelper(
 
         var classes = (output.Attributes["class"]?.Value?.ToString() ?? string.Empty)
             .Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var isToolsPopover = classes.Contains(
-            "action-menu-popover",
+        var isToolsDialogActions = classes.Contains(
+            "host-tools-dialog-actions",
             StringComparer.Ordinal);
         var isHeaderContext = classes.Contains(
             "game-header-context",
             StringComparer.Ordinal);
 
-        if (!isToolsPopover && !isHeaderContext)
+        if (!isToolsDialogActions && !isHeaderContext)
         {
             return;
         }
@@ -57,19 +57,17 @@ public sealed class RestartGameToolsTagHelper(
         var labels = RestartLabels.ForCurrentLanguage();
         var html = HtmlEncoder.Default;
 
-        if (isToolsPopover)
+        if (isToolsDialogActions)
         {
-            if (game.Session.Status == GameSessionStatus.Running)
-            {
-                output.PostContent.AppendHtml($$"""
-                    <button class="action-menu-item"
-                            type="button"
-                            data-open-restart-game-dialog>
-                        {{html.Encode(labels.Restart)}}
-                    </button>
-                    """);
-            }
-
+            output.PostContent.AppendHtml($$"""
+                <button class="host-tools-action host-tools-action-danger"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-restart-game-dialog>
+                    <span class="host-tools-action-icon" aria-hidden="true">↻</span>
+                    <span class="host-tools-action-label">{{html.Encode(labels.Restart)}}</span>
+                </button>
+                """);
             return;
         }
 
@@ -77,24 +75,6 @@ public sealed class RestartGameToolsTagHelper(
         if (string.IsNullOrWhiteSpace(requestToken))
         {
             return;
-        }
-
-        if (game.Session.Status != GameSessionStatus.Running)
-        {
-            output.PostContent.AppendHtml($$"""
-                <details class="action-menu board-action-menu">
-                    <summary class="button button-secondary action-menu-trigger">
-                        {{html.Encode(labels.Tools)}}
-                    </summary>
-                    <div class="action-menu-popover">
-                        <button class="action-menu-item"
-                                type="button"
-                                data-open-restart-game-dialog>
-                            {{html.Encode(labels.Restart)}}
-                        </button>
-                    </div>
-                </details>
-                """);
         }
 
         output.PostContent.AppendHtml($$"""
@@ -139,7 +119,7 @@ public sealed class RestartGameToolsTagHelper(
                     for (const button of document.querySelectorAll(
                         "[data-open-restart-game-dialog]")) {
                         button.addEventListener("click", () => {
-                            button.closest("details")?.removeAttribute("open");
+                            button.closest("[data-host-tools-dialog]")?.close();
                             dialog.showModal();
                         });
                     }

@@ -354,6 +354,110 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Host_tools_use_a_responsive_dialog_instead_of_dropdown()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "site.css"));
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-tools-dialog.js"));
+
+        Assert.Contains("data-open-host-tools-dialog", markup);
+        Assert.Contains("data-host-tools-dialog", markup);
+        Assert.Contains("host-tools-dialog-actions", markup);
+        Assert.Contains("data-close-host-tools-dialog", markup);
+        Assert.DoesNotContain("host-tools-dialog.css", markup);
+        Assert.DoesNotContain(
+            "<details class=\"action-menu board-action-menu\">",
+            markup);
+        Assert.Contains(
+            "grid-template-columns: repeat(2, minmax(0, 1fr));",
+            css);
+        Assert.Contains("@media (max-width: 640px)", css);
+        Assert.Contains(
+            "grid-template-columns: minmax(0, 1fr);",
+            css);
+        Assert.Contains("dialog.showModal();", script);
+        Assert.Contains("event.target === dialog", script);
+        Assert.Contains("opener?.focus();", script);
+
+        var actionsStart = markup.IndexOf(
+            "<div class=\"host-tools-dialog-actions\">",
+            StringComparison.Ordinal);
+        var actionsEnd = markup.IndexOf(
+            "</div>\n        </div>\n    </dialog>",
+            actionsStart,
+            StringComparison.Ordinal);
+        var actions = markup[actionsStart..actionsEnd];
+
+        var answerHistory = actions.IndexOf(
+            "asp-page=\"/Admin/Games/AnswerHistory\"",
+            StringComparison.Ordinal);
+        var nextRound = actions.IndexOf(
+            "id=\"force-advance-round-form\"",
+            StringComparison.Ordinal);
+        var answerKey = actions.IndexOf(
+            "asp-page=\"/Admin/Games/AnswerKey\"",
+            StringComparison.Ordinal);
+        var finalQuestion = actions.IndexOf(
+            "id=\"force-advance-final-form\"",
+            StringComparison.Ordinal);
+        var blockedPlayers = actions.IndexOf(
+            "data-open-blocked-players",
+            StringComparison.Ordinal);
+        var joinCode = actions.IndexOf(
+            "data-open-join-code",
+            StringComparison.Ordinal);
+        var achievements = actions.IndexOf(
+            "asp-page=\"/Admin/Games/PlayerAchievements\"",
+            StringComparison.Ordinal);
+        var randomPlayer = actions.IndexOf(
+            "asp-page-handler=\"RandomActivePlayer\"",
+            StringComparison.Ordinal);
+        var cancelBuzzer = actions.IndexOf(
+            "asp-page-handler=\"CancelBuzzerClaim\"",
+            StringComparison.Ordinal);
+        var settings = actions.IndexOf(
+            "data-open-game-settings",
+            StringComparison.Ordinal);
+
+        Assert.True(answerHistory >= 0);
+        Assert.True(nextRound > answerHistory);
+        Assert.True(answerKey > nextRound);
+        Assert.True(finalQuestion > answerKey);
+        Assert.True(blockedPlayers > finalQuestion);
+        Assert.True(joinCode > blockedPlayers);
+        Assert.True(achievements > joinCode);
+        Assert.True(randomPlayer > achievements);
+        Assert.True(cancelBuzzer > randomPlayer);
+        Assert.True(settings > cancelBuzzer);
+        Assert.Contains(
+            "host-tools-action host-tools-action-wide",
+            actions);
+        Assert.Contains(
+            ".host-tools-action-wide,",
+            css);
+
+        var layout = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Shared",
+            "_Layout.cshtml"));
+        Assert.Contains(
+            "host-tools-trigger limited-game-tools",
+            layout);
+        Assert.Contains(
+            "class=\"app-dialog host-tools-dialog\"",
+            layout);
+        Assert.DoesNotContain(
+            "<details class=\"action-menu board-action-menu limited-game-tools\">",
+            layout);
+    }
+
+    [Fact]
     public void Partial_round_refresh_synchronizes_tools_navigation_visibility()
     {
         var markup = File.ReadAllText(FindLobbyView());
@@ -369,8 +473,8 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("#force-advance-round-form", markup);
         Assert.Contains("currentAction.hidden = nextAction.hidden;", markup);
         Assert.Contains("syncRoundNavigationActions(parsed);", markup);
-        Assert.Contains(".action-menu-popover form[hidden]", css);
-        Assert.Contains(".action-menu-popover .action-menu-item[hidden]", css);
+        Assert.Contains(".host-tools-action-form[hidden]", css);
+        Assert.Contains(".host-tools-action[hidden]", css);
         Assert.Contains("display: none !important;", css);
     }
 

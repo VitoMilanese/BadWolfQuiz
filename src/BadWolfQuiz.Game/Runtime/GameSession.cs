@@ -617,6 +617,32 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion CancelQuestionBuzzerClaim(
+        int sourceQuestionId,
+        bool resumeQuestionTimer,
+        IReadOnlyCollection<GamePlayerId>? skipProposalPlayerIdsToRestore = null)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        question.CancelBuzzerClaim();
+
+        foreach (var playerId in skipProposalPlayerIdsToRestore ?? [])
+        {
+            FindPlayer(playerId);
+            question.RestoreSkipProposal(playerId);
+        }
+
+        AnswerTimer.Stop();
+
+        if (resumeQuestionTimer && Timer.IsPaused)
+        {
+            Timer.Resume();
+        }
+
+        return question;
+    }
+
     public RuntimeQuestion ProposeQuestionSkip(
         int sourceQuestionId,
         GamePlayerId playerId)

@@ -1138,6 +1138,34 @@ public sealed class LobbyModel(
         return RedirectToPage(new { id });
     }
 
+    public async Task<IActionResult> OnPostCancelBuzzerClaimAsync(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var game = sessionRegistry.FindOwned(
+            new GameSessionId(id),
+            currentHost.RequiredId);
+
+        if (game is null)
+        {
+            return NotFound();
+        }
+
+        try
+        {
+            sessionRegistry.CancelCurrentQuestionBuzzerClaim(game.PublicCode);
+            await BroadcastBuzzerAsync(game, cancellationToken);
+            await BroadcastTimerAsync(game, cancellationToken);
+        }
+        catch (GameRuleViolationException)
+        {
+            TempData["ErrorMessage"] =
+                localizer["GameBoard_CancelBuzzerPressRejected"].Value;
+        }
+
+        return RedirectToPage(new { id });
+    }
+
     public async Task<IActionResult> OnPostRevealAllPlayerChoiceOptionsAsync(
         Guid id,
         int sourceQuestionId,

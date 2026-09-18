@@ -572,6 +572,84 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Host_cancelled_claim_reopens_buzzer_and_restores_previous_skip_proposal()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer(
+            "ABC123",
+            rose.AccessToken!,
+            "rose-connection",
+            true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+        registry.ProposeQuestionSkip("rose-connection", 1);
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+
+        var claim = registry.ClaimQuestionBuzzer("rose-connection", 1);
+
+        Assert.True(claim!.IsWinner);
+        Assert.True(game.BuzzerRace!.WinnerHadSkipProposal);
+        Assert.True(game.BuzzerRace.QuestionTimerWasPausedByClaim);
+        Assert.DoesNotContain(
+            rose.Player!.Id,
+            claim.Question.SkipProposalPlayerIds);
+
+        var cancelled = registry.CancelCurrentQuestionBuzzerClaim("ABC123");
+
+        Assert.NotNull(cancelled);
+        Assert.Equal(QuestionBuzzerStatus.Open, cancelled.BuzzerStatus);
+        Assert.Null(cancelled.AnsweringPlayerId);
+        Assert.Empty(cancelled.AnswerAttempts);
+        Assert.Contains(rose.Player.Id, cancelled.SkipProposalPlayerIds);
+        Assert.Equal(0, rose.Player.Score);
+        Assert.Null(game.BuzzerRace);
+        Assert.Equal(GameTimerStatus.Running, game.Session.Timer.Status);
+        Assert.Equal(GameTimerStatus.Stopped, game.Session.AnswerTimer.Status);
+
+        var reclaimed = registry.ClaimQuestionBuzzer("rose-connection", 1);
+        Assert.True(reclaimed!.IsWinner);
+    }
+
+    [Fact]
+    public void Host_cancelled_claim_restores_late_players_skip_proposal()
+    {
+        var timeProvider = new TestTimeProvider();
+        var registry = new GameSessionRegistry(
+            new StubGameCodeGenerator(["ABC123"]),
+            timeProvider);
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        var donna = registry.JoinPlayer("ABC123", "Donna");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+        registry.ConnectPlayer("ABC123", donna.AccessToken!, "donna-connection", true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+        registry.ProposeQuestionSkip("mickey-connection", 1);
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+        registry.ClaimQuestionBuzzer("rose-connection", 1);
+
+        timeProvider.Advance(TimeSpan.FromMilliseconds(250));
+        registry.ClaimQuestionBuzzer("mickey-connection", 1);
+
+        Assert.True(game.BuzzerRace!.LatePlayers.Single().HadSkipProposal);
+        Assert.DoesNotContain(
+            mickey.Player!.Id,
+            game.Session.Board.Questions.Single().SkipProposalPlayerIds);
+
+        registry.CancelCurrentQuestionBuzzerClaim("ABC123");
+
+        Assert.Contains(
+            mickey.Player.Id,
+            game.Session.Board.Questions.Single().SkipProposalPlayerIds);
+        Assert.Null(game.BuzzerRace);
+    }
+
+    [Fact]
     public void Last_skip_proposal_reports_question_closed()
     {
         var registry = CreateRegistry("ABC123");

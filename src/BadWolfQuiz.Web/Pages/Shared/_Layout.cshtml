@@ -187,46 +187,75 @@
             @await RenderSectionAsync("HeaderContext", required: false)
             @if (showLimitedGameTools && finalQuestionGame is not null)
             {
-                <details class="action-menu board-action-menu limited-game-tools">
-                    <summary class="button button-secondary action-menu-trigger">
-                        @Localizer["Menu_Tools"]
-                    </summary>
-                    <div class="action-menu-popover">
-                        <a class="action-menu-item"
-                           asp-page="/Admin/Games/PlayerAchievements"
-                           asp-route-id="@finalQuestionGame.Session.Id.Value"
-                           data-achievement-history-open
-                           onclick="if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}">
-                            @AchievementHistoryLocalizer["History_Open"]
-                        </a>
+                <button class="button button-secondary host-tools-trigger limited-game-tools"
+                        type="button"
+                        data-open-host-tools-dialog>
+                    @Localizer["Menu_Tools"]
+                </button>
 
-                        <a class="action-menu-item"
-                           asp-page="/Admin/Games/AnswerHistory"
-                           asp-route-id="@finalQuestionGame.Session.Id.Value">
-                            @Localizer["AnswerHistory_Open"]
-                        </a>
+                <dialog id="host-tools-dialog"
+                        class="app-dialog host-tools-dialog"
+                        data-host-tools-dialog
+                        aria-labelledby="host-tools-dialog-title">
+                    <div class="dialog-card host-tools-dialog-card">
+                        <div class="dialog-heading">
+                            <div class="host-tools-dialog-title">
+                                <span class="host-tools-kicker">BAD WOLF QUIZ</span>
+                                <h2 id="host-tools-dialog-title">@Localizer["Menu_Tools"]</h2>
+                            </div>
+                            <button class="dialog-close"
+                                    type="button"
+                                    data-close-host-tools-dialog
+                                    aria-label="@Localizer["Button_Close"]">×</button>
+                        </div>
 
-                        <a class="action-menu-item"
-                           asp-page="/Admin/Games/AnswerKey"
-                           asp-route-id="@finalQuestionGame.Session.Id.Value"
-                           target="_blank"
-                           rel="noopener">
-                            @Localizer["AnswerKey_Open"]
-                        </a>
+                        <div class="host-tools-dialog-actions">
+                            <a class="host-tools-action"
+                               asp-page="/Admin/Games/AnswerHistory"
+                               asp-route-id="@finalQuestionGame.Session.Id.Value"
+                               data-host-tools-dialog-dismiss>
+                                <span class="host-tools-action-icon" aria-hidden="true">≡</span>
+                                <span class="host-tools-action-label">@Localizer["AnswerHistory_Open"]</span>
+                            </a>
 
-                        <button class="action-menu-item"
-                                type="button"
-                                data-open-blocked-players>
-                            @Localizer["GameBoard_ManageBlockedPlayers"]
-                        </button>
+                            <a class="host-tools-action"
+                               asp-page="/Admin/Games/AnswerKey"
+                               asp-route-id="@finalQuestionGame.Session.Id.Value"
+                               target="_blank"
+                               rel="noopener"
+                               data-host-tools-dialog-dismiss>
+                                <span class="host-tools-action-icon" aria-hidden="true">✓</span>
+                                <span class="host-tools-action-label">@Localizer["AnswerKey_Open"]</span>
+                            </a>
 
-                        <button class="action-menu-item"
-                                type="button"
-                                data-open-game-settings>
-                            @Localizer["GameSettings_LobbyTitle"]
-                        </button>
+                            <button class="host-tools-action"
+                                    type="button"
+                                    data-host-tools-dialog-dismiss
+                                    data-open-blocked-players>
+                                <span class="host-tools-action-icon" aria-hidden="true">⊘</span>
+                                <span class="host-tools-action-label">@Localizer["GameBoard_ManageBlockedPlayers"]</span>
+                            </button>
+
+                            <a class="host-tools-action"
+                               asp-page="/Admin/Games/PlayerAchievements"
+                               asp-route-id="@finalQuestionGame.Session.Id.Value"
+                               data-host-tools-dialog-dismiss
+                               data-achievement-history-open
+                               onclick="if(window.BadWolfBusy){window.BadWolfBusy.navigate(this.href);return false;}">
+                                <span class="host-tools-action-icon" aria-hidden="true">★</span>
+                                <span class="host-tools-action-label">@AchievementHistoryLocalizer["History_Open"]</span>
+                            </a>
+
+                            <button class="host-tools-action host-tools-action-wide"
+                                    type="button"
+                                    data-host-tools-dialog-dismiss
+                                    data-open-game-settings>
+                                <span class="host-tools-action-icon" aria-hidden="true">⚙</span>
+                                <span class="host-tools-action-label">@Localizer["GameSettings_LobbyTitle"]</span>
+                            </button>
+                        </div>
                     </div>
-                </details>
+                </dialog>
             }
             @if (gameHeaderQrDarkDataUri is not null && gameHeaderQrLightDataUri is not null)
             {

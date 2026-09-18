@@ -1234,6 +1234,11 @@ public sealed class GameSessionRegistry
 
             if (question.BuzzerStatus == QuestionBuzzerStatus.Open)
             {
+                var winnerHadSkipProposal =
+                    question.SkipProposalPlayerIds.Contains(player.Id);
+                var questionTimerWasPausedByClaim =
+                    game.Session.Timer.Status == GameTimerStatus.Running;
+
                 question = game.Session.ClaimQuestionBuzzer(
                     sourceQuestionId,
                     player.Id);
@@ -1242,7 +1247,9 @@ public sealed class GameSessionRegistry
                     pressedAt,
                     player.Id,
                     player.Name,
-                    []);
+                    [],
+                    winnerHadSkipProposal,
+                    questionTimerWasPausedByClaim);
                 game.MarkPersistenceChanged();
 
                 return new BuzzerClaimResult(game, question, player, true);
@@ -1267,7 +1274,8 @@ public sealed class GameSessionRegistry
             var latePlayer = new BuzzerRaceLatePlayer(
                 player.Id,
                 player.Name,
-                checked((int)Math.Round(delay.TotalMilliseconds)));
+                checked((int)Math.Round(delay.TotalMilliseconds)),
+                question.SkipProposalPlayerIds.Contains(player.Id));
 
             game.BuzzerRace = race with
             {
@@ -1282,6 +1290,56 @@ public sealed class GameSessionRegistry
             }
 
             return new BuzzerClaimResult(game, question, player, false);
+        }
+    }
+
+    public RuntimeQuestion? CancelCurrentQuestionBuzzerClaim(
+        string publicCode)
+    {
+        var game = Find(publicCode);
+        if (game is null)
+        {
+            return null;
+        }
+
+        lock (game)
+        {
+            var question = game.Session.Board.Questions.SingleOrDefault(item =>
+                item.BuzzerStatus == QuestionBuzzerStatus.Claimed &&
+                item.Status is RuntimeQuestionStatus.Selected or
+                    RuntimeQuestionStatus.Active);
+
+            if (question is null)
+            {
+                throw new GameRuleViolationException(
+                    "There is no claimed buzzer to cancel.");
+            }
+
+            var race = game.BuzzerRace is { } currentRace &&
+                currentRace.SourceQuestionId == question.SourceQuestionId
+                    ? currentRace
+                    : null;
+
+            var skipProposalPlayerIdsToRestore = race is null
+                ? Array.Empty<GamePlayerId>()
+                : race.LatePlayers
+                    .Where(item => item.HadSkipProposal)
+                    .Select(item => item.PlayerId)
+                    .Concat(
+                        race.WinnerHadSkipProposal
+                            ? [race.WinnerPlayerId]
+                            : [])
+                    .Distinct()
+                    .ToArray();
+
+            var result = game.Session.CancelQuestionBuzzerClaim(
+                question.SourceQuestionId,
+                race?.QuestionTimerWasPausedByClaim == true,
+                skipProposalPlayerIdsToRestore);
+
+            game.BuzzerRace = null;
+            game.MarkPersistenceChanged();
+            return result;
         }
     }
 
