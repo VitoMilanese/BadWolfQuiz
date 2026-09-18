@@ -34,9 +34,11 @@ public sealed class PlayerAchievementAssetsTagHelper : TagHelper
         output.PostContent.AppendHtml(
             "<link rel=\"stylesheet\" href=\"/css/player-achievements.css?v=12\" />" +
             "<link rel=\"stylesheet\" href=\"/css/achievement-category-filter.css?v=2\" />" +
+            "<link rel=\"stylesheet\" href=\"/css/player-lobby-dialog-menu.css?v=5\" />" +
             "<script defer src=\"/js/achievement-image-trim.js?v=1\"></script>" +
             "<script defer src=\"/js/achievement-category-filter.js?v=2\"></script>" +
-            "<script defer src=\"/js/player-achievements.js?v=1\"></script>" +
+            "<script defer src=\"/js/player-lobby-dialog-menu.js?v=3\"></script>" +
+            "<script defer src=\"/js/player-achievements.js?v=2\"></script>" +
             "<script defer src=\"/js/achievement-reset.js?v=1\"></script>");
     }
 }
@@ -129,9 +131,6 @@ public sealed class PlayerAchievementsTagHelper(
         }
 
         var antiforgeryTokens = antiforgery.GetAndStoreTokens(ViewContext.HttpContext);
-        output.Attributes.SetAttribute(
-            "data-player-achievements-label",
-            localizer["Achievements_PlayerLabel"].Value);
         output.PostContent.AppendHtml(BuildMarkup(
             achievements,
             game.PublicCode,

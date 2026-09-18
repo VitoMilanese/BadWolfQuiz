@@ -1,6 +1,7 @@
 @page "{code}/{playerId:guid}"
 @model BadWolfQuiz.Web.Pages.Player.LobbyModel
 @inject IConfiguration Configuration
+@inject BadWolfQuiz.Web.Services.JoinUrlBuilder JoinUrlBuilder
 @{
     ViewData["Title"] = Model.Game.Session.Quiz.Title;
     ViewData["HidePortalFooter"] = true;
@@ -8,6 +9,7 @@
     var returnUrl = Request.Path + Request.QueryString;
     var discordInviteUrl = Configuration["Discord:InviteUrl"];
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var joinUrl = JoinUrlBuilder.Build(Request, Model.Game.PublicCode);
 }
 
 <div class="form-card narrow player-lobby"
@@ -32,15 +34,104 @@
     <p class="eyebrow">@Localizer["Message_WaitingHost"]</p>
     <h1>@Model.Game.Session.Quiz.Title</h1>
 
-    <p>
+    <button class="player-lobby-menu-trigger"
+            type="button"
+            data-open-player-lobby-menu
+            aria-haspopup="dialog"
+            aria-controls="player-lobby-action-menu"
+            aria-expanded="false"
+            aria-label="@Localizer["PlayerMenu_Title"]">
+        <span aria-hidden="true">☰</span>
+    </button>
+
+    <p class="player-name-line">
         <strong>@Localizer["Label_PlayerName"]:</strong>
         @Model.CurrentPlayer.Name
     </p>
 
-    <details class="player-media-settings player-menu-settings">
-        <summary>@Localizer["PlayerMenu_Title"]</summary>
-        <div class="player-media-settings-content">
-            <nav class="player-menu-links" aria-label="@Localizer["PlayerMenu_Title"]">
+    <dialog id="player-lobby-action-menu"
+            class="player-lobby-action-menu"
+            data-player-lobby-action-menu
+            aria-labelledby="player-lobby-action-menu-title">
+        <div class="player-lobby-action-menu-panel">
+            <div class="player-lobby-action-menu-heading">
+                <div>
+                    <span class="player-lobby-action-menu-kicker">BAD WOLF QUIZ</span>
+                    <h2 id="player-lobby-action-menu-title">@Localizer["PlayerMenu_Title"]</h2>
+                </div>
+                <button class="player-lobby-action-menu-close"
+                        type="button"
+                        data-close-player-lobby-menu
+                        aria-label="@Localizer["Button_Close"]">×</button>
+            </div>
+
+            <div class="player-lobby-game-code-card">
+                <button class="player-lobby-game-code-copy"
+                        type="button"
+                        data-copy-player-game-code
+                        data-player-game-code="@Model.Game.PublicCode"
+                        data-copied-label="@Localizer["GameBoard_JoinCopied"]"
+                        title="@Localizer["GameBoard_CopyJoinCode"]"
+                        aria-label="@Localizer["GameBoard_CopyJoinCode"]">
+                    <span class="player-lobby-game-code-copy-text">
+                        <span>@Localizer["Label_GameCode"]</span>
+                        <strong>@Model.Game.PublicCode</strong>
+                    </span>
+                </button>
+                <button class="player-lobby-join-link-copy"
+                        type="button"
+                        data-copy-player-join-link
+                        data-player-join-link="@joinUrl"
+                        data-copied-label="@Localizer["GameBoard_JoinCopied"]"
+                        title="@Localizer["GameBoard_CopyJoinLink"]"
+                        aria-label="@Localizer["GameBoard_CopyJoinLink"]">
+                    <span aria-hidden="true">🔗</span>
+                </button>
+                <span class="player-lobby-game-code-copy-status"
+                      data-player-join-copy-status
+                      aria-live="polite"></span>
+            </div>
+
+            <nav class="player-lobby-action-menu-list"
+                 aria-label="@Localizer["PlayerMenu_Title"]">
+                <button class="player-lobby-action-menu-item"
+                        type="button"
+                        data-player-dialog-target="player-menu-dialog">
+                    <span class="player-lobby-action-menu-item-icon" aria-hidden="true">☰</span>
+                    <span>@Localizer["PlayerMenu_Title"]</span>
+                </button>
+                <button class="player-lobby-action-menu-item"
+                        type="button"
+                        data-player-dialog-target="player-media-dialog">
+                    <span class="player-lobby-action-menu-item-icon" aria-hidden="true">◎</span>
+                    <span>@Localizer["PlayerMedia_Settings"]</span>
+                </button>
+                <button class="player-lobby-action-menu-item"
+                        type="button"
+                        data-player-achievements-open
+                        data-player-dialog-target="player-achievements-dialog"
+                        hidden>
+                    <span class="player-lobby-action-menu-item-icon" aria-hidden="true">★</span>
+                    <span>@Localizer["PlayerMenu_Achievements"]</span>
+                </button>
+            </nav>
+        </div>
+    </dialog>
+
+    <dialog id="player-menu-dialog"
+            class="app-dialog player-lobby-settings-dialog"
+            data-player-settings-dialog
+            aria-labelledby="player-menu-dialog-title">
+        <div class="dialog-card player-lobby-settings-dialog-card">
+            <div class="dialog-heading">
+                <h2 id="player-menu-dialog-title">@Localizer["PlayerMenu_Title"]</h2>
+                <button class="dialog-close"
+                        type="button"
+                        data-close-player-settings-dialog
+                        aria-label="@Localizer["Button_Close"]">×</button>
+            </div>
+            <div class="player-lobby-settings-dialog-body">
+<nav class="player-menu-links" aria-label="@Localizer["PlayerMenu_Title"]">
                 @if (isAuthenticated)
                 {
                     <a class="button button-secondary" asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
@@ -50,7 +141,10 @@
                     <a class="button button-secondary" asp-page="/Account/ChangePassword">@Localizer["Account_ChangePassword"]</a>
                 }
 
-                <a class="button button-secondary" asp-page="/Join/Index">@Localizer["Button_Join"]</a>
+                <a class="button button-secondary"
+                   asp-page="/Join/Index"
+                   target="_blank"
+                   rel="noopener noreferrer">@Localizer["Button_Join"]</a>
                 @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
                 {
                     <a class="button button-secondary"
@@ -58,8 +152,14 @@
                        target="_blank"
                        rel="noopener noreferrer">@Localizer["Menu_PlayWithUs"]</a>
                 }
-                <a class="button button-secondary" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
-                <a class="button button-secondary" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+                <a class="button button-secondary"
+                   asp-page="/Faq"
+                   target="_blank"
+                   rel="noopener noreferrer">@Localizer["Menu_FAQ"]</a>
+                <a class="button button-secondary"
+                   asp-page="/AskQuestion"
+                   target="_blank"
+                   rel="noopener noreferrer">@Localizer["Menu_AskQuestion"]</a>
 
                 @if (isAuthenticated)
                 {
@@ -69,7 +169,10 @@
                 }
                 else
                 {
-                    <a class="button button-secondary" asp-page="/Account/Login">@Localizer["Account_HostSignIn"]</a>
+                    <a class="button button-secondary"
+                       asp-page="/Account/Login"
+                       target="_blank"
+                       rel="noopener noreferrer">@Localizer["Account_HostSignIn"]</a>
                 }
             </nav>
 
@@ -94,13 +197,25 @@
                        asp-route-returnUrl="@returnUrl">🇮🇹 Italiano</a>
                 </div>
             </div>
+            </div>
         </div>
-    </details>
+    </dialog>
 
-    <details class="player-media-settings">
-        <summary>@Localizer["PlayerMedia_Settings"]</summary>
-        <div class="player-media-settings-content">
-        <div class="player-avatar-control">
+    <dialog id="player-media-dialog"
+            class="app-dialog player-lobby-settings-dialog"
+            data-player-settings-dialog
+            data-player-media-dialog
+            aria-labelledby="player-media-dialog-title">
+        <div class="dialog-card player-lobby-settings-dialog-card player-lobby-media-dialog-card">
+            <div class="dialog-heading">
+                <h2 id="player-media-dialog-title">@Localizer["PlayerMedia_Settings"]</h2>
+                <button class="dialog-close"
+                        type="button"
+                        data-close-player-settings-dialog
+                        aria-label="@Localizer["Button_Close"]">×</button>
+            </div>
+            <div class="player-lobby-settings-dialog-body player-media-settings-content">
+<div class="player-avatar-control">
         <img class="player-avatar-current"
              data-current-player-avatar
              src="@(!string.IsNullOrWhiteSpace(Model.CurrentPlayer.AvatarId) ? $"/avatars/{Model.CurrentPlayer.AvatarId}" : null)"
@@ -185,8 +300,9 @@
              data-unsupported-label="@Localizer["PlayerWebcam_RequiresHttps"]"
              data-denied-label="@Localizer["PlayerWebcam_AccessFailed"]"
              hidden></div>
+            </div>
         </div>
-    </details>
+    </dialog>
 
     <div id="activity-warning" class="message message-error" hidden>
         @Localizer["PlayerPresence_InactiveWarning"]

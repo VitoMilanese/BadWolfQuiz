@@ -88,10 +88,29 @@ following a stale player-page URL.
 
 ## Player-device navigation and screen wake behavior
 
-The compact **Menu** expander on the player buzzer page contains the same
-navigation actions available to that user in the regular site header, together
-with the language selector. The full header remains hidden so the buzzer and
-player controls retain the available phone viewport.
+BadWolfQuiz Web 1.51.0 replaces the two large inline player-page expanders with
+one compact menu button in the upper-right corner. On larger screens the action
+drawer opens from the right; on phone-sized screens it opens from the top. The
+drawer exposes **Menu**, **Picture, avatar, and webcam**, and **Achievements**.
+The Achievements action is shown only when the existing player-achievement dialog
+is available.
+
+The **Menu** action opens the existing account/navigation/language controls in a
+dialog, while **Picture, avatar, and webcam** opens the existing player-media
+controls in a separate dialog. Contributor frames remain attached to the media
+controls. Join, Play with us, FAQ, Ask the developer, and Host sign-in links open
+in a new browser tab so the active player page stays connected; language changes
+continue in the current tab.
+
+The six-character game code is shown at the top of the action drawer. Pressing
+the code area copies only the game code. The adjacent link action copies the full
+public join URL generated with the same `Game:PublicBaseUrl` rules as the real
+join QR code. The localized copied-status row is collapsed while empty, so it
+does not reserve vertical space until feedback is actually shown.
+
+The full site header remains hidden so the buzzer and player controls retain the
+available phone viewport. Drawer and dialog close behavior supports the close
+button, backdrop clicks, Escape/cancel, and focus restoration.
 
 While the buzzer page is visible, the client requests the browser's Screen Wake
 Lock and periodically reacquires it if the browser releases it. A media-based

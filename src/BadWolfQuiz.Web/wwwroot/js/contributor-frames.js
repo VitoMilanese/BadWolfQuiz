@@ -568,6 +568,7 @@
     }
 
     const mediaSettings = document.querySelector(
+        "[data-player-media-dialog] .player-media-settings-content, " +
         ".player-media-settings:not(.player-menu-settings) .player-media-settings-content"
     );
     const avatarControl = document.querySelector(".player-avatar-control");
