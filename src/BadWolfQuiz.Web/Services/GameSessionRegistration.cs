@@ -493,9 +493,12 @@ public sealed record BuzzerRaceSnapshot(
     DateTimeOffset WinnerPressedAt,
     GamePlayerId WinnerPlayerId,
     string WinnerPlayerName,
-    IReadOnlyList<BuzzerRaceLatePlayer> LatePlayers);
+    IReadOnlyList<BuzzerRaceLatePlayer> LatePlayers,
+    bool WinnerHadSkipProposal = false,
+    bool QuestionTimerWasPausedByClaim = false);
 
 public sealed record BuzzerRaceLatePlayer(
     GamePlayerId PlayerId,
     string PlayerName,
-    int DelayMilliseconds);
+    int DelayMilliseconds,
+    bool HadSkipProposal = false);

@@ -22,6 +22,8 @@ During an active regular buzzer question, a player may press **Skip** to propose
 
 The question moves to answer presentation only when every player who is still eligible to answer has an active skip proposal. Players who already produced an answer attempt are not part of that unanimity check. When unanimity closes the question, the host sees a centered transient overlay explaining that all players voted to skip. A proposal may be made before a manually or media-delayed buzzer opens, and proposals persist through active-game recovery. If another player is currently answering, proposals may still be collected but cannot resolve the question until the claimed answer phase ends. Wager questions, mandatory all-player questions, and Final Question flows do not expose this action.
 
+If a player claims the buzzer accidentally, the host can use **Cancel buzzer press** from the running-game **Tools** menu while that claim is active. Cancelling is an undo operation rather than a judgment: it creates no answer attempt, changes no score, clears the answering player and live buzzer race, stops the answer timer, and reopens the buzzer for every still-eligible player including the cancelled claimant. The question timer resumes only when that claim itself paused a running timer; a timer that the host had already paused stays paused. Skip proposals withdrawn by the cancelled winner or accepted late presses are restored.
+
 ### Optional x2 and 1/2 correct-answer rewards
 
 Quiz authors can opt an individual question into special correct-answer scoring from the Question Editor. The setting is disabled by default, and legacy questions without an explicit value are treated as disabled.

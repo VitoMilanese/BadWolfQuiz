@@ -116,6 +116,15 @@
                         @Localizer["GameSettings_LobbyTitle"]
                     </button>
 
+                    <form method="post"
+                          asp-page-handler="CancelBuzzerClaim"
+                          data-cancel-buzzer-claim-form
+                          hidden="@(Model.CurrentQuestion?.BuzzerStatus != BadWolfQuiz.Game.Runtime.QuestionBuzzerStatus.Claimed ? "hidden" : null)">
+                        <button class="action-menu-item" type="submit">
+                            @Localizer["GameBoard_CancelBuzzerPress"]
+                        </button>
+                    </form>
+
                 </div>
                 </details>
             }
@@ -5103,6 +5112,8 @@
             const questionSelectionForms = document.querySelectorAll(".question-selection-form");
             const gameBoardError = document.getElementById("game-board-error");
             let revealClueForm = document.querySelector("[data-reveal-clue-form]");
+            const cancelBuzzerClaimForm =
+                document.querySelector("[data-cancel-buzzer-claim-form]");
             let questionClues = document.querySelector("[data-question-clues]");
             let questionHeading = document.querySelector("[data-question-heading]");
 
@@ -6107,6 +6118,10 @@
             connection.on("BuzzerStateChanged", update => {
                 buzzerState = update;
                 applyBuzzerPlayerStates();
+
+                if (cancelBuzzerClaimForm) {
+                    cancelBuzzerClaimForm.hidden = update.status !== "claimed";
+                }
 
                 if (revealClueForm) {
                     revealClueForm.hidden =

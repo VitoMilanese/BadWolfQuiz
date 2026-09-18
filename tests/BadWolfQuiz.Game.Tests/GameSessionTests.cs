@@ -180,6 +180,57 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Cancel_buzzer_claim_reopens_for_same_player_and_restores_timers()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        Assert.Equal(QuestionBuzzerStatus.Claimed, question.BuzzerStatus);
+        Assert.Equal(rose.Id, question.AnsweringPlayerId);
+        Assert.Equal(GameTimerStatus.Paused, session.Timer.Status);
+        Assert.Equal(GameTimerStatus.Running, session.AnswerTimer.Status);
+
+        session.CancelQuestionBuzzerClaim(
+            100,
+            resumeQuestionTimer: true);
+
+        Assert.Equal(QuestionBuzzerStatus.Open, question.BuzzerStatus);
+        Assert.Null(question.AnsweringPlayerId);
+        Assert.Empty(question.AnswerAttempts);
+        Assert.Equal(0, rose.Score);
+        Assert.Equal(GameTimerStatus.Running, session.Timer.Status);
+        Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
+
+        var reclaimed = session.ClaimQuestionBuzzer(100, rose.Id);
+        Assert.Equal(rose.Id, reclaimed.AnsweringPlayerId);
+    }
+
+    [Fact]
+    public void Cancel_buzzer_claim_does_not_resume_timer_paused_before_claim()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.ActivateQuestionBuzzer(100);
+        session.Timer.Pause();
+
+        session.ClaimQuestionBuzzer(100, rose.Id);
+        session.CancelQuestionBuzzerClaim(
+            100,
+            resumeQuestionTimer: false);
+
+        Assert.Equal(GameTimerStatus.Paused, session.Timer.Status);
+        Assert.Equal(GameTimerStatus.Stopped, session.AnswerTimer.Status);
+    }
+
+    [Fact]
     public void Restore_preserves_current_question_skip_proposals()
     {
         var session = CreateSession();
