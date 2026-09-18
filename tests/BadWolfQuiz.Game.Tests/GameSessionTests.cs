@@ -156,6 +156,94 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Skip_proposal_keeps_buzzer_eligibility_and_is_withdrawn_by_buzz()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+
+        session.ProposeQuestionSkip(100, rose.Id);
+
+        Assert.Contains(rose.Id, question.SkipProposalPlayerIds);
+        Assert.Empty(question.AnswerAttempts);
+        Assert.Equal(0, rose.Score);
+
+        session.ActivateQuestionBuzzer(100);
+        var claimed = session.ClaimQuestionBuzzer(100, rose.Id);
+
+        Assert.Equal(rose.Id, claimed.AnsweringPlayerId);
+        Assert.DoesNotContain(rose.Id, question.SkipProposalPlayerIds);
+        Assert.Empty(question.AnswerAttempts);
+        Assert.Equal(0, rose.Score);
+    }
+
+    [Fact]
+    public void Restore_preserves_current_question_skip_proposals()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.AddPlayer("Mickey");
+        session.Start();
+        session.SelectQuestion(100);
+        session.ProposeQuestionSkip(100, rose.Id);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        var question = restored.Board.Questions.Single(
+            item => item.SourceQuestionId == 100);
+        Assert.Contains(rose.Id, question.SkipProposalPlayerIds);
+    }
+
+    [Fact]
+    public void All_eligible_skip_proposals_show_answer_without_score_changes()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+
+        session.ProposeQuestionSkip(100, rose.Id);
+
+        Assert.Equal(RuntimeQuestionStatus.Selected, question.Status);
+
+        session.ProposeQuestionSkip(100, mickey.Id);
+
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
+        Assert.Empty(question.AnswerAttempts);
+        Assert.Equal(0, rose.Score);
+        Assert.Equal(0, mickey.Score);
+    }
+
+    [Fact]
+    public void Wrong_answer_resolves_when_all_remaining_players_proposed_skip()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.ProposeQuestionSkip(100, mickey.Id);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        session.JudgeQuestionAnswer(100, rose.Id, false);
+
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
+        Assert.Single(question.AnswerAttempts);
+        Assert.Contains(mickey.Id, question.SkipProposalPlayerIds);
+        Assert.Equal(-100, rose.Score);
+        Assert.Equal(0, mickey.Score);
+    }
+
+    [Fact]
     public void Restore_preserves_a_claimed_buzzer()
     {
         var session = CreateSession();

@@ -617,6 +617,59 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion ProposeQuestionSkip(
+        int sourceQuestionId,
+        GamePlayerId playerId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        var player = FindPlayer(playerId);
+        question.ProposeSkip(player.Id);
+
+        if (HasUnanimousSkipProposal(question))
+        {
+            question.ResolveWithoutCorrectAnswer();
+            Timer.Stop();
+            AnswerTimer.Stop();
+        }
+
+        return question;
+    }
+
+    public bool WithdrawQuestionSkipProposal(
+        int sourceQuestionId,
+        GamePlayerId playerId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        var player = FindPlayer(playerId);
+        return question.WithdrawSkipProposal(player.Id);
+    }
+
+    private bool HasUnanimousSkipProposal(RuntimeQuestion question)
+    {
+        if (question.IsSpecial ||
+            question.IsAllPlayerQuestion ||
+            question.Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active ||
+            question.BuzzerStatus == QuestionBuzzerStatus.Claimed)
+        {
+            return false;
+        }
+
+        var eligiblePlayers = _players
+            .Where(candidate =>
+                question.AnswerAttempts.All(
+                    answer => answer.PlayerId != candidate.Id))
+            .ToArray();
+
+        return eligiblePlayers.Length > 0 &&
+            eligiblePlayers.All(candidate =>
+                question.SkipProposalPlayerIds.Contains(candidate.Id));
+    }
+
     public QuestionAnswerAttempt JudgeQuestionAnswer(
         int sourceQuestionId,
         GamePlayerId playerId,
@@ -660,7 +713,8 @@ public sealed class GameSession
             var hasEligiblePlayer = _players.Any(candidate =>
                 question.AnswerAttempts.All(answer => answer.PlayerId != candidate.Id));
 
-            if (!hasEligiblePlayer)
+            if (!hasEligiblePlayer ||
+                HasUnanimousSkipProposal(question))
             {
                 question.ResolveWithoutCorrectAnswer();
                 Timer.Stop();

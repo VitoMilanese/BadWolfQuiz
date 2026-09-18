@@ -388,6 +388,17 @@
              role="status"
              data-discord-operation-status></div>
 
+        <div class="question-skip-unanimous-notification"
+             data-question-skip-unanimous-notification
+             role="status"
+             aria-live="assertive"
+             hidden>
+            <div class="question-skip-unanimous-card">
+                <span class="question-skip-unanimous-icon" aria-hidden="true">⏭</span>
+                <strong>@Localizer["GameBoard_AllPlayersVotedToSkip"]</strong>
+            </div>
+        </div>
+
         <div class="question-timeout-notification"
              data-question-timeout-notification
              data-buzzer-message="@Localizer["GameTimer_ExpiredBuzzer"]"
@@ -1269,7 +1280,10 @@
 
         </div>
 
-        <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
+        <ul id="player-list"
+            class="game-scoreboard"
+            aria-label="@Localizer["Label_Players"]"
+            data-skip-proposal-label="@Localizer["GameBoard_PlayerProposesSkip"]">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
@@ -1330,6 +1344,8 @@
                 var hasAttempted = questionIsActive &&
                     Model.CurrentQuestion?.AnswerAttempts.Any(
                         attempt => attempt.PlayerId == player.Id) == true;
+                var hasSkipProposal = questionIsActive &&
+                    Model.CurrentQuestion?.SkipProposalPlayerIds.Contains(player.Id) == true;
 
                 <li class="scoreboard-player
                            @(Model.Game.Session.ActivePlayerId == player.Id ? "active-player" : null)
@@ -1358,6 +1374,13 @@
                         <span class="presence-badge presence-@player.Presence.ToString().ToLowerInvariant()">
                             @Localizer[$"PlayerPresence_{player.Presence}"]
                         </span>
+                    }
+                    @if (hasSkipProposal)
+                    {
+                        <span class="skip-proposal-badge"
+                              data-skip-proposal-badge
+                              title="@Localizer["GameBoard_PlayerProposesSkip"]"
+                              aria-label="@Localizer["GameBoard_PlayerProposesSkip"]"></span>
                     }
                     <span class="scoreboard-score @(player.Score < 0 ? "score-negative" : null)">
                         @player.Score
@@ -1705,7 +1728,10 @@
              aria-valuemin="130"
              aria-valuenow="230"
              tabindex="0"><span></span></div>
-        <ul id="player-list" class="game-scoreboard" aria-label="@Localizer["Label_Players"]">
+        <ul id="player-list"
+            class="game-scoreboard"
+            aria-label="@Localizer["Label_Players"]"
+            data-skip-proposal-label="@Localizer["GameBoard_PlayerProposesSkip"]">
             @if (Model.Game.Session.Settings.HasHostCard)
             {
                 <li class="scoreboard-player host-card" data-host-card>
@@ -5932,6 +5958,29 @@
                 }
             };
 
+            connection.on("QuestionSkippedByAllPlayers", () => {
+                const notification = document.querySelector(
+                    "[data-question-skip-unanimous-notification]");
+                if (!notification) {
+                    return;
+                }
+
+                window.clearTimeout(notification._hideTimer);
+                window.clearTimeout(notification._removeTimer);
+                notification.hidden = false;
+                notification.classList.remove("is-visible", "is-leaving");
+                void notification.offsetWidth;
+                notification.classList.add("is-visible");
+                notification._hideTimer = window.setTimeout(() => {
+                    notification.classList.remove("is-visible");
+                    notification.classList.add("is-leaving");
+                    notification._removeTimer = window.setTimeout(() => {
+                        notification.hidden = true;
+                        notification.classList.remove("is-leaving");
+                    }, 320);
+                }, 3600);
+            });
+
             connection.on("QuestionTimerExpired", update => {
                 const notification = document.querySelector(
                     "[data-question-timeout-notification]");
@@ -6024,6 +6073,8 @@
                         buzzerState?.answeringPlayerId === itemPlayerId;
                     const hasAttempted =
                         buzzerState?.ineligiblePlayerIds?.includes(itemPlayerId) ?? false;
+                    const hasSkipProposal =
+                        buzzerState?.skipProposalPlayerIds?.includes(itemPlayerId) ?? false;
 
                     item.classList.toggle(
                         "question-answering-player",
@@ -6031,6 +6082,25 @@
                     item.classList.toggle(
                         "question-attempted-player",
                         hasAttempted && !isAnswering);
+                    item.classList.toggle(
+                        "question-skip-proposed-player",
+                        hasSkipProposal);
+
+                    let skipProposalBadge =
+                        item.querySelector("[data-skip-proposal-badge]");
+                    if (hasSkipProposal && !skipProposalBadge) {
+                        skipProposalBadge = document.createElement("span");
+                        skipProposalBadge.className = "skip-proposal-badge";
+                        skipProposalBadge.dataset.skipProposalBadge = "";
+                        const label = playerList.dataset.skipProposalLabel || "";
+                        if (label) {
+                            skipProposalBadge.title = label;
+                            skipProposalBadge.setAttribute("aria-label", label);
+                        }
+                        item.append(skipProposalBadge);
+                    } else if (!hasSkipProposal) {
+                        skipProposalBadge?.remove();
+                    }
                 });
             };
 

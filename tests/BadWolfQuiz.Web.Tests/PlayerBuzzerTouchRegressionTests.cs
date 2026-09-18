@@ -101,6 +101,109 @@ public sealed class PlayerBuzzerTouchRegressionTests
         Assert.Contains("{ passive: false }", script);
     }
 
+    [Fact]
+    public void Player_skip_is_a_proposal_and_does_not_disable_buzzer_eligibility()
+    {
+        var root = FindRepositoryRoot();
+        var page = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Player",
+            "Lobby.cshtml"));
+        var hub = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Hubs",
+            "GameHub.cs"));
+        var styles = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "player-regular-gameplay-safe.css"));
+        var ukrainian = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Resources",
+            "Localization",
+            "SharedResource.uk.resx"));
+
+        Assert.Contains("id=\"player-skip-question\"", page);
+        Assert.Contains("@Localizer[\"PlayerGame_SkipQuestion\"]", page);
+        var playerNameIndex = page.IndexOf(
+            "class=\"player-name-line\"",
+            StringComparison.Ordinal);
+        var skipControlsIndex = page.IndexOf(
+            "id=\"player-skip-controls\"",
+            StringComparison.Ordinal);
+        var skipButtonIndex = page.IndexOf(
+            "id=\"player-skip-question\"",
+            StringComparison.Ordinal);
+        var moveButtonIndex = page.IndexOf(
+            "id=\"player-skip-position-toggle\"",
+            StringComparison.Ordinal);
+        var actionMenuIndex = page.IndexOf(
+            "id=\"player-lobby-action-menu\"",
+            StringComparison.Ordinal);
+        var buzzerPanelIndex = page.IndexOf(
+            "class=\"player-buzzer-panel\"",
+            StringComparison.Ordinal);
+        Assert.True(playerNameIndex >= 0);
+        Assert.True(skipControlsIndex > playerNameIndex);
+        Assert.True(skipButtonIndex > skipControlsIndex);
+        Assert.True(moveButtonIndex > skipButtonIndex);
+        Assert.True(actionMenuIndex > moveButtonIndex);
+        Assert.True(buzzerPanelIndex > moveButtonIndex);
+        Assert.DoesNotContain("data-question-skipped-label", page);
+        Assert.Contains("update.canProposeSkip === true", page);
+        Assert.Contains("update.skipProposalPlayerIds?.includes(playerId)", page);
+        Assert.Contains("const canBuzz = isOpen && !hasAlreadyAnswered;", page);
+        Assert.Contains("!hasProposedSkip", page);
+        Assert.Contains(
+            "connection.invoke(\"ProposeQuestionSkip\", sourceQuestionId)",
+            page);
+        Assert.Contains("skipQuestionControls.hidden = !canProposeSkip", page);
+        Assert.Contains("skipQuestionControls.hidden = true", page);
+        Assert.Contains("id=\"player-skip-position-toggle\"", page);
+        Assert.Contains("data-player-skip-position-icon", page);
+        Assert.Contains("moveToBottom ? \"↑\" : \"↓\"", page);
+        Assert.Contains("buzzerPanel.append(skipQuestionControls)", page);
+        Assert.Contains(
+            "playerNameLine.insertAdjacentElement(",
+            page);
+        Assert.Contains("skip-controls-position", page);
+        Assert.Contains("localStorage.setItem(", page);
+        Assert.Contains("QuestionSkipProposalRejected", page);
+
+        Assert.Contains(
+            "public async Task ProposeQuestionSkip(int sourceQuestionId)",
+            hub);
+        Assert.Contains("skipProposalPlayerIds", hub);
+        Assert.Contains("ineligiblePlayerIds", hub);
+        Assert.Contains("canProposeSkip", hub);
+        Assert.DoesNotContain(".Concat(skipProposalPlayerIds)", hub);
+
+        Assert.Contains(".player-skip-controls[hidden]", styles);
+        Assert.Contains("display: none !important;", styles);
+        Assert.Contains(".player-skip-controls:not([hidden])", styles);
+        Assert.Contains(".player-skip-position-toggle", styles);
+        Assert.Contains("width: 44px;", styles);
+        Assert.Contains("height: 44px;", styles);
+        Assert.Contains(
+            "@media (max-width: 900px), (hover: none) and (pointer: coarse)",
+            styles);
+        Assert.Contains("width: 100% !important;", styles);
+        Assert.Contains("justify-self: stretch;", styles);
+        Assert.Contains("flex: 1 1 0;", styles);
+        Assert.Contains("<value>Пропустити</value>", ukrainian);
+        Assert.Contains("<value>Пропонує пропустити питання</value>", ukrainian);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

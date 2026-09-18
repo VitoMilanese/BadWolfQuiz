@@ -356,6 +356,48 @@ public sealed class GameHub(
         }
     }
 
+    public async Task ProposeQuestionSkip(int sourceQuestionId)
+    {
+        PlayerQuestionSkipProposalResult? result;
+
+        try
+        {
+            result = sessionRegistry.ProposeQuestionSkip(
+                Context.ConnectionId,
+                sourceQuestionId);
+        }
+        catch (GameRuleViolationException)
+        {
+            result = null;
+        }
+
+        if (result is null)
+        {
+            await Clients.Caller.SendAsync(
+                "QuestionSkipProposalRejected",
+                new { sourceQuestionId });
+            return;
+        }
+
+        var group = Clients.Group(GroupName(result.Game.PublicCode));
+        await Task.WhenAll(
+            group.SendAsync(
+                "BuzzerStateChanged",
+                CreateBuzzerUpdate(result.Game)),
+            group.SendAsync(
+                "TimerStateChanged",
+                CreateTimerUpdate(result.Game)));
+
+        if (result.QuestionClosed)
+        {
+            await Clients
+                .Group(HostGroupName(result.Game.PublicCode))
+                .SendAsync(
+                    "QuestionSkippedByAllPlayers",
+                    new { sourceQuestionId });
+        }
+    }
+
     public async Task Buzz(int sourceQuestionId)
     {
         BuzzerClaimResult? claim;
@@ -583,6 +625,8 @@ public sealed class GameHub(
                 answeringPlayerId = (Guid?)null,
                 answeringPlayerName = (string?)null,
                 ineligiblePlayerIds = Array.Empty<Guid>(),
+                skipProposalPlayerIds = Array.Empty<Guid>(),
+                canProposeSkip = false,
                 buzzerRace = (object?)null
             };
         }
@@ -590,6 +634,17 @@ public sealed class GameHub(
         var answeringPlayer = question.AnsweringPlayerId is { } playerId
             ? game.Session.Players.Single(player => player.Id == playerId)
             : null;
+        var skipProposalPlayerIds = question.SkipProposalPlayerIds
+            .Select(id => id.Value)
+            .ToArray();
+        var ineligiblePlayerIds = question.AnswerAttempts
+            .Select(attempt => attempt.PlayerId.Value)
+            .ToArray();
+        var canProposeSkip =
+            !question.IsSpecial &&
+            !question.IsAllPlayerQuestion &&
+            question.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.Active;
 
         return new
         {
@@ -597,9 +652,9 @@ public sealed class GameHub(
             status = question.BuzzerStatus.ToString().ToLowerInvariant(),
             answeringPlayerId = answeringPlayer?.Id.Value,
             answeringPlayerName = answeringPlayer?.Name,
-            ineligiblePlayerIds = question.AnswerAttempts
-                .Select(attempt => attempt.PlayerId.Value)
-                .ToArray(),
+            ineligiblePlayerIds,
+            skipProposalPlayerIds,
+            canProposeSkip,
             buzzerRace = game.BuzzerRace is { } race &&
                 race.SourceQuestionId == question.SourceQuestionId
                     ? new

@@ -984,6 +984,21 @@
   <data name="PlayerGame_Buzz" xml:space="preserve">
     <value>BUZZER</value>
   </data>
+  <data name="PlayerGame_SkipQuestion" xml:space="preserve">
+    <value>Salta</value>
+  </data>
+  <data name="PlayerGame_MoveSkipControlsDown" xml:space="preserve">
+    <value>Sposta i controlli Salta sotto il buzzer</value>
+  </data>
+  <data name="PlayerGame_MoveSkipControlsUp" xml:space="preserve">
+    <value>Sposta i controlli Salta sotto il nome del giocatore</value>
+  </data>
+  <data name="GameBoard_PlayerProposesSkip" xml:space="preserve">
+    <value>Propone di saltare la domanda</value>
+  </data>
+  <data name="GameBoard_AllPlayersVotedToSkip" xml:space="preserve">
+    <value>Tutti i giocatori hanno votato per saltare questa domanda.</value>
+  </data>
   <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
     <value>Il buzzer è attivo.</value>
   </data>

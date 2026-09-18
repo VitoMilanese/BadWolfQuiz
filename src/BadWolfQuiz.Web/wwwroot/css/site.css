@@ -6311,6 +6311,92 @@ body.youtube-auto-expanded-open {
 
 
 /* Host-only timer expiration impact notification. */
+.question-skip-unanimous-notification[hidden] {
+    display: none !important;
+}
+
+.question-skip-unanimous-notification {
+    position: fixed;
+    z-index: 1320;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgb(0 0 0 / 34%);
+    pointer-events: none;
+    opacity: 0;
+}
+
+.question-skip-unanimous-card {
+    width: min(820px, calc(100vw - 40px));
+    box-sizing: border-box;
+    padding: clamp(22px, 4vw, 42px);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(16px, 3vw, 28px);
+    border: 2px solid color-mix(in srgb, var(--gold) 76%, white 18%);
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--panel) 94%, black);
+    box-shadow:
+        0 30px 90px rgb(0 0 0 / 58%),
+        0 0 54px color-mix(in srgb, var(--gold) 22%, transparent);
+}
+
+.question-skip-unanimous-icon {
+    display: grid;
+    place-items: center;
+    width: clamp(64px, 9vw, 92px);
+    aspect-ratio: 1;
+    border: 2px solid color-mix(in srgb, var(--gold) 78%, white 14%);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--gold) 10%, var(--panel-2));
+    color: var(--gold);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1;
+}
+
+.question-skip-unanimous-card strong {
+    color: var(--text);
+    font-size: clamp(1.7rem, 4.6vw, 3.8rem);
+    font-weight: 950;
+    line-height: 1.04;
+    text-wrap: balance;
+}
+
+.question-skip-unanimous-notification.is-visible {
+    animation: question-skip-unanimous-in 360ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.question-skip-unanimous-notification.is-leaving {
+    animation: question-skip-unanimous-out 320ms ease both;
+}
+
+@keyframes question-skip-unanimous-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes question-skip-unanimous-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@media (max-width: 620px) {
+    .question-skip-unanimous-card {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .question-skip-unanimous-notification.is-visible,
+    .question-skip-unanimous-notification.is-leaving {
+        animation-duration: 1ms;
+    }
+}
+
 .question-timeout-notification {
     position: fixed;
     z-index: 1300;

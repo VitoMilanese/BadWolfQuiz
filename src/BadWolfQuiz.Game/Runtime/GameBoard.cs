@@ -115,10 +115,12 @@ public sealed class RuntimeQuestion
     private readonly List<Wager> _allPlayerWagers = [];
     private readonly List<int> _remainingHostMultipleChoiceOptionIds = [];
     private readonly List<GamePlayerId> _allPlayerChoiceExcludedPlayerIds = [];
+    private readonly List<GamePlayerId> _skipProposalPlayerIds = [];
     private readonly IReadOnlyList<QuestionAnswerAttempt> _readOnlyAnswerAttempts;
     private readonly IReadOnlyList<Wager> _readOnlyAllPlayerWagers;
     private readonly IReadOnlyList<int> _readOnlyRemainingHostMultipleChoiceOptionIds;
     private readonly IReadOnlyList<GamePlayerId> _readOnlyAllPlayerChoiceExcludedPlayerIds;
+    private readonly IReadOnlyList<GamePlayerId> _readOnlySkipProposalPlayerIds;
 
     internal RuntimeQuestion(
         int sourceRoundId,
@@ -156,6 +158,7 @@ public sealed class RuntimeQuestion
             _remainingHostMultipleChoiceOptionIds.AsReadOnly();
         _readOnlyAllPlayerChoiceExcludedPlayerIds =
             _allPlayerChoiceExcludedPlayerIds.AsReadOnly();
+        _readOnlySkipProposalPlayerIds = _skipProposalPlayerIds.AsReadOnly();
 
         if (IsHostMultipleChoice)
         {
@@ -315,6 +318,8 @@ public sealed class RuntimeQuestion
 
     public IReadOnlyList<QuestionAnswerAttempt> AnswerAttempts => _readOnlyAnswerAttempts;
 
+    public IReadOnlyList<GamePlayerId> SkipProposalPlayerIds => _readOnlySkipProposalPlayerIds;
+
     internal RuntimeQuestionState CaptureState() => new(
         SourceQuestionId,
         IsSpecial,
@@ -332,7 +337,8 @@ public sealed class RuntimeQuestion
         AreAllPlayerChoiceOptionsRevealed,
         _allPlayerChoiceExcludedPlayerIds.ToArray(),
         HintCount,
-        RevealedHintCount);
+        RevealedHintCount,
+        _skipProposalPlayerIds.ToArray());
 
     internal void RestoreState(RuntimeQuestionState state)
     {
@@ -347,6 +353,10 @@ public sealed class RuntimeQuestion
         _allPlayerChoiceExcludedPlayerIds.Clear();
         _allPlayerChoiceExcludedPlayerIds.AddRange(
             (state.AllPlayerChoiceExcludedPlayerIds ?? [])
+                .Distinct());
+        _skipProposalPlayerIds.Clear();
+        _skipProposalPlayerIds.AddRange(
+            (state.SkipProposalPlayerIds ?? [])
                 .Distinct());
         RevealedClueCount = PresentationType == QuestionPresentationType.FourClues
             ? Math.Clamp(state.RevealedClueCount == 0 ? 2 : state.RevealedClueCount, 2, 4)
@@ -621,9 +631,45 @@ public sealed class RuntimeQuestion
                 "This player has already answered the current question.");
         }
 
+        _skipProposalPlayerIds.Remove(playerId);
         AnsweringPlayerId = playerId;
         BuzzerStatus = QuestionBuzzerStatus.Claimed;
     }
+
+    internal void ProposeSkip(GamePlayerId playerId)
+    {
+        if (IsSpecial ||
+            IsAllPlayerQuestion ||
+            Status is not RuntimeQuestionStatus.Selected and
+                not RuntimeQuestionStatus.Active)
+        {
+            throw new GameRuleViolationException(
+                "Only an active regular question can be skipped.");
+        }
+
+        if (AnsweringPlayerId == playerId)
+        {
+            throw new GameRuleViolationException(
+                "The player who owns the buzzer cannot skip the question.");
+        }
+
+        if (_answerAttempts.Any(attempt => attempt.PlayerId == playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player has already answered the current question.");
+        }
+
+        if (_skipProposalPlayerIds.Contains(playerId))
+        {
+            throw new GameRuleViolationException(
+                "This player has already proposed skipping the current question.");
+        }
+
+        _skipProposalPlayerIds.Add(playerId);
+    }
+
+    internal bool WithdrawSkipProposal(GamePlayerId playerId) =>
+        _skipProposalPlayerIds.Remove(playerId);
 
     internal QuestionAnswerAttempt JudgeAnswer(
         GamePlayerId playerId,

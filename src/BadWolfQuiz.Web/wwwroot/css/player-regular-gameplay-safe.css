@@ -332,6 +332,68 @@
     box-shadow: 0 24px 56px rgb(0 0 0 / 30%);
 }
 
+.player-lobby .player-skip-controls[hidden] {
+    display: none !important;
+}
+
+.player-lobby > .player-skip-controls:not([hidden]) {
+    grid-column: 1 / -1;
+    width: min(22rem, 100%);
+    margin: 0.35rem 0 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    justify-self: start;
+    align-self: start;
+}
+
+.player-lobby .player-skip-controls > .player-skip-question {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 44px;
+    min-height: 44px;
+    margin: 0;
+    font-weight: 850;
+}
+
+.player-lobby .player-skip-controls > .player-skip-position-toggle {
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.player-lobby > .player-buzzer-panel > .player-skip-controls:not([hidden]) {
+    width: 100%;
+    margin: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+    .player-lobby > .player-skip-controls:not([hidden]) {
+        width: 100% !important;
+        max-width: none !important;
+        margin-top: 0.25rem;
+        justify-self: stretch;
+    }
+
+    .player-lobby > .player-skip-controls:not([hidden]) > .player-skip-question {
+        flex: 1 1 0;
+        width: auto;
+        max-width: none;
+    }
+}
+
 /* Anonymous shared wager already owns its stable runtime. Style the panel itself. */
 .player-lobby > .anonymous-shared-wager-player-panel {
     grid-column: 1 / -1 !important;
