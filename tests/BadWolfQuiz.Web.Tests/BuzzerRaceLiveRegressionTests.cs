@@ -70,7 +70,10 @@ public sealed class BuzzerRaceLiveRegressionTests
             "await submitGameControl(\n                        cancelBuzzerClaimForm,",
             markup);
         Assert.Contains(
-            ".closest(\"details\")\n                        ?.removeAttribute(\"open\")",
+            "data-host-tools-dialog-dismiss",
+            markup);
+        Assert.DoesNotContain(
+            ".closest(\"details\")",
             markup);
         Assert.Contains(
             "OnPostCancelBuzzerClaimAsync(",

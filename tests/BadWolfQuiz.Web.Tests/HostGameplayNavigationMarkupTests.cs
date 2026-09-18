@@ -354,13 +354,45 @@ public sealed class HostGameplayNavigationMarkupTests
     }
 
     [Fact]
+    public void Host_tools_use_a_responsive_dialog_instead_of_dropdown()
+    {
+        var markup = File.ReadAllText(FindLobbyView());
+        var css = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "css",
+            "host-tools-dialog.css"));
+        var script = File.ReadAllText(FindWebFile(
+            "wwwroot",
+            "js",
+            "host-tools-dialog.js"));
+
+        Assert.Contains("data-open-host-tools-dialog", markup);
+        Assert.Contains("data-host-tools-dialog", markup);
+        Assert.Contains("host-tools-dialog-actions", markup);
+        Assert.Contains("data-close-host-tools-dialog", markup);
+        Assert.DoesNotContain(
+            "<details class=\"action-menu board-action-menu\">",
+            markup);
+        Assert.Contains(
+            "grid-template-columns: repeat(2, minmax(0, 1fr));",
+            css);
+        Assert.Contains("@media (max-width: 640px)", css);
+        Assert.Contains(
+            "grid-template-columns: minmax(0, 1fr);",
+            css);
+        Assert.Contains("dialog.showModal();", script);
+        Assert.Contains("event.target === dialog", script);
+        Assert.Contains("opener?.focus();", script);
+    }
+
+    [Fact]
     public void Partial_round_refresh_synchronizes_tools_navigation_visibility()
     {
         var markup = File.ReadAllText(FindLobbyView());
         var css = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "site.css"));
+            "host-tools-dialog.css"));
 
         Assert.Contains("!Model.Game.Session.HasPreviousUnfinishedRound", markup);
         Assert.Contains("!Model.Game.Session.HasNextUnfinishedRound", markup);
@@ -369,8 +401,8 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("#force-advance-round-form", markup);
         Assert.Contains("currentAction.hidden = nextAction.hidden;", markup);
         Assert.Contains("syncRoundNavigationActions(parsed);", markup);
-        Assert.Contains(".action-menu-popover form[hidden]", css);
-        Assert.Contains(".action-menu-popover .action-menu-item[hidden]", css);
+        Assert.Contains(".host-tools-action-form[hidden]", css);
+        Assert.Contains(".host-tools-action[hidden]", css);
         Assert.Contains("display: none !important;", css);
     }
 
