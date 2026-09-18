@@ -230,12 +230,15 @@ html.player-lobby-action-menu-open body {
 
 .player-lobby-game-code-copy-status {
     grid-column: 1 / -1;
-    min-height: 0.9rem;
     padding: 0 8px 2px;
     color: var(--red-bright);
     font-size: 0.75rem;
     font-weight: 800;
     line-height: 1;
+}
+
+.player-lobby-game-code-copy-status:empty {
+    display: none;
 }
 
 .player-lobby-action-menu-list {
