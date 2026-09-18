@@ -253,6 +253,208 @@
                                 <span class="host-tools-action-icon" aria-hidden="true">⚙</span>
                                 <span class="host-tools-action-label">@Localizer["GameSettings_LobbyTitle"]</span>
                             </button>
+                        </div>
+                    </div>
+                </dialog>
+            }
+            @if (gameHeaderQrDarkDataUri is not null && gameHeaderQrLightDataUri is not null)
+            {
+                <button class="button button-secondary game-header-square-button game-header-join-qr"
+                        type="button"
+                        data-open-join-code
+                        data-show-join-code-label="@Localizer["GameBoard_ShowJoinCode"]"
+                        data-hide-join-code-label="@Localizer["GameBoard_HideJoinCode"]"
+                        hidden
+                        title="@Localizer["GameBoard_ShowJoinCode"]"
+                        aria-label="@Localizer["GameBoard_ShowJoinCode"]">
+                    <img src="@gameHeaderQrDarkDataUri"
+                         data-dark-src="@gameHeaderQrDarkDataUri"
+                         data-light-src="@gameHeaderQrLightDataUri"
+                         alt=""
+                         aria-hidden="true" />
+                </button>
+            }
+            @if (isSettingsPage)
+            {
+                <small>@ProductVersionLocalizer["VersionLabel"]: @productVersion.Version</small>
+            }
+        </div>
+
+        @if (gameHeaderQrDarkDataUri is not null && gameHeaderQrLightDataUri is not null)
+        {
+            <script>
+                (() => {
+                    const gameHeader = document.querySelector('.game-header-context');
+                    const qrButton = document.querySelector('.game-header-join-qr');
+                    const qrImage = qrButton?.querySelector('img');
+                    const discordButton = gameHeader?.querySelector('[data-open-discord-settings]');
+                    if (!gameHeader || !qrButton || !qrImage || !discordButton) {
+                        return;
+                    }
+
+                    gameHeader
+                        .querySelectorAll('.board-action-menu .action-menu-item[data-open-join-code]')
+                        .forEach(item => item.remove());
+
+                    const buttonBackground = getComputedStyle(discordButton).backgroundColor;
+                    qrButton.style.backgroundColor = buttonBackground;
+
+                    const channels = buttonBackground
+                        .match(/[\d.]+/g)
+                        ?.slice(0, 3)
+                        .map(Number);
+                    const backgroundIsLight = channels?.length === 3 &&
+                        ((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255) >= 0.55;
+                    qrImage.src = backgroundIsLight
+                        ? qrImage.dataset.darkSrc
+                        : qrImage.dataset.lightSrc;
+
+                    discordButton.classList.add('game-header-square-button');
+                    gameHeader.insertBefore(qrButton, discordButton);
+
+                    const menu = document.querySelector('.limited-game-tools');
+                    if (menu) {
+                        gameHeader.insertBefore(menu, qrButton);
+                    }
+
+                    qrButton.hidden = false;
+                })();
+            </script>
+        }
+
+        <button class="button button-secondary header-menu-trigger"
+                type="button"
+                data-open-header-menu
+                aria-haspopup="dialog"
+                aria-controls="header-menu-drawer"
+                aria-expanded="false">
+            <span aria-hidden="true">☰</span>
+            <span>@Localizer["Menu_Title"]</span>
+        </button>
+
+        <div class="language-selector">
+            <button id="languageButton"
+                    class="language-button"
+                    type="button"
+                    aria-label="Language"
+                    aria-expanded="false">
+                @currentFlag
+            </button>
+
+            <div id="languageMenu" class="language-menu">
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="uk"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "uk" ? "active" : null)">
+                    🇺🇦 Українська
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="en"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "en" ? "active" : null)">
+                    🇬🇧 English
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="ru"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "ru" ? "active" : null)">
+                    🇷🇺 Кацапська
+                </a>
+                <a asp-page="/SetLanguage"
+                   asp-route-culture="it"
+                   asp-route-returnUrl="@returnUrl"
+                   class="@(currentCulture == "it" ? "active" : null)">
+                    🇮🇹 Italiano
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <dialog id="header-menu-drawer"
+            class="header-side-menu"
+            data-header-side-menu
+            aria-labelledby="header-side-menu-title">
+        <div class="header-side-menu-panel">
+            <div class="header-side-menu-heading">
+                <div class="header-side-menu-title-wrap">
+                    <span class="header-side-menu-kicker">BAD WOLF QUIZ</span>
+                    <h2 id="header-side-menu-title">@Localizer["Menu_Title"]</h2>
+                </div>
+                <button class="header-side-menu-close"
+                        type="button"
+                        data-close-header-menu
+                        aria-label="@Localizer["Button_Close"]">×</button>
+            </div>
+
+            <nav class="header-side-menu-scroll" aria-label="@Localizer["Menu_Title"]">
+                <div class="header-side-menu-group">
+                    @if (isAuthenticated)
+                    {
+                        <a class="header-side-menu-item" asp-page="/Admin/Quizzes/Index">@Localizer["Menu_Quizzes"]</a>
+                    }
+
+                    <a class="header-side-menu-item" asp-page="/PublicQuizzes">@Localizer["Menu_PublicQuizzes"]</a>
+                    <a class="header-side-menu-item" asp-page="/Minigames">@Localizer["Menu_Minigames"]</a>
+                    @if (!string.IsNullOrWhiteSpace(discordInviteUrl))
+                    {
+                        <a class="header-side-menu-item" href="@discordInviteUrl" target="_blank" rel="noopener noreferrer">
+                            @Localizer["Menu_PlayWithUs"]
+                        </a>
+                    }
+                    <a class="header-side-menu-item" asp-page="/Join/Index">@Localizer["Menu_Join"]</a>
+                </div>
+
+                @if (isAuthenticated)
+                {
+                    <div class="header-side-menu-group">
+                        <a class="header-side-menu-item" asp-page="/Admin/Games/History">@Localizer["Menu_GameHistory"]</a>
+                        <a class="header-side-menu-item" asp-page="/Admin/Games/Statistics">@Localizer["Menu_PlayerStatistics"]</a>
+                        <a class="header-side-menu-item" asp-page="/Achievements">@AchievementLocalizer["Achievements_Title"]</a>
+                        <a class="header-side-menu-item" asp-page="/Admin/CustomAchievements">@CustomAchievementLocalizer["Title"]</a>
+                        <a class="header-side-menu-item" asp-page="/Admin/WordRingsEditor">@WordRingsLocalizer["EditorMenu"]</a>
+                        @if (isMasterHost)
+                        {
+                            <a class="header-side-menu-item" asp-page="/Admin/MasterGames">@Localizer["Menu_ActiveGames"]</a>
+                        }
+                    </div>
+                }
+
+                <div class="header-side-menu-group">
+                    <a class="header-side-menu-item" asp-page="/AskQuestion">@Localizer["Menu_AskQuestion"]</a>
+                    @if (hasUserQuestionHistory)
+                    {
+                        <a class="header-side-menu-item" asp-page="/MyQuestions">@Localizer["Menu_MyQuestions"]</a>
+                    }
+                    @if (isMasterHost)
+                    {
+                        <a class="header-side-menu-item" asp-page="/Admin/QuestionInbox">
+                            @Localizer["Menu_QuestionInbox"]
+                        </a>
+                    }
+                    <a class="header-side-menu-item" asp-page="/Faq">@Localizer["Menu_FAQ"]</a>
+                </div>
+
+                <div class="header-side-menu-group">
+                    @if (isAuthenticated)
+                    {
+                        <a class="header-side-menu-item" asp-page="/Admin/Settings/Index">@Localizer["Menu_Settings"]</a>
+                        <a class="header-side-menu-item" asp-page="/Account/ChangePassword">@Localizer["Menu_ChangePassword"]</a>
+                    }
+                    <a class="header-side-menu-item" asp-page="/About">@ProductVersionLocalizer["MenuAbout"]</a>
+                </div>
+            </nav>
+
+            <div class="header-side-menu-footer">
+                @if (isAuthenticated)
+                {
+                    <form method="post" asp-page="/Account/Logout">
+                        <button type="submit" class="header-side-menu-item">@Localizer["Menu_SignOut"]</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="header-side-menu-item" asp-page="/Account/Login">@Localizer["Menu_HostSignIn"]</a>
+                }
             </div>
         </div>
     </dialog>
