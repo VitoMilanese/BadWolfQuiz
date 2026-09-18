@@ -14,12 +14,6 @@
             currentQuestion.PresentationType);
 }
 
-@section Styles {
-    <link rel="stylesheet"
-          href="~/css/host-tools-dialog.css"
-          asp-append-version="true" />
-}
-
 @section HeaderContext {
     @if (Model.Game.Session.Status is
         BadWolfQuiz.Game.Runtime.GameSessionStatus.Running or
@@ -62,8 +56,8 @@
             aria-labelledby="host-tools-dialog-title">
         <div class="dialog-card host-tools-dialog-card">
             <div class="dialog-heading">
-                <div>
-                    <p class="eyebrow">@Localizer["Menu_Tools"]</p>
+                <div class="host-tools-dialog-title">
+                    <span class="host-tools-kicker">BAD WOLF QUIZ</span>
                     <h2 id="host-tools-dialog-title">@Localizer["Menu_Tools"]</h2>
                 </div>
                 <button class="dialog-close"

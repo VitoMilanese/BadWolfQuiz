@@ -360,7 +360,7 @@ public sealed class HostGameplayNavigationMarkupTests
         var css = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "host-tools-dialog.css"));
+            "site.css"));
         var script = File.ReadAllText(FindWebFile(
             "wwwroot",
             "js",
@@ -370,6 +370,7 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("data-host-tools-dialog", markup);
         Assert.Contains("host-tools-dialog-actions", markup);
         Assert.Contains("data-close-host-tools-dialog", markup);
+        Assert.DoesNotContain("host-tools-dialog.css", markup);
         Assert.DoesNotContain(
             "<details class=\"action-menu board-action-menu\">",
             markup);
@@ -383,6 +384,20 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("dialog.showModal();", script);
         Assert.Contains("event.target === dialog", script);
         Assert.Contains("opener?.focus();", script);
+
+        var layout = File.ReadAllText(FindWebFile(
+            "Pages",
+            "Shared",
+            "_Layout.cshtml"));
+        Assert.Contains(
+            "host-tools-trigger limited-game-tools",
+            layout);
+        Assert.Contains(
+            "class=\"app-dialog host-tools-dialog\"",
+            layout);
+        Assert.DoesNotContain(
+            "<details class=\"action-menu board-action-menu limited-game-tools\">",
+            layout);
     }
 
     [Fact]
@@ -392,7 +407,7 @@ public sealed class HostGameplayNavigationMarkupTests
         var css = File.ReadAllText(FindWebFile(
             "wwwroot",
             "css",
-            "host-tools-dialog.css"));
+            "site.css"));
 
         Assert.Contains("!Model.Game.Session.HasPreviousUnfinishedRound", markup);
         Assert.Contains("!Model.Game.Session.HasNextUnfinishedRound", markup);

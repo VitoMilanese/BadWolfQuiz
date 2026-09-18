@@ -40,8 +40,8 @@ public sealed class GameRestartRegressionTests
         Assert.Contains("\"host-tools-dialog-actions\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("var isHeaderContext = classes.Contains(", tagHelper, StringComparison.Ordinal);
         Assert.Contains("\"game-header-context\"", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("id=\"host-tools-dialog\"", tagHelper, StringComparison.Ordinal);
-        Assert.Contains("data-open-host-tools-dialog", tagHelper, StringComparison.Ordinal);
+        Assert.DoesNotContain("id=\"host-tools-dialog\"", tagHelper, StringComparison.Ordinal);
+        Assert.DoesNotContain("data-open-host-tools-dialog", tagHelper, StringComparison.Ordinal);
         Assert.Contains("host-tools-action host-tools-action-danger", tagHelper, StringComparison.Ordinal);
         Assert.Contains("id=\"restart-game-dialog\"", tagHelper, StringComparison.Ordinal);
         Assert.Contains("class=\"app-dialog\"", tagHelper, StringComparison.Ordinal);

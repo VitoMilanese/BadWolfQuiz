@@ -59,19 +59,15 @@ public sealed class RestartGameToolsTagHelper(
 
         if (isToolsDialogActions)
         {
-            if (game.Session.Status == GameSessionStatus.Running)
-            {
-                output.PostContent.AppendHtml($$"""
-                    <button class="host-tools-action host-tools-action-danger"
-                            type="button"
-                            data-host-tools-dialog-dismiss
-                            data-open-restart-game-dialog>
-                        <span class="host-tools-action-icon" aria-hidden="true">↻</span>
-                        <span class="host-tools-action-label">{{html.Encode(labels.Restart)}}</span>
-                    </button>
-                    """);
-            }
-
+            output.PostContent.AppendHtml($$"""
+                <button class="host-tools-action host-tools-action-danger"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-restart-game-dialog>
+                    <span class="host-tools-action-icon" aria-hidden="true">↻</span>
+                    <span class="host-tools-action-label">{{html.Encode(labels.Restart)}}</span>
+                </button>
+                """);
             return;
         }
 
@@ -79,41 +75,6 @@ public sealed class RestartGameToolsTagHelper(
         if (string.IsNullOrWhiteSpace(requestToken))
         {
             return;
-        }
-
-        if (game.Session.Status != GameSessionStatus.Running)
-        {
-            output.PostContent.AppendHtml($$"""
-                <button class="button button-secondary host-tools-trigger"
-                        type="button"
-                        data-open-host-tools-dialog>
-                    {{html.Encode(labels.Tools)}}
-                </button>
-
-                <dialog id="host-tools-dialog"
-                        class="app-dialog host-tools-dialog"
-                        data-host-tools-dialog
-                        aria-labelledby="host-tools-dialog-title">
-                    <div class="dialog-card host-tools-dialog-card">
-                        <div class="dialog-heading">
-                            <h2 id="host-tools-dialog-title">{{html.Encode(labels.Tools)}}</h2>
-                            <button class="dialog-close"
-                                    type="button"
-                                    data-close-host-tools-dialog
-                                    aria-label="{{html.Encode(labels.Close)}}">×</button>
-                        </div>
-                        <div class="host-tools-dialog-actions">
-                            <button class="host-tools-action host-tools-action-danger"
-                                    type="button"
-                                    data-host-tools-dialog-dismiss
-                                    data-open-restart-game-dialog>
-                                <span class="host-tools-action-icon" aria-hidden="true">↻</span>
-                                <span class="host-tools-action-label">{{html.Encode(labels.Restart)}}</span>
-                            </button>
-                        </div>
-                    </div>
-                </dialog>
-                """);
         }
 
         output.PostContent.AppendHtml($$"""
