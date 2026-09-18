@@ -196,6 +196,35 @@ confirmation is therefore shown only if content still exists in the part of the
 board that would actually be removed. No page refresh is required after deleting
 a question for these checks to become accurate.
 
+## Question anomaly detection and repair
+
+BadWolfQuiz Web 1.50.0 detects question structures that can prevent a quiz from
+being converted into a gameplay snapshot. An anomalous board cell is highlighted
+and shows a warning badge even when the question and answer previews are empty.
+
+The board also exposes a compact wrench **Fix** action for anomalies that can be
+repaired conservatively. The action runs asynchronously, shows the global busy
+indicator, disables itself while the request is in progress, and updates the
+question card in place without reloading the Quiz Editor.
+
+Automatic repair never invents answer content. For a structurally broken
+Four-clue, all-player multiple-choice, on-demand multiple-choice, or
+host-selected multiple-choice question, the repair removes stale structural
+markers and empty leftover blocks, preserves meaningful question/answer content,
+and resets the presentation to a safe Standard question. Empty Text placeholders
+are created only when needed so the repaired question remains editable.
+
+Valid questions are not modified. Anomalies that cannot be repaired safely remain
+visible for manual correction.
+
+Quiz-start validation also reports the concrete failing location instead of only
+the generic cannot-start message. Empty rounds identify the round, while invalid
+questions identify the question ID, round, category, row, and underlying
+validation reason.
+
+The repair query uses split EF collection loading so question blocks, answer
+blocks, and round rows are not multiplied into one cartesian result set.
+
 ## Final question
 
 Final description, question, and answer blocks are stored directly on the quiz

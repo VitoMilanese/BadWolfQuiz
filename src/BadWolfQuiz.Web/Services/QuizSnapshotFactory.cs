@@ -54,6 +54,12 @@ public sealed class QuizSnapshotFactory
                     copyFileData)))
             .ToList();
 
+        if (questions.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"Round #{round.Id} \"{round.Title}\" does not contain any questions.");
+        }
+
         var categoryIntros = categories
             .Select(category => new QuizCategoryIntroSnapshot(
                 category.Id,
@@ -88,7 +94,7 @@ public sealed class QuizSnapshotFactory
         if (!pointsByRow.TryGetValue(question.RowIndex, out var points))
         {
             throw new InvalidOperationException(
-                $"Question {question.Id} references missing row {question.RowIndex}.");
+                $"Question #{question.Id} in round \"{question.Category.Round.Title}\", category \"{question.Category.Title}\" references missing row {question.RowIndex} in the point table.");
         }
 
         var presentationType =
@@ -98,22 +104,31 @@ public sealed class QuizSnapshotFactory
             question.BuzzModeOverride,
             roundDefaultBuzzMode);
 
-        return new QuizQuestionSnapshot(
-            question.Id,
-            question.QuizCategoryId,
-            question.RowIndex,
-            points,
-            question.IsSpecial,
-            question.Category.Title,
-            question.ExcludeFromRandomWagerSelection,
-            question.QuestionBlocks.Select(block =>
-                CreateContentBlock(block, copyFileData)),
-            question.AnswerBlocks.Select(block =>
-                CreateContentBlock(block, copyFileData)),
-            presentationType,
-            buzzerMode,
-            Math.Max(0, question.BuzzDelaySeconds),
-                        question.AllowAnswerRewardModifiers);
+        try
+        {
+            return new QuizQuestionSnapshot(
+                question.Id,
+                question.QuizCategoryId,
+                question.RowIndex,
+                points,
+                question.IsSpecial,
+                question.Category.Title,
+                question.ExcludeFromRandomWagerSelection,
+                question.QuestionBlocks.Select(block =>
+                    CreateContentBlock(block, copyFileData)),
+                question.AnswerBlocks.Select(block =>
+                    CreateContentBlock(block, copyFileData)),
+                presentationType,
+                buzzerMode,
+                Math.Max(0, question.BuzzDelaySeconds),
+                question.AllowAnswerRewardModifiers);
+        }
+        catch (ArgumentException exception)
+        {
+            throw new InvalidOperationException(
+                $"Question #{question.Id} in round \"{question.Category.Round.Title}\", category \"{question.Category.Title}\", row {question.RowIndex} is invalid: {exception.Message}",
+                exception);
+        }
     }
 
     private static QuestionBuzzerMode ResolveBuzzerMode(

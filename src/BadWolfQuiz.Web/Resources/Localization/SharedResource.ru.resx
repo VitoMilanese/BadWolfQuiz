@@ -447,6 +447,18 @@
   <data name="QuizEditor_QuestionDeleted" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="QuizEditor_QuestionAnomaly" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_FixQuestion" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_QuestionFixed" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuizEditor_QuestionFixUnavailable" xml:space="preserve">
+    <value>Україна</value>
+  </data>
   <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
     <value>Україна</value>
   </data>
@@ -802,6 +814,9 @@
     <value>Україна</value>
   </data>
   <data name="Error_QuizCannotStart" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Error_QuizCannotStart_Detail" xml:space="preserve">
     <value>Україна</value>
   </data>
   <data name="PlayerPresence_Active" xml:space="preserve">

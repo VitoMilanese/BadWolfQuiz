@@ -139,14 +139,18 @@ public sealed class IndexModel(
                 "/Admin/Games/Lobby",
                 new { id = session.Session.Id.Value });
         }
-        catch (ArgumentException)
+        catch (ArgumentException exception)
         {
-            TempData["ErrorMessage"] = localizer["Error_QuizCannotStart"].Value;
+            TempData["ErrorMessage"] = localizer[
+                "Error_QuizCannotStart_Detail",
+                exception.Message].Value;
             return RedirectToPage();
         }
-        catch (InvalidOperationException)
+        catch (InvalidOperationException exception)
         {
-            TempData["ErrorMessage"] = localizer["Error_QuizCannotStart"].Value;
+            TempData["ErrorMessage"] = localizer[
+                "Error_QuizCannotStart_Detail",
+                exception.Message].Value;
             return RedirectToPage();
         }
     }

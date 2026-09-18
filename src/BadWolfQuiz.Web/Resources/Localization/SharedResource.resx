@@ -447,6 +447,18 @@
   <data name="QuizEditor_QuestionDeleted" xml:space="preserve">
     <value>Question deleted.</value>
   </data>
+  <data name="QuizEditor_QuestionAnomaly" xml:space="preserve">
+    <value>This question has a structure that can prevent the quiz from starting.</value>
+  </data>
+  <data name="QuizEditor_FixQuestion" xml:space="preserve">
+    <value>Fix question structure</value>
+  </data>
+  <data name="QuizEditor_QuestionFixed" xml:space="preserve">
+    <value>Question structure repaired. The question was reset to Standard while meaningful content was preserved.</value>
+  </data>
+  <data name="QuizEditor_QuestionFixUnavailable" xml:space="preserve">
+    <value>This question cannot be repaired automatically.</value>
+  </data>
   <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
     <value>Delete category</value>
   </data>
@@ -803,6 +815,9 @@
   </data>
   <data name="Error_QuizCannotStart" xml:space="preserve">
     <value>This quiz cannot be used to create a game. Check its rounds, questions, and point rows.</value>
+  </data>
+  <data name="Error_QuizCannotStart_Detail" xml:space="preserve">
+    <value>This quiz cannot be used to create a game. Details: {0}</value>
   </data>
   <data name="PlayerPresence_Active" xml:space="preserve">
     <value>Active</value>
