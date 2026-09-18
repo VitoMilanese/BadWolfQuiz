@@ -49,6 +49,13 @@
         @Model.CurrentPlayer.Name
     </p>
 
+    <button id="player-skip-question"
+            class="button button-secondary player-skip-question"
+            type="button"
+            hidden>
+        @Localizer["PlayerGame_SkipQuestion"]
+    </button>
+
     <dialog id="player-lobby-action-menu"
             class="player-lobby-action-menu"
             data-player-lobby-action-menu
@@ -501,12 +508,6 @@
                 type="button"
                 disabled>
             @Localizer["PlayerGame_Buzz"]
-        </button>
-        <button id="player-skip-question"
-                class="button button-secondary player-skip-question"
-                type="button"
-                hidden>
-            @Localizer["PlayerGame_SkipQuestion"]
         </button>
         <p id="player-buzzer-status" class="dialog-warning">
             @Localizer["PlayerGame_BuzzerClosed"]

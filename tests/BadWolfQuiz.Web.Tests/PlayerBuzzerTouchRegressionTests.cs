@@ -135,6 +135,22 @@ public sealed class PlayerBuzzerTouchRegressionTests
 
         Assert.Contains("id=\"player-skip-question\"", page);
         Assert.Contains("@Localizer[\"PlayerGame_SkipQuestion\"]", page);
+        var playerNameIndex = page.IndexOf(
+            "class=\"player-name-line\"",
+            StringComparison.Ordinal);
+        var skipButtonIndex = page.IndexOf(
+            "id=\"player-skip-question\"",
+            StringComparison.Ordinal);
+        var actionMenuIndex = page.IndexOf(
+            "id=\"player-lobby-action-menu\"",
+            StringComparison.Ordinal);
+        var buzzerPanelIndex = page.IndexOf(
+            "class=\"player-buzzer-panel\"",
+            StringComparison.Ordinal);
+        Assert.True(playerNameIndex >= 0);
+        Assert.True(skipButtonIndex > playerNameIndex);
+        Assert.True(actionMenuIndex > skipButtonIndex);
+        Assert.True(buzzerPanelIndex > skipButtonIndex);
         Assert.DoesNotContain("data-question-skipped-label", page);
         Assert.Contains("update.canProposeSkip === true", page);
         Assert.Contains("update.skipProposalPlayerIds?.includes(playerId)", page);
@@ -155,6 +171,8 @@ public sealed class PlayerBuzzerTouchRegressionTests
         Assert.Contains("canProposeSkip", hub);
         Assert.DoesNotContain(".Concat(skipProposalPlayerIds)", hub);
 
+        Assert.Contains(".player-skip-question[hidden]", styles);
+        Assert.Contains("display: none !important;", styles);
         Assert.Contains(".player-skip-question:not([hidden])", styles);
         Assert.Contains("<value>Пропустити</value>", ukrainian);
         Assert.Contains("<value>Пропонує пропустити питання</value>", ukrainian);

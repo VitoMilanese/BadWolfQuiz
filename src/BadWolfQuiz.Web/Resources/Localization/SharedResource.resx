@@ -990,6 +990,9 @@
   <data name="GameBoard_PlayerProposesSkip" xml:space="preserve">
     <value>Proposes to skip the question</value>
   </data>
+  <data name="GameBoard_AllPlayersVotedToSkip" xml:space="preserve">
+    <value>All players voted to skip this question.</value>
+  </data>
   <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
     <value>The buzzer is open.</value>
   </data>

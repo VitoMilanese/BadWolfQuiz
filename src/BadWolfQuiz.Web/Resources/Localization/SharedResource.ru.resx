@@ -990,6 +990,9 @@
   <data name="GameBoard_PlayerProposesSkip" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="GameBoard_AllPlayersVotedToSkip" xml:space="preserve">
+    <value>Україна</value>
+  </data>
   <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
     <value>Україна</value>
   </data>

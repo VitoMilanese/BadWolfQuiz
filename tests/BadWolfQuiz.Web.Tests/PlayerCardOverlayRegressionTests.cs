@@ -141,6 +141,51 @@ public sealed class PlayerCardOverlayRegressionTests
     }
 
     [Fact]
+    public void Unanimous_skip_shows_centered_host_overlay()
+    {
+        var page = ReadFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml");
+        var hub = ReadFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Hubs",
+            "GameHub.cs");
+        var css = ReadFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "site.css");
+        var ukrainian = ReadFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Resources",
+            "Localization",
+            "SharedResource.uk.resx");
+
+        Assert.Contains("data-question-skip-unanimous-notification", page);
+        Assert.Contains(
+            "connection.on(\"QuestionSkippedByAllPlayers\"",
+            page);
+        Assert.Contains(
+            "Group(HostGroupName(result.Game.PublicCode))",
+            hub);
+        Assert.Contains("\"QuestionSkippedByAllPlayers\"", hub);
+        Assert.Contains("if (result.QuestionClosed)", hub);
+        Assert.Contains(".question-skip-unanimous-notification", css);
+        Assert.Contains("inset: 0;", css);
+        Assert.Contains("place-items: center;", css);
+        Assert.Contains(
+            "<value>Усі гравці проголосували за пропуск цього питання.</value>",
+            ukrainian);
+    }
+
+    [Fact]
     public void Gameplay_presence_uses_centered_non_flow_top_right_icons()
     {
         var css = ReadFile(

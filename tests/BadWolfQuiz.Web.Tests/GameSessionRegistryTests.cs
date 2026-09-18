@@ -542,6 +542,7 @@ public sealed class GameSessionRegistryTests
             GameHub.CreateBuzzerUpdate(game));
 
         Assert.NotNull(result);
+        Assert.False(result.QuestionClosed);
         Assert.Empty(result.Question.AnswerAttempts);
         Assert.Contains(rose.Player!.Id, result.Question.SkipProposalPlayerIds);
         Assert.Equal(0, rose.Player.Score);
@@ -568,6 +569,30 @@ public sealed class GameSessionRegistryTests
             claimedJson.GetProperty("skipProposalPlayerIds")
                 .EnumerateArray()
                 .Select(item => item.GetGuid()));
+    }
+
+    [Fact]
+    public void Last_skip_proposal_reports_question_closed()
+    {
+        var registry = CreateRegistry("ABC123");
+        registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+
+        var first = registry.ProposeQuestionSkip("rose-connection", 1);
+        var last = registry.ProposeQuestionSkip("mickey-connection", 1);
+
+        Assert.NotNull(first);
+        Assert.False(first.QuestionClosed);
+        Assert.NotNull(last);
+        Assert.True(last.QuestionClosed);
+        Assert.Equal(
+            RuntimeQuestionStatus.ShowingAnswer,
+            last.Question.Status);
     }
 
     [Fact]

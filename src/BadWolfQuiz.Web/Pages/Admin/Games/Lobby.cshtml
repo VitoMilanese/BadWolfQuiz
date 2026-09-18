@@ -388,6 +388,17 @@
              role="status"
              data-discord-operation-status></div>
 
+        <div class="question-skip-unanimous-notification"
+             data-question-skip-unanimous-notification
+             role="status"
+             aria-live="assertive"
+             hidden>
+            <div class="question-skip-unanimous-card">
+                <span class="question-skip-unanimous-icon" aria-hidden="true">⏭</span>
+                <strong>@Localizer["GameBoard_AllPlayersVotedToSkip"]</strong>
+            </div>
+        </div>
+
         <div class="question-timeout-notification"
              data-question-timeout-notification
              data-buzzer-message="@Localizer["GameTimer_ExpiredBuzzer"]"
@@ -5946,6 +5957,29 @@
                     console.debug("Question timeout audio is unavailable.", error);
                 }
             };
+
+            connection.on("QuestionSkippedByAllPlayers", () => {
+                const notification = document.querySelector(
+                    "[data-question-skip-unanimous-notification]");
+                if (!notification) {
+                    return;
+                }
+
+                window.clearTimeout(notification._hideTimer);
+                window.clearTimeout(notification._removeTimer);
+                notification.hidden = false;
+                notification.classList.remove("is-visible", "is-leaving");
+                void notification.offsetWidth;
+                notification.classList.add("is-visible");
+                notification._hideTimer = window.setTimeout(() => {
+                    notification.classList.remove("is-visible");
+                    notification.classList.add("is-leaving");
+                    notification._removeTimer = window.setTimeout(() => {
+                        notification.hidden = true;
+                        notification.classList.remove("is-leaving");
+                    }, 320);
+                }, 3600);
+            });
 
             connection.on("QuestionTimerExpired", update => {
                 const notification = document.querySelector(

@@ -990,6 +990,9 @@
   <data name="GameBoard_PlayerProposesSkip" xml:space="preserve">
     <value>Пропонує пропустити питання</value>
   </data>
+  <data name="GameBoard_AllPlayersVotedToSkip" xml:space="preserve">
+    <value>Усі гравці проголосували за пропуск цього питання.</value>
+  </data>
   <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
     <value>Буззер активний.</value>
   </data>

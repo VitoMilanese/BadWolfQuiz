@@ -387,6 +387,15 @@ public sealed class GameHub(
             group.SendAsync(
                 "TimerStateChanged",
                 CreateTimerUpdate(result.Game)));
+
+        if (result.QuestionClosed)
+        {
+            await Clients
+                .Group(HostGroupName(result.Game.PublicCode))
+                .SendAsync(
+                    "QuestionSkippedByAllPlayers",
+                    new { sourceQuestionId });
+        }
     }
 
     public async Task Buzz(int sourceQuestionId)

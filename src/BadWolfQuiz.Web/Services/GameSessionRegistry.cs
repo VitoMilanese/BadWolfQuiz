@@ -1311,9 +1311,15 @@ public sealed class GameSessionRegistry
             var question = game.Session.ProposeQuestionSkip(
                 sourceQuestionId,
                 player.Id);
+            var questionClosed =
+                question.Status == RuntimeQuestionStatus.ShowingAnswer;
             game.MarkPersistenceChanged();
 
-            return new PlayerQuestionSkipProposalResult(game, question, player);
+            return new PlayerQuestionSkipProposalResult(
+                game,
+                question,
+                player,
+                questionClosed);
         }
     }
 
@@ -1916,7 +1922,8 @@ public sealed record BuzzerClaimResult(
 public sealed record PlayerQuestionSkipProposalResult(
     GameSessionRegistration Game,
     RuntimeQuestion Question,
-    GamePlayer Player);
+    GamePlayer Player,
+    bool QuestionClosed);
 
 
 public sealed record QuestionTimerTickResult(
