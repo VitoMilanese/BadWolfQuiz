@@ -108,7 +108,7 @@ public sealed class HostMultipleChoiceWebRegressionTests
             "QuestionPresentationType.HostMultipleChoice",
             editor);
         Assert.Contains("options.Count is < 4 or > 10", editor);
-        Assert.Contains("option.TextContent.Trim().Length > 20", editor);
+        Assert.Contains("option.TextContent.Trim().Length > 30", editor);
         Assert.Contains("Distinct(StringComparer.OrdinalIgnoreCase)", editor);
         Assert.Contains("isHostMultipleChoice ||", editor);
         Assert.Contains("Input.ExcludeFromRandomWagerSelection", editor);
@@ -116,7 +116,9 @@ public sealed class HostMultipleChoiceWebRegressionTests
         Assert.Contains("GetAnswerOptionsLayout", editor);
 
         Assert.Contains("value === \"4\"", answerOptionsScript);
-        Assert.Contains("textarea.maxLength = 20", answerOptionsScript);
+        Assert.Contains("textarea.maxLength = 30", answerOptionsScript);
+        Assert.Contains("value.length > 30", answerOptionsScript);
+        Assert.Contains("isChoiceType(type)", answerOptionsScript);
         Assert.Contains("minimumOptions", answerOptionsScript);
         Assert.Contains("maximumOptions", answerOptionsScript);
         Assert.Contains("multiple-choice-answer-option-correct-badge", answerOptionsScript);

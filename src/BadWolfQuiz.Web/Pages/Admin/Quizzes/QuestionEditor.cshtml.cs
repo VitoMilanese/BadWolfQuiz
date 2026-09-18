@@ -885,7 +885,7 @@ public sealed class QuestionEditorModel(
         {
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
-                "Every answer option must be non-empty text or an image.");
+                "Every answer option must be non-empty text with at most 30 characters or an image.");
             return;
         }
 
@@ -919,11 +919,11 @@ public sealed class QuestionEditorModel(
         if (options.Any(option =>
                 option.BlockType != ContentBlockType.Text ||
                 string.IsNullOrWhiteSpace(option.TextContent) ||
-                option.TextContent.Trim().Length > 20))
+                option.TextContent.Trim().Length > 30))
         {
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
-                "Every answer option must be non-empty text with at most 20 characters.");
+                "Every answer option must be non-empty text with at most 30 characters.");
             return;
         }
 
@@ -943,7 +943,8 @@ public sealed class QuestionEditorModel(
     {
         if (option.BlockType == ContentBlockType.Text)
         {
-            return !string.IsNullOrWhiteSpace(option.TextContent);
+            return !string.IsNullOrWhiteSpace(option.TextContent) &&
+                option.TextContent.Trim().Length <= 30;
         }
 
         if (option.BlockType != ContentBlockType.Image || option.RemoveFile)

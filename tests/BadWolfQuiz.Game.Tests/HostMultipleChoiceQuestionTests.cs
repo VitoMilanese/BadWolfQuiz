@@ -52,8 +52,12 @@ public sealed class HostMultipleChoiceQuestionTests
         Assert.Throws<ArgumentException>(() => CreateQuestion(3));
         Assert.Throws<ArgumentException>(() => CreateQuestion(11));
 
+        var maxLength = CreateOptions(4).ToArray();
+        maxLength[1] = TextBlock(202, new string('x', 30), 1);
+        Assert.Equal(30, CreateQuestion(maxLength).AnswerBlocks[1].TextContent!.Length);
+
         var tooLong = CreateOptions(4).ToArray();
-        tooLong[1] = TextBlock(202, new string('x', 21), 1);
+        tooLong[1] = TextBlock(202, new string('x', 31), 1);
         Assert.Throws<ArgumentException>(() => CreateQuestion(tooLong));
 
         var duplicate = CreateOptions(4).ToArray();

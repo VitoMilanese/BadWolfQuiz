@@ -27,12 +27,12 @@
             typeHostChoice: "Вибір відповіді — обирає хост",
             textHint: "Кожен гравець надсилає власну текстову відповідь. Хост перевіряє відповіді по черзі.",
             choiceHint: "Варіанти відповіді зберігаються в обов’язковому блоці «Варіанти відповіді». Перший варіант правильний. Інші блоки відповіді показуються лише після завершення питання.",
-            hostChoiceHint: "У блоці «Варіанти відповіді» має бути від 4 до 10 унікальних текстових варіантів до 20 символів. Перший варіант правильний. Інші блоки відповіді показуються лише після завершення питання.",
+            hostChoiceHint: "У блоці «Варіанти відповіді» має бути від 4 до 10 унікальних текстових варіантів до 30 символів. Перший варіант правильний. Інші блоки відповіді показуються лише після завершення питання.",
             correct: "Правильна",
             invalidChoiceQuestion: "Питання з вибором для всіх гравців підтримує лише текст і зображення в самому питанні.",
-            invalidChoice: "У блоці «Варіанти відповіді» має бути від 2 до 4 непорожніх унікальних текстових або графічних варіантів.",
+            invalidChoice: "У блоці «Варіанти відповіді» має бути від 2 до 4 непорожніх унікальних текстових або графічних варіантів. Текстовий варіант — не більше 30 символів.",
             invalidHostCount: "У блоці «Варіанти відповіді» має бути від 4 до 10 варіантів.",
-            invalidHostText: "Кожен варіант для хоста має бути непорожнім текстом довжиною не більше 20 символів.",
+            invalidHostText: "Кожен варіант для хоста має бути непорожнім текстом довжиною не більше 30 символів.",
             invalidHostDuplicate: "Варіанти відповіді для хоста мають бути унікальними.",
             addFailed: "Не вдалося додати варіант відповіді."
         }
@@ -43,12 +43,12 @@
                 typeHostChoice: "Scelta multipla — seleziona il conduttore",
                 textHint: "Ogni giocatore invia una risposta testuale privata. Il conduttore le valuta una alla volta.",
                 choiceHint: "Le opzioni sono contenute nel blocco obbligatorio «Opzioni di risposta». La prima opzione è corretta. Gli altri blocchi della risposta vengono mostrati solo dopo la chiusura della domanda.",
-                hostChoiceHint: "Il blocco «Opzioni di risposta» deve contenere da 4 a 10 opzioni testuali uniche di massimo 20 caratteri. La prima è corretta. Gli altri blocchi vengono mostrati solo dopo la chiusura della domanda.",
+                hostChoiceHint: "Il blocco «Opzioni di risposta» deve contenere da 4 a 10 opzioni testuali uniche di massimo 30 caratteri. La prima è corretta. Gli altri blocchi vengono mostrati solo dopo la chiusura della domanda.",
                 correct: "Corretta",
                 invalidChoiceQuestion: "La domanda a scelta per tutti i giocatori supporta solo testo e immagini nella domanda.",
-                invalidChoice: "Il blocco «Opzioni di risposta» deve contenere da 2 a 4 opzioni di testo o immagine non vuote e uniche.",
+                invalidChoice: "Il blocco «Opzioni di risposta» deve contenere da 2 a 4 opzioni di testo o immagine non vuote e uniche. Ogni opzione testuale può contenere al massimo 30 caratteri.",
                 invalidHostCount: "Il blocco «Opzioni di risposta» deve contenere da 4 a 10 opzioni.",
-                invalidHostText: "Ogni opzione selezionata dal conduttore deve essere un testo non vuoto di massimo 20 caratteri.",
+                invalidHostText: "Ogni opzione selezionata dal conduttore deve essere un testo non vuoto di massimo 30 caratteri.",
                 invalidHostDuplicate: "Le opzioni selezionate dal conduttore devono essere uniche.",
                 addFailed: "Impossibile aggiungere l’opzione di risposta."
             }
@@ -74,12 +74,12 @@
                     typeHostChoice: "Multiple choice — host selects",
                     textHint: "Every player submits a private text answer. The host judges submissions one at a time.",
                     choiceHint: "Selectable choices live in the required Answer options block. The first option is correct. Other answer blocks are shown only after the question closes.",
-                    hostChoiceHint: "The Answer options block must contain 4 to 10 unique text options of at most 20 characters. The first option is correct. Other answer blocks are shown only after the question closes.",
+                    hostChoiceHint: "The Answer options block must contain 4 to 10 unique text options of at most 30 characters. The first option is correct. Other answer blocks are shown only after the question closes.",
                     correct: "Correct",
                     invalidChoiceQuestion: "All-player multiple choice supports only Text and Image blocks in the question itself.",
-                    invalidChoice: "The Answer options block must contain 2 to 4 non-empty unique Text or Image options.",
+                    invalidChoice: "The Answer options block must contain 2 to 4 non-empty unique Text or Image options. Text options are limited to 30 characters.",
                     invalidHostCount: "The Answer options block must contain between 4 and 10 options.",
-                    invalidHostText: "Every host-selected option must be non-empty text of at most 20 characters.",
+                    invalidHostText: "Every host-selected option must be non-empty text of at most 30 characters.",
                     invalidHostDuplicate: "Host-selected answer options must be unique.",
                     addFailed: "Could not add answer option."
                 };
@@ -517,8 +517,8 @@
 
                 const textarea = card.querySelector('textarea[name$=".TextContent"]');
                 if (textarea instanceof HTMLTextAreaElement) {
-                    if (isHostChoice(type)) {
-                        textarea.maxLength = 20;
+                    if (isChoiceType(type)) {
+                        textarea.maxLength = 30;
                     } else {
                         textarea.removeAttribute("maxlength");
                     }
@@ -698,7 +698,7 @@
                 if (card.dataset.blockType === "Text") {
                     const value = card.querySelector('[name$=".TextContent"]')
                         ?.value?.trim() ?? "";
-                    if (!value || (isHostChoice(type) && value.length > 20)) {
+                    if (!value || value.length > 30) {
                         return isHostChoice(type)
                             ? text.invalidHostText
                             : text.invalidChoice;
