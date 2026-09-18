@@ -32,6 +32,7 @@ public sealed class QuizDbContext : DbContext
     public DbSet<CategoryDescriptionContentBlock> CategoryDescriptionContentBlocks => Set<CategoryDescriptionContentBlock>();
     public DbSet<QuestionContentBlock> QuestionContentBlocks => Set<QuestionContentBlock>();
     public DbSet<AnswerContentBlock> AnswerContentBlocks => Set<AnswerContentBlock>();
+    public DbSet<QuestionHintContentBlock> QuestionHintContentBlocks => Set<QuestionHintContentBlock>();
     public DbSet<GameSession> GameSessions => Set<GameSession>();
     public DbSet<GamePlayer> GamePlayers => Set<GamePlayer>();
     public DbSet<GameQuestion> GameQuestions => Set<GameQuestion>();
@@ -148,6 +149,8 @@ public sealed class QuizDbContext : DbContext
         modelBuilder.Entity<QuestionContentBlock>()
             .HasQueryFilter(x => x.Question.Category.Round.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<AnswerContentBlock>()
+            .HasQueryFilter(x => x.Question.Category.Round.Quiz.HostId == CurrentHostId);
+        modelBuilder.Entity<QuestionHintContentBlock>()
             .HasQueryFilter(x => x.Question.Category.Round.Quiz.HostId == CurrentHostId);
         modelBuilder.Entity<GameSession>()
             .HasQueryFilter(x => x.HostId == CurrentHostId);

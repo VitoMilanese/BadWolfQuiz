@@ -629,7 +629,10 @@ public sealed class GameSession
         
         var player = FindPlayer(playerId);
 
-        var correctAnswerValue = isCorrect
+        // Resolve every live reward reduction first (revealed clues, hints,
+        // and answer-timer decay). x2 / 1/2 are applied to this current value,
+        // never to the authored question points.
+        var currentCorrectAnswerValue = isCorrect
             ? GetCurrentCorrectAnswerValue(sourceQuestionId)
             : (int?)null;
 
@@ -637,7 +640,7 @@ public sealed class GameSession
             player.Id,
             isCorrect,
             _timeProvider.GetUtcNow(),
-            correctAnswerValue,
+            currentCorrectAnswerValue,
             rewardModifier);
 
         player.ApplyScore(attempt.ScoreDelta);

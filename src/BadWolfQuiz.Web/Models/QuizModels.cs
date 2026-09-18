@@ -244,6 +244,7 @@ public sealed class QuizQuestion
     public QuizCategory Category { get; set; } = null!;
     public ICollection<QuestionContentBlock> QuestionBlocks { get; set; } = new List<QuestionContentBlock>();
     public ICollection<AnswerContentBlock> AnswerBlocks { get; set; } = new List<AnswerContentBlock>();
+    public ICollection<QuestionHintContentBlock> HintBlocks { get; set; } = new List<QuestionHintContentBlock>();
     public ICollection<QuizQuestionTag> Tags { get; set; } = new List<QuizQuestionTag>();
 }
 
@@ -301,6 +302,12 @@ public sealed class QuestionContentBlock : ContentBlockBase
 }
 
 public sealed class AnswerContentBlock : ContentBlockBase
+{
+    public int QuizQuestionId { get; set; }
+    public QuizQuestion Question { get; set; } = null!;
+}
+
+public sealed class QuestionHintContentBlock : ContentBlockBase
 {
     public int QuizQuestionId { get; set; }
     public QuizQuestion Question { get; set; } = null!;

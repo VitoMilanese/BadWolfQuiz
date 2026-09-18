@@ -68,6 +68,7 @@ public sealed class MediaArchiveBackgroundService(
                     !db.GameSessions.IgnoreQueryFilters().Any(s => s.QuizId == x.Id && s.Status != GameSessionStatus.Finished) &&
                     (db.QuestionContentBlocks.IgnoreQueryFilters().Any(b => b.Question.Category.Round.QuizId == x.Id && b.FileData != null && b.FileData.Length > 0) ||
                      db.AnswerContentBlocks.IgnoreQueryFilters().Any(b => b.Question.Category.Round.QuizId == x.Id && b.FileData != null && b.FileData.Length > 0) ||
+                     db.QuestionHintContentBlocks.IgnoreQueryFilters().Any(b => b.Question.Category.Round.QuizId == x.Id && b.FileData != null && b.FileData.Length > 0) ||
                      db.FinalQuestionContentBlocks.IgnoreQueryFilters().Any(b => b.QuizId == x.Id && b.FileData != null && b.FileData.Length > 0) ||
                      db.FinalAnswerContentBlocks.IgnoreQueryFilters().Any(b => b.QuizId == x.Id && b.FileData != null && b.FileData.Length > 0)))
                 .OrderBy(x => x.LastPlayedAtUtc ?? x.UpdatedAtUtc)

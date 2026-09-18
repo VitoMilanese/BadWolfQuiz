@@ -35,6 +35,7 @@ This directory contains product vision, gameplay architecture, feature specifica
 - [Buzzer activation modes](features/buzzer-activation-modes.md)
 - [Answer reward decay](features/answer-reward-decay.md)
 - [Four-clue questions](features/four-clue-questions.md)
+- [Question hints](features/question-hints.md)
 - [Mandatory all-player questions](features/all-player-questions.md)
 - [Peer-rated all-player text questions](features/peer-rated-all-player-text.md)
 - [Final question](features/final-question.md)

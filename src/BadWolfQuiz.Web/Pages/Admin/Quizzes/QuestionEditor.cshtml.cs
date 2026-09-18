@@ -52,6 +52,7 @@ public sealed class QuestionEditorModel(
                 .ThenInclude(x => x.Round)
             .Include(x => x.QuestionBlocks)
             .Include(x => x.AnswerBlocks)
+            .Include(x => x.HintBlocks)
             .Include(x => x.Tags)
             .SingleOrDefaultAsync(x => x.Id == id);
 
@@ -84,6 +85,9 @@ public sealed class QuestionEditorModel(
             AllPlayerMode = AllPlayerQuestionCompatibility.GetMode(
                 storedPresentationType),
             RevealAnswerOptionsOnDemand = isAllPlayerMultipleChoiceOnDemand,
+            EnableHints =
+                presentationType == QuestionPresentationType.Standard &&
+                question.HintBlocks.Count > 0,
             ExcludeFromRandomWagerSelection =
                 question.ExcludeFromRandomWagerSelection,
             AllowAnswerRewardModifiers = question.AllowAnswerRewardModifiers,
@@ -136,6 +140,26 @@ public sealed class QuestionEditorModel(
             })
             .ToList();
 
+        Input.HintBlocks = question.HintBlocks
+            .OrderBy(x => x.SortOrder)
+            .Select(x => new ContentBlockInputModel
+            {
+                Id = x.Id,
+                SortOrder = x.SortOrder,
+                BlockType = x.BlockType,
+                TextContent = x.TextContent,
+                TopCaption = x.TopCaption,
+                BottomCaption = x.BottomCaption,
+                ExternalUrl = x.ExternalUrl,
+                AudioOnly = false,
+                Autoplay = false,
+                FileContentType = x.FileContentType,
+                FileName = x.FileName,
+                IsAnswerBlock = false,
+                StoredFileHandler = "HintBlockFile"
+            })
+            .ToList();
+
         NormalizeAnswerOptionsStructure(
             presentationType,
             Input.AnswerBlocks,
@@ -184,6 +208,13 @@ public sealed class QuestionEditorModel(
         if (Input.PresentationType != QuestionPresentationType.Standard)
         {
             Input.WagerMode = QuestionWagerMode.Normal;
+            Input.EnableHints = false;
+        }
+
+        Input.HintBlocks ??= [];
+        if (!Input.EnableHints)
+        {
+            Input.HintBlocks.Clear();
         }
 
         NormalizeAnswerOptionsStructure(
@@ -210,6 +241,24 @@ public sealed class QuestionEditorModel(
             ModelState.AddModelError(
                 $"{nameof(Input)}.{nameof(Input.AnswerBlocks)}",
                 localizer["AnswerBlocksRequired"]);
+        }
+
+        if (Input.EnableHints)
+        {
+            if (Input.HintBlocks.Count is < 1 or > 4)
+            {
+                ModelState.AddModelError(
+                    $"{nameof(Input)}.{nameof(Input.HintBlocks)}",
+                    localizer["QuestionHints_CountRequired"]);
+            }
+            else if (Input.HintBlocks.Any(block =>
+                block.BlockType is not ContentBlockType.Text and
+                    not ContentBlockType.Image))
+            {
+                ModelState.AddModelError(
+                    $"{nameof(Input)}.{nameof(Input.HintBlocks)}",
+                    localizer["QuestionHints_AllowedTypes"]);
+            }
         }
 
         if (Input.PresentationType == QuestionPresentationType.FourClues)
@@ -267,6 +316,10 @@ public sealed class QuestionEditorModel(
                 question.Id)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
         var answerBlockSnapshots = await GetAnswerBlockEditMetadataQuery(
+                db,
+                question.Id)
+            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        var hintBlockSnapshots = await GetHintBlockEditMetadataQuery(
                 db,
                 question.Id)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
@@ -399,6 +452,102 @@ public sealed class QuestionEditorModel(
             entity.Autoplay = inputBlock.Autoplay &&
                 inputBlock.BlockType is ContentBlockType.Audio or ContentBlockType.Video or ContentBlockType.YouTube;
             persistedQuestionBlocks.Add(entity);
+        }
+
+
+        var submittedHintBlockIds = Input.HintBlocks
+            .Where(x => x.Id.HasValue)
+            .Select(x => x.Id!.Value)
+            .ToHashSet();
+
+        if (submittedHintBlockIds.Count !=
+                Input.HintBlocks.Count(x => x.Id.HasValue) ||
+            submittedHintBlockIds.Any(id =>
+                !hintBlockSnapshots.ContainsKey(id)))
+        {
+            ModelState.AddModelError(string.Empty, localizer["Error_Unexpected"]);
+            if (IsAjaxRequest())
+            {
+                return AjaxValidationError();
+            }
+            return Page();
+        }
+
+        foreach (var snapshot in hintBlockSnapshots.Values
+                     .Where(x => !submittedHintBlockIds.Contains(x.Id)))
+        {
+            db.QuestionHintContentBlocks.Remove(new QuestionHintContentBlock
+            {
+                Id = snapshot.Id,
+                QuizQuestionId = question.Id
+            });
+        }
+
+        var persistedHintBlocks =
+            new List<QuestionHintContentBlock>(Input.HintBlocks.Count);
+
+        foreach (var inputBlock in Input.HintBlocks.OrderBy(x => x.SortOrder))
+        {
+            QuestionHintContentBlock entity;
+
+            if (inputBlock.Id.HasValue)
+            {
+                entity = AttachHintBlockForUpdate(
+                    db,
+                    question.Id,
+                    hintBlockSnapshots[inputBlock.Id.Value]);
+            }
+            else
+            {
+                entity = new QuestionHintContentBlock
+                {
+                    QuizQuestionId = question.Id
+                };
+                db.QuestionHintContentBlocks.Add(entity);
+            }
+
+            if (inputBlock.RemoveFile && inputBlock.BlockType == ContentBlockType.Image)
+            {
+                ClearStoredFile(entity);
+            }
+
+            if (inputBlock.UploadedFile is not null &&
+                inputBlock.UploadedFile.Length > 0)
+            {
+                try
+                {
+                    var media = await mediaUploadProcessor.ProcessContentBlockAsync(
+                        inputBlock.UploadedFile,
+                        inputBlock.BlockType,
+                        premiumHostAccess.IsPremium(currentHost.RequiredId),
+                        cancellationToken);
+                    entity.FileData = media.Data;
+                    entity.FileContentType = media.ContentType;
+                    entity.FileName = media.FileName;
+                }
+                catch (MediaUploadException exception)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        localizer[exception.ResourceKey, exception.ResourceArguments]);
+
+                    if (IsAjaxRequest())
+                    {
+                        return AjaxValidationError();
+                    }
+                    return Page();
+                }
+            }
+
+            entity.SortOrder = inputBlock.SortOrder;
+            entity.BlockType = inputBlock.BlockType;
+            entity.TextContent = inputBlock.TextContent?.Trim();
+            entity.TopCaption = inputBlock.TopCaption?.Trim();
+            entity.BottomCaption = inputBlock.BottomCaption?.Trim();
+            entity.ExternalUrl = null;
+            entity.AudioOnly = false;
+            entity.Autoplay = false;
+            persistedHintBlocks.Add(entity);
         }
 
         var submittedAnswerBlockIds = Input.AnswerBlocks
@@ -542,6 +691,10 @@ public sealed class QuestionEditorModel(
                     .OrderBy(x => x.SortOrder)
                     .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
                     .ToArray(),
+                hintBlocks = persistedHintBlocks
+                    .OrderBy(x => x.SortOrder)
+                    .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
+                    .ToArray(),
                 answerBlocks = persistedAnswerBlocks
                     .OrderBy(x => x.SortOrder)
                     .Select(x => new { id = x.Id, sortOrder = x.SortOrder })
@@ -569,6 +722,24 @@ public sealed class QuestionEditorModel(
             QuizDbContext db,
             int questionId) =>
         db.QuestionContentBlocks
+            .AsNoTracking()
+            .Where(x => x.QuizQuestionId == questionId)
+            .Select(x => new EditableContentBlockSnapshot(
+                x.Id,
+                x.SortOrder,
+                x.BlockType,
+                x.TextContent,
+                x.TopCaption,
+                x.BottomCaption,
+                x.ExternalUrl,
+                x.AudioOnly,
+                x.Autoplay));
+
+    internal static IQueryable<EditableContentBlockSnapshot>
+        GetHintBlockEditMetadataQuery(
+            QuizDbContext db,
+            int questionId) =>
+        db.QuestionHintContentBlocks
             .AsNoTracking()
             .Where(x => x.QuizQuestionId == questionId)
             .Select(x => new EditableContentBlockSnapshot(
@@ -612,6 +783,21 @@ public sealed class QuestionEditorModel(
         };
         ApplyEditableSnapshot(entity, snapshot);
         db.QuestionContentBlocks.Attach(entity);
+        return entity;
+    }
+
+    internal static QuestionHintContentBlock AttachHintBlockForUpdate(
+        QuizDbContext db,
+        int questionId,
+        EditableContentBlockSnapshot snapshot)
+    {
+        var entity = new QuestionHintContentBlock
+        {
+            Id = snapshot.Id,
+            QuizQuestionId = questionId
+        };
+        ApplyEditableSnapshot(entity, snapshot);
+        db.QuestionHintContentBlocks.Attach(entity);
         return entity;
     }
 
@@ -972,6 +1158,23 @@ public sealed class QuestionEditorModel(
         return File(block.FileData, block.FileContentType, block.FileName);
     }
 
+    public async Task<IActionResult> OnGetHintBlockFileAsync(int id)
+    {
+        var block = await db.QuestionHintContentBlocks
+            .AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == id);
+
+        if (block is null ||
+            block.FileData is null ||
+            block.FileData.Length == 0 ||
+            string.IsNullOrWhiteSpace(block.FileContentType))
+        {
+            return NotFound();
+        }
+
+        return File(block.FileData, block.FileContentType, block.FileName);
+    }
+
     public async Task<IActionResult> OnGetQuestionBlockAudioAsync(int id)
     {
         var block = await db.QuestionContentBlocks
@@ -1030,6 +1233,9 @@ public sealed class QuestionEditorModel(
         [Display(Name = "Label_AllPlayerChoiceOnDemand")]
         public bool RevealAnswerOptionsOnDemand { get; set; }
 
+        [Display(Name = "Label_EnableQuestionHints")]
+        public bool EnableHints { get; set; }
+
         [Display(Name = "Label_ExcludeFromRandomWagerSelection")]
         public bool ExcludeFromRandomWagerSelection { get; set; }
 
@@ -1048,6 +1254,8 @@ public sealed class QuestionEditorModel(
         public List<ContentBlockInputModel> QuestionBlocks { get; set; } = [];
 
         public List<ContentBlockInputModel> AnswerBlocks { get; set; } = [];
+
+        public List<ContentBlockInputModel> HintBlocks { get; set; } = [];
     }
 
     private sealed record AnswerOptionsInputLayout(

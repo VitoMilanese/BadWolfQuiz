@@ -2916,4 +2916,19 @@
   <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
     <value>Mostra le opzioni di risposta</value>
   </data>
+  <data name="Label_EnableQuestionHints" xml:space="preserve">
+    <value>Aggiungi suggerimenti</value>
+  </data>
+  <data name="Hint_EnableQuestionHints" xml:space="preserve">
+    <value>Mostra una scheda Suggerimenti in cui creare da 1 a 4 suggerimenti di testo o immagine.</value>
+  </data>
+  <data name="Label_Hints" xml:space="preserve">
+    <value>Suggerimenti</value>
+  </data>
+  <data name="QuestionHints_CountRequired" xml:space="preserve">
+    <value>I suggerimenti richiedono da 1 a 4 blocchi.</value>
+  </data>
+  <data name="QuestionHints_AllowedTypes" xml:space="preserve">
+    <value>I suggerimenti supportano solo blocchi di testo e immagini.</value>
+  </data>
 </root>

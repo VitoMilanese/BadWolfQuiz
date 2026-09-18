@@ -40,6 +40,10 @@ public static class QuizCloneOperations
             .Include(quiz => quiz.Rounds)
                 .ThenInclude(round => round.Categories)
                     .ThenInclude(category => category.Questions)
+                        .ThenInclude(question => question.HintBlocks)
+            .Include(quiz => quiz.Rounds)
+                .ThenInclude(round => round.Categories)
+                    .ThenInclude(category => category.Questions)
                         .ThenInclude(question => question.Tags)
             .SingleOrDefaultAsync(
                 quiz => quiz.Id == sourceQuizId &&
@@ -154,6 +158,11 @@ public static class QuizCloneOperations
                     foreach (var sourceBlock in sourceQuestion.AnswerBlocks.OrderBy(block => block.SortOrder))
                     {
                         question.AnswerBlocks.Add(CloneBlock<AnswerContentBlock>(sourceBlock));
+                    }
+
+                    foreach (var sourceBlock in sourceQuestion.HintBlocks.OrderBy(block => block.SortOrder))
+                    {
+                        question.HintBlocks.Add(CloneBlock<QuestionHintContentBlock>(sourceBlock));
                     }
 
                     category.Questions.Add(question);

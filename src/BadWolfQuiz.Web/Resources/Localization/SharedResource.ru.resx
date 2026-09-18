@@ -2916,4 +2916,19 @@
   <data name="GameBoard_ShowAnswerOptions" xml:space="preserve">
     <value>Україна</value>
   </data>
+  <data name="Label_EnableQuestionHints" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Hint_EnableQuestionHints" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="Label_Hints" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionHints_CountRequired" xml:space="preserve">
+    <value>Україна</value>
+  </data>
+  <data name="QuestionHints_AllowedTypes" xml:space="preserve">
+    <value>Україна</value>
+  </data>
 </root>

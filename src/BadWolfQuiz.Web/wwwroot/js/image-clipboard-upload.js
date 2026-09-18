@@ -140,6 +140,7 @@
         const form = document.querySelector(".question-editor");
         const questionSection = document.getElementById("question-blocks");
         const answerSection = document.getElementById("answer-blocks");
+        const hintSection = document.getElementById("hint-blocks");
         const descriptionSection = document.getElementById("description-blocks");
 
         if (!form || !questionSection || !answerSection) {
@@ -150,17 +151,23 @@
         const questionValidation = questionSection.nextElementSibling;
         const answerHeading = answerSection.previousElementSibling;
         const answerValidation = answerSection.nextElementSibling;
+        const hintHeading = hintSection?.previousElementSibling;
+        const hintValidation = hintSection?.nextElementSibling;
         const descriptionHeading = descriptionSection?.previousElementSibling;
         const questionTypeSetting = form.querySelector(".question-type-setting");
+        const hintCheckbox = form.querySelector("[data-standard-question-hints]");
+        const presentationTypeSelect = form.querySelector("#Input_PresentationType");
 
         if (questionHeading?.tagName !== "H2" ||
             answerHeading?.tagName !== "H2" ||
+            (hintSection && hintHeading?.tagName !== "H2") ||
             (descriptionSection && descriptionHeading?.tagName !== "H2")) {
             return;
         }
 
         const questionTitle = questionHeading.textContent.trim();
         const answerTitle = answerHeading.textContent.trim();
+        const hintTitle = hintHeading?.textContent.trim();
         const descriptionTitle = descriptionHeading?.textContent.trim();
 
         const tabs = document.createElement("div");
@@ -182,11 +189,17 @@
 
         const questionTab = createTab("question", questionTitle, true);
         const answerTab = createTab("answer", answerTitle, false);
+        const hintTab = hintSection && hintTitle
+            ? createTab("hints", hintTitle, false)
+            : null;
         const descriptionTab = descriptionSection && descriptionTitle
             ? createTab("description", descriptionTitle, false)
             : null;
 
         tabs.append(questionTab, answerTab);
+        if (hintTab) {
+            tabs.appendChild(hintTab);
+        }
         if (descriptionTab) {
             tabs.appendChild(descriptionTab);
         }
@@ -198,6 +211,9 @@
 
         questionHeading.hidden = true;
         answerHeading.hidden = true;
+        if (hintHeading) {
+            hintHeading.hidden = true;
+        }
         if (descriptionHeading) {
             descriptionHeading.hidden = true;
         }
@@ -205,12 +221,14 @@
         const groups = {
             question: [questionTypeSetting, questionSection, questionValidation],
             answer: [answerSection, answerValidation],
+            hints: [hintSection, hintValidation],
             description: [descriptionSection]
         };
 
         const tabButtons = {
             question: questionTab,
             answer: answerTab,
+            hints: hintTab,
             description: descriptionTab
         };
 
@@ -240,11 +258,35 @@
 
         questionTab.addEventListener("click", () => selectTab("question"));
         answerTab.addEventListener("click", () => selectTab("answer"));
+        hintTab?.addEventListener("click", () => selectTab("hints"));
         descriptionTab?.addEventListener(
             "click",
             () => selectTab("description"));
 
+        const syncHintTab = () => {
+            if (!hintTab) {
+                return;
+            }
+            const visible =
+                presentationTypeSelect instanceof HTMLSelectElement &&
+                presentationTypeSelect.value === "0" &&
+                hintCheckbox instanceof HTMLInputElement &&
+                hintCheckbox.checked;
+            hintTab.hidden = !visible;
+            hintTab.style.display = visible ? "" : "none";
+            if (!visible && hintTab.getAttribute("aria-selected") === "true") {
+                selectTab("question");
+            }
+        };
+
+        hintCheckbox?.addEventListener("change", syncHintTab);
+        presentationTypeSelect?.addEventListener("change", syncHintTab);
+        document.addEventListener(
+            "badwolf:question-editor-hints-changed",
+            syncHintTab);
+
         selectTab("question");
+        syncHintTab();
     }
 
     initializeQuestionEditorTabs();

@@ -30,6 +30,8 @@ All three positive actions are authoritative correct judgments and follow the sa
 - **x2** awards twice that positive value and records `AnswerRewardModifier.Double`;
 - **1/2** awards half that positive value using midpoint rounding away from zero, with a minimum positive award of 1 point, and records `AnswerRewardModifier.Half`.
 
+The modifier is always applied to the same **currently available correct-answer value** that the normal **Correct** action would award at that exact moment. All dynamic reductions are resolved first, including answer reward decay, Standard-question hint penalties, and Four-clue clue-reveal penalties; only then is `x2` or `1/2` applied. For example, if the current correct-answer value has already fallen to 52 points, `x2` awards 104 and `1/2` awards 26 rather than using the authored question value.
+
 The multiplier applies only to the current answer attempt. It does not mutate the authored question value or the current value used by later attempts. The actual applied delta is used by score feedback, answer history, persisted attempts, recovery, and gameplay statistics. Duplicate submissions remain rejected by the existing attempt guards.
 
 The explicit `Double` and `Half` modifiers are also the only normal gameplay path that qualifies a correct attempt for the `DoubleReward` and `HalfReward` player achievements. Unrelated mechanics that happen to produce a doubled or halved numeric score do not unlock those achievements.
