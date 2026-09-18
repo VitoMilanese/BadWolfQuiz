@@ -17,6 +17,8 @@ public sealed class PlayerLobbyDialogMenuRegressionTests
         var ukrainian = File.ReadAllText(Path.Combine(
             root, "src", "BadWolfQuiz.Web", "Resources", "Localization", "SharedResource.uk.resx"));
 
+        Assert.Contains("@inject BadWolfQuiz.Web.Services.JoinUrlBuilder JoinUrlBuilder", page);
+        Assert.Contains("var joinUrl = JoinUrlBuilder.Build(Request, Model.Game.PublicCode);", page);
         Assert.Contains("class=\"player-name-line\"", page);
         Assert.Contains("data-open-player-lobby-menu", page);
         Assert.Contains("id=\"player-lobby-action-menu\"", page);
@@ -27,6 +29,11 @@ public sealed class PlayerLobbyDialogMenuRegressionTests
         Assert.Contains("data-player-dialog-target=\"player-media-dialog\"", page);
         Assert.Contains("data-player-dialog-target=\"player-achievements-dialog\"", page);
         Assert.Contains("data-player-achievements-open", page);
+        Assert.Contains("data-copy-player-join-link", page);
+        Assert.Contains("data-player-join-link=\"@joinUrl\"", page);
+        Assert.Contains("data-copied-label=\"@Localizer[\"GameBoard_JoinCopied\"]\"", page);
+        Assert.Contains("@Localizer[\"Label_GameCode\"]", page);
+        Assert.Contains("@Model.Game.PublicCode", page);
         Assert.Contains("hidden>", page);
         Assert.DoesNotContain("<details class=\"player-media-settings", page);
         Assert.DoesNotContain("<summary>@Localizer[\"PlayerMenu_Title\"]", page);
@@ -35,7 +42,10 @@ public sealed class PlayerLobbyDialogMenuRegressionTests
         Assert.Contains("transform: translateX(100%)", css);
         Assert.Contains("@media (max-width: 700px)", css);
         Assert.Contains("transform: translateY(-100%)", css);
-        Assert.Contains("right: calc(0.75rem + 3.35rem)", css);
+        Assert.Contains(".player-lobby[data-final-status=\"lobby\"]::after {\n    display: none;", css);
+        Assert.Contains(".player-lobby-game-code-copy", css);
+        Assert.Contains("padding-right: 4rem", css);
+        Assert.DoesNotContain("right: calc(0.75rem + 3.35rem)", css);
         Assert.Contains("display: flex !important", css);
 
         Assert.Contains("menu.showModal()", script);
@@ -43,6 +53,10 @@ public sealed class PlayerLobbyDialogMenuRegressionTests
         Assert.Contains("pendingDialog = target", script);
         Assert.Contains("target.showModal()", script);
         Assert.Contains("[data-player-settings-dialog]", script);
+        Assert.Contains("[data-copy-player-join-link]", script);
+        Assert.Contains("navigator.clipboard?.writeText", script);
+        Assert.Contains("document.execCommand(\"copy\")", script);
+        Assert.Contains("copyJoinStatus.textContent = copiedLabel", script);
         Assert.Contains("dialog.close()", script);
 
         Assert.Contains("[data-player-media-dialog] .player-media-settings-content", contributor);

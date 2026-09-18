@@ -3,6 +3,8 @@
     const menu = document.querySelector("[data-player-lobby-action-menu]");
     const panel = menu?.querySelector(".player-lobby-action-menu-panel");
     const closeButton = menu?.querySelector("[data-close-player-lobby-menu]");
+    const copyJoinLinkButton = menu?.querySelector("[data-copy-player-join-link]");
+    const copyJoinStatus = menu?.querySelector("[data-player-join-copy-status]");
 
     if (!(trigger instanceof HTMLButtonElement) ||
         !(menu instanceof HTMLDialogElement) ||
@@ -22,6 +24,7 @@
     let closeTimer = null;
     let openFocusTimer = null;
     let pendingDialog = null;
+    let copyStatusTimer = null;
 
     const clearTimers = () => {
         if (closeTimer !== null) {
@@ -127,6 +130,57 @@
             });
         });
     };
+
+    const copyText = async value => {
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(value);
+            return;
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.append(textarea);
+        textarea.select();
+
+        try {
+            if (!document.execCommand("copy")) {
+                throw new Error("Copy command failed.");
+            }
+        } finally {
+            textarea.remove();
+        }
+    };
+
+    copyJoinLinkButton?.addEventListener("click", async () => {
+        const joinUrl = copyJoinLinkButton.dataset.playerJoinLink?.trim();
+        if (!joinUrl) {
+            return;
+        }
+
+        try {
+            await copyText(joinUrl);
+        } catch {
+            return;
+        }
+
+        const copiedLabel = copyJoinLinkButton.dataset.copiedLabel?.trim();
+        if (!(copyJoinStatus instanceof HTMLElement) || !copiedLabel) {
+            return;
+        }
+
+        copyJoinStatus.textContent = copiedLabel;
+        if (copyStatusTimer !== null) {
+            window.clearTimeout(copyStatusTimer);
+        }
+
+        copyStatusTimer = window.setTimeout(() => {
+            copyStatusTimer = null;
+            copyJoinStatus.textContent = "";
+        }, 1600);
+    });
 
     trigger.addEventListener("click", openMenu);
     closeButton.addEventListener("click", closeMenu);
