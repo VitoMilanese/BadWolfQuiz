@@ -305,7 +305,7 @@ public sealed class QuizQuestionSnapshot
                 answerLayout.OptionBlocks.Any(block => !IsValidAllPlayerChoiceOption(block)))
             {
                 throw new ArgumentException(
-                    "An all-player multiple-choice question must contain two to four text or image answer options.",
+                    "An all-player multiple-choice question must contain two to four non-empty text options of at most 30 characters or image answer options.",
                     nameof(answerBlocks));
             }
 
@@ -336,10 +336,10 @@ public sealed class QuizQuestionSnapshot
                 answerLayout.OptionBlocks.Any(block =>
                     block.Kind != ContentBlockKind.Text ||
                     string.IsNullOrWhiteSpace(block.TextContent) ||
-                    block.TextContent.Trim().Length > 20))
+                    block.TextContent.Trim().Length > 30))
             {
                 throw new ArgumentException(
-                    "A host multiple-choice question must contain four to ten non-empty text options of at most 20 characters.",
+                    "A host multiple-choice question must contain four to ten non-empty text options of at most 30 characters.",
                     nameof(answerBlocks));
             }
 
@@ -399,7 +399,9 @@ public sealed class QuizQuestionSnapshot
     private static bool IsValidAllPlayerChoiceOption(ContentBlockSnapshot block) =>
         block.Kind switch
         {
-            ContentBlockKind.Text => !string.IsNullOrWhiteSpace(block.TextContent),
+            ContentBlockKind.Text =>
+                !string.IsNullOrWhiteSpace(block.TextContent) &&
+                block.TextContent.Trim().Length <= 30,
             ContentBlockKind.Image =>
                 block.FileData is { Length: > 0 } &&
                 !string.IsNullOrWhiteSpace(block.FileContentType),

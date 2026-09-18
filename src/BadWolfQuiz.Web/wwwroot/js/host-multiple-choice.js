@@ -15,10 +15,10 @@
     const strings = {
         en: {
             type: "Multiple choice — host selects answer",
-            editorHint: "Use 4–10 unique text options (max 20 characters). The first option is correct; move cards to change the correct answer. Wager mode is disabled.",
+            editorHint: "Use 4–10 unique text options (max 30 characters). The first option is correct; move cards to change the correct answer. Wager mode is disabled.",
             correct: "Correct answer",
             invalidCount: "Multiple choice requires 4–10 answer options.",
-            invalidText: "Every option must be non-empty text with at most 20 characters.",
+            invalidText: "Every option must be non-empty text with at most 30 characters.",
             invalidDuplicate: "Answer options must be unique.",
             title: "Answer options",
             reward: (value, percentage) => `Current value: ${value} (${percentage}%)`,
@@ -29,10 +29,10 @@
         },
         uk: {
             type: "Вибір відповіді — обирає хост",
-            editorHint: "Додайте 4–10 унікальних текстових варіантів (до 20 символів). Перший варіант правильний; змініть порядок блоків, щоб змінити правильну відповідь. Ставка вимкнена.",
+            editorHint: "Додайте 4–10 унікальних текстових варіантів (до 30 символів). Перший варіант правильний; змініть порядок блоків, щоб змінити правильну відповідь. Ставка вимкнена.",
             correct: "Правильна відповідь",
             invalidCount: "Для вибору відповіді потрібно 4–10 варіантів.",
-            invalidText: "Кожен варіант має бути непорожнім текстом до 20 символів.",
+            invalidText: "Кожен варіант має бути непорожнім текстом до 30 символів.",
             invalidDuplicate: "Варіанти відповіді мають бути унікальними.",
             title: "Варіанти відповіді",
             reward: (value, percentage) => `Поточна вартість: ${value} (${percentage}%)`,
@@ -43,10 +43,10 @@
         },
         it: {
             type: "Scelta multipla — selezione del conduttore",
-            editorHint: "Usa 4–10 opzioni di testo uniche (massimo 20 caratteri). La prima opzione è corretta; riordina i blocchi per cambiarla. Le puntate sono disattivate.",
+            editorHint: "Usa 4–10 opzioni di testo uniche (massimo 30 caratteri). La prima opzione è corretta; riordina i blocchi per cambiarla. Le puntate sono disattivate.",
             correct: "Risposta corretta",
             invalidCount: "La scelta multipla richiede 4–10 opzioni.",
-            invalidText: "Ogni opzione deve essere testo non vuoto di massimo 20 caratteri.",
+            invalidText: "Ogni opzione deve essere testo non vuoto di massimo 30 caratteri.",
             invalidDuplicate: "Le opzioni devono essere uniche.",
             title: "Opzioni di risposta",
             reward: (value, percentage) => `Valore attuale: ${value} (${percentage}%)`,
@@ -72,10 +72,10 @@
     }[culture] ?? null;
     const text = strings ?? {
         type: "Multiple choice — host selects answer",
-        editorHint: "Use 4–10 unique text options (max 20 characters). The first option is correct; move cards to change the correct answer. Wager mode is disabled.",
+        editorHint: "Use 4–10 unique text options (max 30 characters). The first option is correct; move cards to change the correct answer. Wager mode is disabled.",
         correct: "Correct answer",
         invalidCount: "Multiple choice requires 4–10 answer options.",
-        invalidText: "Every option must be non-empty text with at most 20 characters.",
+        invalidText: "Every option must be non-empty text with at most 30 characters.",
         invalidDuplicate: "Answer options must be unique.",
         title: "Answer options",
         reward: (value, percentage) => `Current value: ${value} (${percentage}%)`,
@@ -217,7 +217,7 @@
                 const textarea = card.querySelector('textarea[name$=".TextContent"]');
                 const value = textarea?.value.trim() ?? "";
                 if (card.dataset.blockType !== "Text" ||
-                    !value || value.length > 20) {
+                    !value || value.length > 30) {
                     return text.invalidText;
                 }
                 values.push(value.toLocaleLowerCase(culture));
@@ -268,7 +268,7 @@
                 const textarea = card.querySelector('textarea[name$=".TextContent"]');
                 if (textarea instanceof HTMLTextAreaElement) {
                     if (hostChoice) {
-                        textarea.maxLength = 20;
+                        textarea.maxLength = 30;
                     } else {
                         textarea.removeAttribute("maxlength");
                     }

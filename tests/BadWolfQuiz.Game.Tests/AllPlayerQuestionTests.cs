@@ -41,6 +41,16 @@ public void Text_mode_accepts_standard_answer_content()
         Assert.Throws<ArgumentException>(() => CreateQuestion(
             QuestionPresentationType.AllPlayerMultipleChoice,
             [TextBlock(10, "Red")]));
+        var maxLength = new string('x', 30);
+        Assert.Equal(
+            maxLength,
+            CreateQuestion(
+                QuestionPresentationType.AllPlayerMultipleChoice,
+                [TextBlock(10, maxLength), TextBlock(11, "Blue")])
+                .AnswerBlocks[0].TextContent);
+        Assert.Throws<ArgumentException>(() => CreateQuestion(
+            QuestionPresentationType.AllPlayerMultipleChoice,
+            [TextBlock(10, new string('x', 31)), TextBlock(11, "Blue")]));
         Assert.Throws<ArgumentException>(() => CreateQuestion(
             QuestionPresentationType.AllPlayerMultipleChoice,
             [TextBlock(10, "Red"), TextBlock(11, "red")]));
