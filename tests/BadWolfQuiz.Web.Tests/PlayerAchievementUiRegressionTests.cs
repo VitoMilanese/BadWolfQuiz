@@ -3,7 +3,7 @@ namespace BadWolfQuiz.Web.Tests;
 public sealed class PlayerAchievementUiRegressionTests
 {
     [Fact]
-    public void Player_lobby_exposes_achievements_from_the_top_player_label_in_a_fullscreen_dialog()
+    public void Player_lobby_exposes_achievements_from_the_player_menu_in_a_fullscreen_dialog()
     {
         var root = FindRepositoryRoot();
         var tagHelper = File.ReadAllText(Path.Combine(
@@ -67,14 +67,15 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("/css/achievement-category-filter.css?v=2", tagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", tagHelper);
         Assert.Contains("/js/achievement-category-filter.js?v=2", tagHelper);
-        Assert.Contains("/js/player-achievements.js?v=1", tagHelper);
+        Assert.Contains("/css/player-lobby-dialog-menu.css?v=1", tagHelper);
+        Assert.Contains("/js/player-lobby-dialog-menu.js?v=1", tagHelper);
+        Assert.Contains("/js/player-achievements.js?v=2", tagHelper);
         Assert.Contains("/css/player-achievements.css?v=11", hostTagHelper);
         Assert.Contains("/css/achievement-category-filter.css?v=2", hostTagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", hostTagHelper);
         Assert.Contains("/js/achievement-category-filter.js?v=2", hostTagHelper);
         Assert.Contains("/js/host-player-achievements.js?v=8", hostTagHelper);
-        Assert.Contains("data-player-achievements-label", tagHelper);
-        Assert.Contains("Achievements_PlayerLabel", tagHelper);
+        Assert.DoesNotContain("data-player-achievements-label", tagHelper);
         Assert.Contains("player-achievements-dialog", tagHelper);
         Assert.Contains("player-achievements-dialog-body", tagHelper);
         Assert.Contains("data-player-achievements-close", tagHelper);
@@ -137,11 +138,12 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("@media (max-width: 600px)", css);
         Assert.Contains("grid-template-columns: 1fr", css);
 
-        Assert.Contains("dataset.playerAchievementsLabel", script);
-        Assert.Contains("player-achievements-open", script);
+        Assert.Contains("[data-player-achievements-open]", script);
+        Assert.Contains("opener.hidden = false", script);
         Assert.Contains("dialog.showModal()", script);
         Assert.Contains("dialog.close()", script);
-        Assert.Contains("playerLine.replaceChildren(opener)", script);
+        Assert.DoesNotContain("playerLine.replaceChildren(opener)", script);
+        Assert.DoesNotContain("dataset.playerAchievementsLabel", script);
 
         Assert.Contains("achievementSortGroup", hostScript);
         Assert.Contains("item.isUnlocked ? 0 : item.isSecret ? 2 : 1", hostScript);
