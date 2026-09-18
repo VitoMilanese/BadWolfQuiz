@@ -984,6 +984,12 @@
   <data name="PlayerGame_Buzz" xml:space="preserve">
     <value>БУЗЗЕР</value>
   </data>
+  <data name="PlayerGame_SkipQuestion" xml:space="preserve">
+    <value>Пропустити</value>
+  </data>
+  <data name="PlayerGame_QuestionSkipped" xml:space="preserve">
+    <value>Ви пропустили це питання.</value>
+  </data>
   <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
     <value>Буззер активний.</value>
   </data>

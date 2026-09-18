@@ -523,6 +523,41 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
+    public void Connected_player_can_skip_question_without_creating_answer_attempt()
+    {
+        var registry = CreateRegistry("ABC123");
+        var game = registry.Create(CreateQuiz());
+        var joined = registry.JoinPlayer("ABC123", "Rose");
+        registry.ConnectPlayer(
+            "ABC123",
+            joined.AccessToken!,
+            "rose-connection",
+            true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+
+        var result = registry.SkipQuestion("rose-connection", 1);
+        var buzzerJson = JsonSerializer.SerializeToElement(
+            GameHub.CreateBuzzerUpdate(game));
+
+        Assert.NotNull(result);
+        Assert.Empty(result.Question.AnswerAttempts);
+        Assert.Contains(joined.Player!.Id, result.Question.SkippedPlayerIds);
+        Assert.Equal(0, joined.Player.Score);
+        Assert.True(buzzerJson.GetProperty("canSkip").GetBoolean());
+        Assert.Contains(
+            joined.Player.Id.Value,
+            buzzerJson.GetProperty("skippedPlayerIds")
+                .EnumerateArray()
+                .Select(item => item.GetGuid()));
+        Assert.Contains(
+            joined.Player.Id.Value,
+            buzzerJson.GetProperty("ineligiblePlayerIds")
+                .EnumerateArray()
+                .Select(item => item.GetGuid()));
+    }
+
+    [Fact]
     public void ClaimQuestionBuzzer_records_players_within_one_second_of_winner()
     {
         var timeProvider = new TestTimeProvider();

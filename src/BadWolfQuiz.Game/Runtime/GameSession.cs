@@ -617,6 +617,18 @@ public sealed class GameSession
         return question;
     }
 
+    public RuntimeQuestion SkipQuestion(
+        int sourceQuestionId,
+        GamePlayerId playerId)
+    {
+        EnsureRunning();
+
+        var question = FindQuestion(sourceQuestionId);
+        var player = FindPlayer(playerId);
+        question.Skip(player.Id);
+        return question;
+    }
+
     public QuestionAnswerAttempt JudgeQuestionAnswer(
         int sourceQuestionId,
         GamePlayerId playerId,
@@ -658,7 +670,8 @@ public sealed class GameSession
         else
         {
             var hasEligiblePlayer = _players.Any(candidate =>
-                question.AnswerAttempts.All(answer => answer.PlayerId != candidate.Id));
+                question.AnswerAttempts.All(answer => answer.PlayerId != candidate.Id) &&
+                !question.SkippedPlayerIds.Contains(candidate.Id));
 
             if (!hasEligiblePlayer)
             {

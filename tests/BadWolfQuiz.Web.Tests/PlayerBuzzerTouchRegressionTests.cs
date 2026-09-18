@@ -101,6 +101,57 @@ public sealed class PlayerBuzzerTouchRegressionTests
         Assert.Contains("{ passive: false }", script);
     }
 
+    [Fact]
+    public void Player_page_exposes_skip_only_for_server_reported_skippable_question()
+    {
+        var root = FindRepositoryRoot();
+        var page = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Player",
+            "Lobby.cshtml"));
+        var hub = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Hubs",
+            "GameHub.cs"));
+        var styles = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "player-regular-gameplay-safe.css"));
+        var ukrainian = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Resources",
+            "Localization",
+            "SharedResource.uk.resx"));
+
+        Assert.Contains("id=\"player-skip-question\"", page);
+        Assert.Contains("@Localizer[\"PlayerGame_SkipQuestion\"]", page);
+        Assert.Contains("data-question-skipped-label", page);
+        Assert.Contains("update.canSkip === true", page);
+        Assert.Contains("update.skippedPlayerIds?.includes(playerId)", page);
+        Assert.Contains("connection.invoke(\"SkipQuestion\", sourceQuestionId)", page);
+        Assert.Contains("skipQuestionButton.hidden = !canSkip", page);
+        Assert.Contains("QuestionSkipRejected", page);
+
+        Assert.Contains("public async Task SkipQuestion(int sourceQuestionId)", hub);
+        Assert.Contains("skippedPlayerIds", hub);
+        Assert.Contains("ineligiblePlayerIds", hub);
+        Assert.Contains("canSkip", hub);
+
+        Assert.Contains(".player-skip-question:not([hidden])", styles);
+        Assert.Contains("<value>Пропустити</value>", ukrainian);
+        Assert.Contains("<value>Ви пропустили це питання.</value>", ukrainian);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

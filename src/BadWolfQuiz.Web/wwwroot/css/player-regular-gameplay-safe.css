@@ -332,6 +332,14 @@
     box-shadow: 0 24px 56px rgb(0 0 0 / 30%);
 }
 
+.player-lobby > .player-buzzer-panel > .player-skip-question:not([hidden]) {
+    width: 100%;
+    min-height: 48px;
+    margin: 0;
+    flex: 0 0 auto;
+    font-weight: 850;
+}
+
 /* Anonymous shared wager already owns its stable runtime. Style the panel itself. */
 .player-lobby > .anonymous-shared-wager-player-panel {
     grid-column: 1 / -1 !important;

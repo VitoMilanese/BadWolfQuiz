@@ -156,6 +156,68 @@ public sealed class GameSessionTests
     }
 
     [Fact]
+    public void Player_can_skip_active_regular_question_without_score_or_answer_attempt()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+
+        session.SkipQuestion(100, rose.Id);
+        session.ActivateQuestionBuzzer(100);
+
+        Assert.Contains(rose.Id, question.SkippedPlayerIds);
+        Assert.Empty(question.AnswerAttempts);
+        Assert.Equal(0, rose.Score);
+        Assert.Throws<GameRuleViolationException>(
+            () => session.ClaimQuestionBuzzer(100, rose.Id));
+
+        var claimed = session.ClaimQuestionBuzzer(100, mickey.Id);
+        Assert.Equal(mickey.Id, claimed.AnsweringPlayerId);
+    }
+
+    [Fact]
+    public void Restore_preserves_players_who_skipped_current_question()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        session.Start();
+        session.SelectQuestion(100);
+        session.SkipQuestion(100, rose.Id);
+
+        var restored = GameSession.Restore(
+            session.Quiz,
+            session.Settings,
+            session.CaptureState());
+
+        var question = restored.Board.Questions.Single(
+            item => item.SourceQuestionId == 100);
+        Assert.Contains(rose.Id, question.SkippedPlayerIds);
+    }
+
+    [Fact]
+    public void Wrong_answer_resolves_when_every_other_player_skipped()
+    {
+        var session = CreateSession();
+        var rose = session.AddPlayer("Rose");
+        var mickey = session.AddPlayer("Mickey");
+        session.Start();
+        var question = session.SelectQuestion(100);
+        session.SkipQuestion(100, mickey.Id);
+        session.ActivateQuestionBuzzer(100);
+        session.ClaimQuestionBuzzer(100, rose.Id);
+
+        session.JudgeQuestionAnswer(100, rose.Id, false);
+
+        Assert.Equal(RuntimeQuestionStatus.ShowingAnswer, question.Status);
+        Assert.Equal(QuestionBuzzerStatus.Closed, question.BuzzerStatus);
+        Assert.Single(question.AnswerAttempts);
+        Assert.Equal(-100, rose.Score);
+        Assert.Equal(0, mickey.Score);
+    }
+
+    [Fact]
     public void Restore_preserves_a_claimed_buzzer()
     {
         var session = CreateSession();

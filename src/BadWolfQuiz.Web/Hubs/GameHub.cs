@@ -356,6 +356,36 @@ public sealed class GameHub(
         }
     }
 
+    public async Task SkipQuestion(int sourceQuestionId)
+    {
+        PlayerQuestionSkipResult? result;
+
+        try
+        {
+            result = sessionRegistry.SkipQuestion(
+                Context.ConnectionId,
+                sourceQuestionId);
+        }
+        catch (GameRuleViolationException)
+        {
+            result = null;
+        }
+
+        if (result is null)
+        {
+            await Clients.Caller.SendAsync(
+                "QuestionSkipRejected",
+                new { sourceQuestionId });
+            return;
+        }
+
+        await Clients
+            .Group(GroupName(result.Game.PublicCode))
+            .SendAsync(
+                "BuzzerStateChanged",
+                CreateBuzzerUpdate(result.Game));
+    }
+
     public async Task Buzz(int sourceQuestionId)
     {
         BuzzerClaimResult? claim;
@@ -583,6 +613,8 @@ public sealed class GameHub(
                 answeringPlayerId = (Guid?)null,
                 answeringPlayerName = (string?)null,
                 ineligiblePlayerIds = Array.Empty<Guid>(),
+                skippedPlayerIds = Array.Empty<Guid>(),
+                canSkip = false,
                 buzzerRace = (object?)null
             };
         }
@@ -590,6 +622,19 @@ public sealed class GameHub(
         var answeringPlayer = question.AnsweringPlayerId is { } playerId
             ? game.Session.Players.Single(player => player.Id == playerId)
             : null;
+        var skippedPlayerIds = question.SkippedPlayerIds
+            .Select(id => id.Value)
+            .ToArray();
+        var ineligiblePlayerIds = question.AnswerAttempts
+            .Select(attempt => attempt.PlayerId.Value)
+            .Concat(skippedPlayerIds)
+            .Distinct()
+            .ToArray();
+        var canSkip =
+            !question.IsSpecial &&
+            !question.IsAllPlayerQuestion &&
+            question.Status is RuntimeQuestionStatus.Selected or
+                RuntimeQuestionStatus.Active;
 
         return new
         {
@@ -597,9 +642,9 @@ public sealed class GameHub(
             status = question.BuzzerStatus.ToString().ToLowerInvariant(),
             answeringPlayerId = answeringPlayer?.Id.Value,
             answeringPlayerName = answeringPlayer?.Name,
-            ineligiblePlayerIds = question.AnswerAttempts
-                .Select(attempt => attempt.PlayerId.Value)
-                .ToArray(),
+            ineligiblePlayerIds,
+            skippedPlayerIds,
+            canSkip,
             buzzerRace = game.BuzzerRace is { } race &&
                 race.SourceQuestionId == question.SourceQuestionId
                     ? new

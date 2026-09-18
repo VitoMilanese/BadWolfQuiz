@@ -1278,6 +1278,38 @@ public sealed class GameSessionRegistry
         }
     }
 
+    public PlayerQuestionSkipResult? SkipQuestion(
+        string connectionId,
+        int sourceQuestionId)
+    {
+        PlayerConnection connection;
+
+        lock (_presenceSync)
+        {
+            if (!_playerConnections.TryGetValue(
+                    connectionId,
+                    out var currentConnection) ||
+                !currentConnection.IsApproved)
+            {
+                return null;
+            }
+
+            connection = currentConnection;
+        }
+
+        lock (connection.Access.Game)
+        {
+            var game = connection.Access.Game;
+            var player = connection.Access.Player;
+            var question = game.Session.SkipQuestion(
+                sourceQuestionId,
+                player.Id);
+            game.MarkPersistenceChanged();
+
+            return new PlayerQuestionSkipResult(game, question, player);
+        }
+    }
+
     public QuestionAnswerAttempt? JudgeQuestionAnswer(
         string publicCode,
         int sourceQuestionId,
@@ -1872,6 +1904,12 @@ public sealed record BuzzerClaimResult(
     RuntimeQuestion Question,
     GamePlayer Player,
     bool IsWinner);
+
+
+public sealed record PlayerQuestionSkipResult(
+    GameSessionRegistration Game,
+    RuntimeQuestion Question,
+    GamePlayer Player);
 
 
 public sealed record QuestionTimerTickResult(

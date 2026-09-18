@@ -26,6 +26,7 @@
      data-buzzer-already-answered-label="@Localizer["PlayerGame_BuzzerAlreadyAnswered"]"
      data-buzzer-closed-label="@Localizer["PlayerGame_BuzzerClosed"]"
      data-buzz-rejected-label="@Localizer["PlayerGame_BuzzRejected"]"
+     data-question-skipped-label="@Localizer["PlayerGame_QuestionSkipped"]"
      data-final-action-rejected-label="@Localizer["FinalQuestion_ActionRejected"]"
      data-removed-from-game-label="@Localizer["PlayerGame_RemovedFromGame"]"
      data-player-image-invalid-label="@Localizer["PlayerImage_Invalid"]"
@@ -502,6 +503,12 @@
                 disabled>
             @Localizer["PlayerGame_Buzz"]
         </button>
+        <button id="player-skip-question"
+                class="button button-secondary player-skip-question"
+                type="button"
+                hidden>
+            @Localizer["PlayerGame_SkipQuestion"]
+        </button>
         <p id="player-buzzer-status" class="dialog-warning">
             @Localizer["PlayerGame_BuzzerClosed"]
         </p>
@@ -644,6 +651,8 @@
             const warning = document.getElementById("activity-warning");
             const rejoinWarning = document.getElementById("rejoin-warning");
             const buzzerButton = document.getElementById("player-buzzer");
+            const skipQuestionButton =
+                document.getElementById("player-skip-question");
             const buzzerStatus = document.getElementById("player-buzzer-status");
             const timerPanel = document.getElementById("game-timer");
             const timerValue = document.getElementById("game-timer-value");
@@ -651,6 +660,7 @@
             const finalAnswerForm = document.getElementById("final-answer-form");
             const finalError = document.getElementById("final-question-error");
             let buzzerQuestionId = null;
+            let skippableQuestionId = null;
             let hasReceivedInitialFinalState = false;
 
             if (!lobby || !warning || typeof signalR === "undefined") {
@@ -1069,11 +1079,25 @@
             });
 
             connection.on("BuzzerStateChanged", update => {
-                const hasAlreadyAnswered =
+                const hasSkipped =
+                    update.skippedPlayerIds?.includes(playerId) ?? false;
+                const isIneligible =
                     update.ineligiblePlayerIds?.includes(playerId) ?? false;
+                const hasAlreadyAnswered = isIneligible && !hasSkipped;
                 const isOpen = update.status === "open";
-                const canBuzz = isOpen && !hasAlreadyAnswered;
+                const isClaimedByCurrentPlayer =
+                    update.status === "claimed" &&
+                    update.answeringPlayerId === playerId;
+                const canBuzz = isOpen && !isIneligible;
+                const canSkip =
+                    update.canSkip === true &&
+                    !isIneligible &&
+                    !isClaimedByCurrentPlayer;
+
                 buzzerQuestionId = canBuzz
+                    ? update.sourceQuestionId
+                    : null;
+                skippableQuestionId = canSkip
                     ? update.sourceQuestionId
                     : null;
                 lobby.classList.toggle("is-page-buzzer-active", canBuzz);
@@ -1083,20 +1107,23 @@
                     buzzerButton.classList.toggle("player-buzzer-open", canBuzz);
                 }
 
-                if (buzzerStatus) {
-                    const isClaimedByCurrentPlayer =
-                        update.status === "claimed" &&
-                        update.answeringPlayerId === playerId;
+                if (skipQuestionButton) {
+                    skipQuestionButton.hidden = !canSkip;
+                    skipQuestionButton.disabled = !canSkip;
+                }
 
-                    buzzerStatus.textContent = hasAlreadyAnswered
-                        ? lobby.dataset.buzzerAlreadyAnsweredLabel
-                        : isOpen
-                            ? lobby.dataset.buzzerOpenLabel
-                            : isClaimedByCurrentPlayer
-                                ? lobby.dataset.buzzerClaimedByYouLabel
-                                : update.status === "claimed"
-                                    ? lobby.dataset.buzzerClaimedLabel
-                                    : lobby.dataset.buzzerClosedLabel;
+                if (buzzerStatus) {
+                    buzzerStatus.textContent = hasSkipped
+                        ? lobby.dataset.questionSkippedLabel
+                        : hasAlreadyAnswered
+                            ? lobby.dataset.buzzerAlreadyAnsweredLabel
+                            : isOpen
+                                ? lobby.dataset.buzzerOpenLabel
+                                : isClaimedByCurrentPlayer
+                                    ? lobby.dataset.buzzerClaimedByYouLabel
+                                    : update.status === "claimed"
+                                        ? lobby.dataset.buzzerClaimedLabel
+                                        : lobby.dataset.buzzerClosedLabel;
                 }
             });
 
@@ -1262,6 +1289,21 @@
 
             buzzerButton?.addEventListener("click", tryBuzz);
 
+            skipQuestionButton?.addEventListener("click", () => {
+                if (skippableQuestionId === null ||
+                    connection.state !== signalR.HubConnectionState.Connected) {
+                    return;
+                }
+
+                const sourceQuestionId = skippableQuestionId;
+                skipQuestionButton.disabled = true;
+                connection.invoke("SkipQuestion", sourceQuestionId)
+                    .catch(error => {
+                        skipQuestionButton.disabled = false;
+                        console.error(error);
+                    });
+            });
+
             document.addEventListener("click", event => {
                 if (buzzerQuestionId === null ||
                     event.target.closest(
@@ -1275,6 +1317,12 @@
             connection.on("BuzzRejected", () => {
                 if (buzzerStatus) {
                     buzzerStatus.textContent = lobby.dataset.buzzRejectedLabel;
+                }
+            });
+
+            connection.on("QuestionSkipRejected", () => {
+                if (skipQuestionButton && skippableQuestionId !== null) {
+                    skipQuestionButton.disabled = false;
                 }
             });
 

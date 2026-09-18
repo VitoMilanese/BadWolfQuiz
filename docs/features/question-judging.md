@@ -18,6 +18,8 @@ For each judged attempt:
 
 When a player answers correctly, that player becomes the active player. If the current active player answers correctly, the active player remains unchanged.
 
+During an active regular buzzer question, a player may explicitly **Skip** the question from their player page. Skipping does not create a `QuestionAnswerAttempt`, does not change the score, and makes that player ineligible to claim the buzzer for the remainder of the current question. The skip action is also available before a manually or media-delayed buzzer opens, but it is not offered for wager, mandatory all-player, or Final Question flows. Skipped-player state is included in active-game recovery. If another player's incorrect answer leaves only players who already answered or skipped, the existing no-eligible-player resolution rule closes the question.
+
 ### Optional x2 and 1/2 correct-answer rewards
 
 Quiz authors can opt an individual question into special correct-answer scoring from the Question Editor. The setting is disabled by default, and legacy questions without an explicit value are treated as disabled.
