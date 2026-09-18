@@ -728,6 +728,12 @@ body[data-quiz-editor-workspace="board"] .question-anomaly-badge {
     line-height: 1;
 }
 
+body[data-quiz-editor-workspace="board"] .question-anomaly-icon {
+    display: block;
+    line-height: 1;
+    transform: translate(1px, -1px);
+}
+
 body[data-quiz-editor-workspace="board"] .question-card-actions .js-question-fix {
     width: 30px;
     min-width: 30px;
