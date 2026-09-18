@@ -379,10 +379,18 @@
     flex: 0 0 auto;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
     .player-lobby > .player-skip-controls:not([hidden]) {
-        width: 100%;
+        width: 100% !important;
+        max-width: none !important;
         margin-top: 0.25rem;
+        justify-self: stretch;
+    }
+
+    .player-lobby > .player-skip-controls:not([hidden]) > .player-skip-question {
+        flex: 1 1 0;
+        width: auto;
+        max-width: none;
     }
 }
 

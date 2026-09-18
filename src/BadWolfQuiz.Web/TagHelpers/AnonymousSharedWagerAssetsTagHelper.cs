@@ -18,7 +18,7 @@ public sealed class AnonymousSharedWagerAssetsTagHelper : TagHelper
             output.PreElement.AppendHtml(
                 "<link rel=\"stylesheet\" href=\"/css/gameplay-review-fixes.css?v=2\" />");
             output.PreElement.AppendHtml(
-                "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-safe.css?v=3\" />");
+                "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-safe.css?v=4\" />");
             output.PostContent.AppendHtml(
                 "<script src=\"/js/anonymous-shared-wager-player.js?v=1\"></script>");
         }
@@ -26,7 +26,7 @@ public sealed class AnonymousSharedWagerAssetsTagHelper : TagHelper
         if (classNames.Contains("host-game-board", StringComparer.Ordinal))
         {
             output.PreElement.AppendHtml(
-                "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-safe.css?v=3\" />");
+                "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-safe.css?v=4\" />");
             output.PreElement.AppendHtml(
                 "<link rel=\"stylesheet\" href=\"/css/player-regular-gameplay-host-followup.css?v=6\" />");
             output.PreElement.AppendHtml(

@@ -18,7 +18,7 @@ public sealed class PlayerRegularGameplaySafeRestyleRegressionTests
             "anonymous-shared-wager-player.js"));
 
         Assert.Contains(
-            "/css/player-regular-gameplay-safe.css?v=3",
+            "/css/player-regular-gameplay-safe.css?v=4",
             helper,
             StringComparison.Ordinal);
         Assert.Contains(

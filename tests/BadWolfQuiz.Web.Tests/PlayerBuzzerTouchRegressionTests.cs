@@ -194,6 +194,12 @@ public sealed class PlayerBuzzerTouchRegressionTests
         Assert.Contains(".player-skip-position-toggle", styles);
         Assert.Contains("width: 44px;", styles);
         Assert.Contains("height: 44px;", styles);
+        Assert.Contains(
+            "@media (max-width: 900px), (hover: none) and (pointer: coarse)",
+            styles);
+        Assert.Contains("width: 100% !important;", styles);
+        Assert.Contains("justify-self: stretch;", styles);
+        Assert.Contains("flex: 1 1 0;", styles);
         Assert.Contains("<value>Пропустити</value>", ukrainian);
         Assert.Contains("<value>Пропонує пропустити питання</value>", ukrainian);
     }
