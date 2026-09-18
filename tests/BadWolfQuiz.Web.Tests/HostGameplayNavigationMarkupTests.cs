@@ -385,6 +385,63 @@ public sealed class HostGameplayNavigationMarkupTests
         Assert.Contains("event.target === dialog", script);
         Assert.Contains("opener?.focus();", script);
 
+        var actionsStart = markup.IndexOf(
+            "<div class=\"host-tools-dialog-actions\">",
+            StringComparison.Ordinal);
+        var actionsEnd = markup.IndexOf(
+            "</div>\n        </div>\n    </dialog>",
+            actionsStart,
+            StringComparison.Ordinal);
+        var actions = markup[actionsStart..actionsEnd];
+
+        var answerHistory = actions.IndexOf(
+            "asp-page=\"/Admin/Games/AnswerHistory\"",
+            StringComparison.Ordinal);
+        var nextRound = actions.IndexOf(
+            "id=\"force-advance-round-form\"",
+            StringComparison.Ordinal);
+        var answerKey = actions.IndexOf(
+            "asp-page=\"/Admin/Games/AnswerKey\"",
+            StringComparison.Ordinal);
+        var finalQuestion = actions.IndexOf(
+            "id=\"force-advance-final-form\"",
+            StringComparison.Ordinal);
+        var blockedPlayers = actions.IndexOf(
+            "data-open-blocked-players",
+            StringComparison.Ordinal);
+        var joinCode = actions.IndexOf(
+            "data-open-join-code",
+            StringComparison.Ordinal);
+        var achievements = actions.IndexOf(
+            "asp-page=\"/Admin/Games/PlayerAchievements\"",
+            StringComparison.Ordinal);
+        var randomPlayer = actions.IndexOf(
+            "asp-page-handler=\"RandomActivePlayer\"",
+            StringComparison.Ordinal);
+        var cancelBuzzer = actions.IndexOf(
+            "asp-page-handler=\"CancelBuzzerClaim\"",
+            StringComparison.Ordinal);
+        var settings = actions.IndexOf(
+            "data-open-game-settings",
+            StringComparison.Ordinal);
+
+        Assert.True(answerHistory >= 0);
+        Assert.True(nextRound > answerHistory);
+        Assert.True(answerKey > nextRound);
+        Assert.True(finalQuestion > answerKey);
+        Assert.True(blockedPlayers > finalQuestion);
+        Assert.True(joinCode > blockedPlayers);
+        Assert.True(achievements > joinCode);
+        Assert.True(randomPlayer > achievements);
+        Assert.True(cancelBuzzer > randomPlayer);
+        Assert.True(settings > cancelBuzzer);
+        Assert.Contains(
+            "host-tools-action host-tools-action-wide",
+            actions);
+        Assert.Contains(
+            ".host-tools-action-wide,",
+            css);
+
         var layout = File.ReadAllText(FindWebFile(
             "Pages",
             "Shared",

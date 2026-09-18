@@ -7302,6 +7302,7 @@ body.youtube-auto-expanded-open {
     overflow-wrap: anywhere;
 }
 
+.host-tools-action-wide,
 .host-tools-action-warning,
 .host-tools-action-danger {
     grid-column: 1 / -1;
@@ -7378,6 +7379,7 @@ body.youtube-auto-expanded-open {
         font-size: 1.08rem;
     }
 
+    .host-tools-action-wide,
     .host-tools-action-warning,
     .host-tools-action-danger {
         grid-column: auto;

@@ -67,6 +67,73 @@
             </div>
 
             <div class="host-tools-dialog-actions">
+                @if (Model.CurrentQuestion is null)
+                {
+                    <a class="host-tools-action"
+                       asp-page="/Admin/Games/AnswerHistory"
+                       asp-route-id="@Model.Game.Session.Id.Value"
+                       data-host-tools-dialog-dismiss>
+                        <span class="host-tools-action-icon" aria-hidden="true">≡</span>
+                        <span class="host-tools-action-label">@Localizer["AnswerHistory_Open"]</span>
+                    </a>
+                }
+
+                <form id="force-advance-round-form"
+                      class="host-tools-action-form"
+                      method="post"
+                      asp-page-handler="ForceAdvanceRound"
+                      hidden="@(!Model.Game.Session.HasNextUnfinishedRound ? "hidden" : null)">
+                    <button class="host-tools-action"
+                            type="button"
+                            data-host-tools-dialog-dismiss
+                            data-open-force-advance-round-dialog>
+                        <span class="host-tools-action-icon" aria-hidden="true">→</span>
+                        <span class="host-tools-action-label">@Localizer["GameBoard_NextRound"]</span>
+                    </button>
+                </form>
+
+                <a class="host-tools-action"
+                   asp-page="/Admin/Games/AnswerKey"
+                   asp-route-id="@Model.Game.Session.Id.Value"
+                   target="_blank"
+                   rel="noopener"
+                   data-host-tools-dialog-dismiss>
+                    <span class="host-tools-action-icon" aria-hidden="true">✓</span>
+                    <span class="host-tools-action-label">@Localizer["AnswerKey_Open"]</span>
+                </a>
+
+                @if (Model.Game.Session.Quiz.FinalQuestion is not null)
+                {
+                    <form id="force-advance-final-form"
+                          class="host-tools-action-form"
+                          method="post"
+                          asp-page-handler="PrepareFinalQuestionLeaderboard">
+                        <button class="host-tools-action"
+                                type="button"
+                                data-host-tools-dialog-dismiss
+                                data-open-force-advance-final-dialog>
+                            <span class="host-tools-action-icon" aria-hidden="true">◆</span>
+                            <span class="host-tools-action-label">@Localizer["FinalQuestion_Advance"]</span>
+                        </button>
+                    </form>
+                }
+
+                <button class="host-tools-action"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-blocked-players>
+                    <span class="host-tools-action-icon" aria-hidden="true">⊘</span>
+                    <span class="host-tools-action-label">@Localizer["GameBoard_ManageBlockedPlayers"]</span>
+                </button>
+
+                <button class="host-tools-action"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-join-code>
+                    <span class="host-tools-action-icon" aria-hidden="true">#</span>
+                    <span class="host-tools-action-label">@Localizer["GameBoard_ShowJoinCode"]</span>
+                </button>
+
                 <a class="host-tools-action"
                    asp-page="/Admin/Games/PlayerAchievements"
                    asp-route-id="@Model.Game.Session.Id.Value"
@@ -79,14 +146,6 @@
 
                 @if (Model.CurrentQuestion is null)
                 {
-                    <a class="host-tools-action"
-                       asp-page="/Admin/Games/AnswerHistory"
-                       asp-route-id="@Model.Game.Session.Id.Value"
-                       data-host-tools-dialog-dismiss>
-                        <span class="host-tools-action-icon" aria-hidden="true">≡</span>
-                        <span class="host-tools-action-label">@Localizer["AnswerHistory_Open"]</span>
-                    </a>
-
                     <form class="host-tools-action-form"
                           method="post"
                           asp-page-handler="RandomActivePlayer">
@@ -109,70 +168,6 @@
                     <span class="host-tools-action-label">@Localizer["GameBoard_PreviousRound"]</span>
                 </button>
 
-                <form id="force-advance-round-form"
-                      class="host-tools-action-form"
-                      method="post"
-                      asp-page-handler="ForceAdvanceRound"
-                      hidden="@(!Model.Game.Session.HasNextUnfinishedRound ? "hidden" : null)">
-                    <button class="host-tools-action"
-                            type="button"
-                            data-host-tools-dialog-dismiss
-                            data-open-force-advance-round-dialog>
-                        <span class="host-tools-action-icon" aria-hidden="true">→</span>
-                        <span class="host-tools-action-label">@Localizer["GameBoard_NextRound"]</span>
-                    </button>
-                </form>
-
-                @if (Model.Game.Session.Quiz.FinalQuestion is not null)
-                {
-                    <form id="force-advance-final-form"
-                          class="host-tools-action-form"
-                          method="post"
-                          asp-page-handler="PrepareFinalQuestionLeaderboard">
-                        <button class="host-tools-action"
-                                type="button"
-                                data-host-tools-dialog-dismiss
-                                data-open-force-advance-final-dialog>
-                            <span class="host-tools-action-icon" aria-hidden="true">◆</span>
-                            <span class="host-tools-action-label">@Localizer["FinalQuestion_Advance"]</span>
-                        </button>
-                    </form>
-                }
-
-                <a class="host-tools-action"
-                   asp-page="/Admin/Games/AnswerKey"
-                   asp-route-id="@Model.Game.Session.Id.Value"
-                   target="_blank"
-                   rel="noopener"
-                   data-host-tools-dialog-dismiss>
-                    <span class="host-tools-action-icon" aria-hidden="true">✓</span>
-                    <span class="host-tools-action-label">@Localizer["AnswerKey_Open"]</span>
-                </a>
-
-                <button class="host-tools-action"
-                        type="button"
-                        data-host-tools-dialog-dismiss
-                        data-open-join-code>
-                    <span class="host-tools-action-icon" aria-hidden="true">#</span>
-                    <span class="host-tools-action-label">@Localizer["GameBoard_ShowJoinCode"]</span>
-                </button>
-
-                <button class="host-tools-action"
-                        type="button"
-                        data-host-tools-dialog-dismiss
-                        data-open-blocked-players>
-                    <span class="host-tools-action-icon" aria-hidden="true">⊘</span>
-                    <span class="host-tools-action-label">@Localizer["GameBoard_ManageBlockedPlayers"]</span>
-                </button>
-
-                <button class="host-tools-action"
-                        type="button"
-                        data-host-tools-dialog-dismiss
-                        data-open-game-settings>
-                    <span class="host-tools-action-icon" aria-hidden="true">⚙</span>
-                    <span class="host-tools-action-label">@Localizer["GameSettings_LobbyTitle"]</span>
-                </button>
-
                 <form class="host-tools-action-form"
                       method="post"
                       asp-page-handler="CancelBuzzerClaim"
@@ -185,6 +180,14 @@
                         <span class="host-tools-action-label">@Localizer["GameBoard_CancelBuzzerPress"]</span>
                     </button>
                 </form>
+
+                <button class="host-tools-action host-tools-action-wide"
+                        type="button"
+                        data-host-tools-dialog-dismiss
+                        data-open-game-settings>
+                    <span class="host-tools-action-icon" aria-hidden="true">⚙</span>
+                    <span class="host-tools-action-label">@Localizer["GameSettings_LobbyTitle"]</span>
+                </button>
             </div>
         </div>
     </dialog>
