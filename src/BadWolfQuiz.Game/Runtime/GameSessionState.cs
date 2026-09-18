@@ -48,7 +48,7 @@ public sealed record RuntimeQuestionState(
     IReadOnlyList<GamePlayerId>? AllPlayerChoiceExcludedPlayerIds = null,
     int HintCount = 0,
     int RevealedHintCount = 0,
-    IReadOnlyList<GamePlayerId>? SkippedPlayerIds = null);
+    IReadOnlyList<GamePlayerId>? SkipProposalPlayerIds = null);
 
 public sealed record FinalQuestionState(
     FinalQuestionStatus Status,

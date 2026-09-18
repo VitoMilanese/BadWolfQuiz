@@ -523,36 +523,81 @@ public sealed class GameSessionRegistryTests
     }
 
     [Fact]
-    public void Connected_player_can_skip_question_without_creating_answer_attempt()
+    public void Connected_player_can_propose_skip_and_still_win_buzzer()
     {
         var registry = CreateRegistry("ABC123");
         var game = registry.Create(CreateQuiz());
-        var joined = registry.JoinPlayer("ABC123", "Rose");
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        registry.JoinPlayer("ABC123", "Mickey");
         registry.ConnectPlayer(
             "ABC123",
-            joined.AccessToken!,
+            rose.AccessToken!,
             "rose-connection",
             true);
         registry.StartGame("ABC123");
         registry.SelectQuestion("ABC123", 1);
 
-        var result = registry.SkipQuestion("rose-connection", 1);
-        var buzzerJson = JsonSerializer.SerializeToElement(
+        var result = registry.ProposeQuestionSkip("rose-connection", 1);
+        var proposedJson = JsonSerializer.SerializeToElement(
             GameHub.CreateBuzzerUpdate(game));
 
         Assert.NotNull(result);
         Assert.Empty(result.Question.AnswerAttempts);
-        Assert.Contains(joined.Player!.Id, result.Question.SkippedPlayerIds);
-        Assert.Equal(0, joined.Player.Score);
-        Assert.True(buzzerJson.GetProperty("canSkip").GetBoolean());
+        Assert.Contains(rose.Player!.Id, result.Question.SkipProposalPlayerIds);
+        Assert.Equal(0, rose.Player.Score);
+        Assert.True(proposedJson.GetProperty("canProposeSkip").GetBoolean());
         Assert.Contains(
-            joined.Player.Id.Value,
-            buzzerJson.GetProperty("skippedPlayerIds")
+            rose.Player.Id.Value,
+            proposedJson.GetProperty("skipProposalPlayerIds")
                 .EnumerateArray()
                 .Select(item => item.GetGuid()));
-        Assert.Contains(
-            joined.Player.Id.Value,
-            buzzerJson.GetProperty("ineligiblePlayerIds")
+        Assert.DoesNotContain(
+            rose.Player.Id.Value,
+            proposedJson.GetProperty("ineligiblePlayerIds")
+                .EnumerateArray()
+                .Select(item => item.GetGuid()));
+
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+        var claim = registry.ClaimQuestionBuzzer("rose-connection", 1);
+        var claimedJson = JsonSerializer.SerializeToElement(
+            GameHub.CreateBuzzerUpdate(game));
+
+        Assert.True(claim!.IsWinner);
+        Assert.DoesNotContain(
+            rose.Player.Id.Value,
+            claimedJson.GetProperty("skipProposalPlayerIds")
+                .EnumerateArray()
+                .Select(item => item.GetGuid()));
+    }
+
+    [Fact]
+    public void Late_buzzer_press_withdraws_existing_skip_proposal()
+    {
+        var timeProvider = new TestTimeProvider();
+        var registry = new GameSessionRegistry(
+            new StubGameCodeGenerator(["ABC123"]),
+            timeProvider);
+        var game = registry.Create(CreateQuiz());
+        var rose = registry.JoinPlayer("ABC123", "Rose");
+        var mickey = registry.JoinPlayer("ABC123", "Mickey");
+        registry.ConnectPlayer("ABC123", rose.AccessToken!, "rose-connection", true);
+        registry.ConnectPlayer("ABC123", mickey.AccessToken!, "mickey-connection", true);
+        registry.StartGame("ABC123");
+        registry.SelectQuestion("ABC123", 1);
+        registry.ProposeQuestionSkip("mickey-connection", 1);
+        registry.ActivateQuestionBuzzer("ABC123", 1);
+        registry.ClaimQuestionBuzzer("rose-connection", 1);
+
+        timeProvider.Advance(TimeSpan.FromMilliseconds(250));
+        var late = registry.ClaimQuestionBuzzer("mickey-connection", 1);
+        var buzzerJson = JsonSerializer.SerializeToElement(
+            GameHub.CreateBuzzerUpdate(game));
+
+        Assert.NotNull(late);
+        Assert.False(late.IsWinner);
+        Assert.DoesNotContain(
+            mickey.Player!.Id.Value,
+            buzzerJson.GetProperty("skipProposalPlayerIds")
                 .EnumerateArray()
                 .Select(item => item.GetGuid()));
     }

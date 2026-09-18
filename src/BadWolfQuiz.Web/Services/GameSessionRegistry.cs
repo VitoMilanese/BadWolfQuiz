@@ -1274,11 +1274,18 @@ public sealed class GameSessionRegistry
                 LatePlayers = [.. race.LatePlayers, latePlayer]
             };
 
+            if (game.Session.WithdrawQuestionSkipProposal(
+                    sourceQuestionId,
+                    player.Id))
+            {
+                game.MarkPersistenceChanged();
+            }
+
             return new BuzzerClaimResult(game, question, player, false);
         }
     }
 
-    public PlayerQuestionSkipResult? SkipQuestion(
+    public PlayerQuestionSkipProposalResult? ProposeQuestionSkip(
         string connectionId,
         int sourceQuestionId)
     {
@@ -1301,12 +1308,12 @@ public sealed class GameSessionRegistry
         {
             var game = connection.Access.Game;
             var player = connection.Access.Player;
-            var question = game.Session.SkipQuestion(
+            var question = game.Session.ProposeQuestionSkip(
                 sourceQuestionId,
                 player.Id);
             game.MarkPersistenceChanged();
 
-            return new PlayerQuestionSkipResult(game, question, player);
+            return new PlayerQuestionSkipProposalResult(game, question, player);
         }
     }
 
@@ -1906,7 +1913,7 @@ public sealed record BuzzerClaimResult(
     bool IsWinner);
 
 
-public sealed record PlayerQuestionSkipResult(
+public sealed record PlayerQuestionSkipProposalResult(
     GameSessionRegistration Game,
     RuntimeQuestion Question,
     GamePlayer Player);

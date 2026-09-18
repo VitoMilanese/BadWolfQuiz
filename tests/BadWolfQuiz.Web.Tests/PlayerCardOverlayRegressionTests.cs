@@ -112,6 +112,35 @@ public sealed class PlayerCardOverlayRegressionTests
     }
 
     [Fact]
+    public void Skip_proposal_uses_a_non_flow_top_left_player_card_overlay()
+    {
+        var css = ReadFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "game-player-card-overlays.css");
+        var page = ReadFile(
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Games",
+            "Lobby.cshtml");
+
+        Assert.Contains(".skip-proposal-badge", css);
+        Assert.Contains("position: absolute;", css);
+        Assert.Contains("top: 8px;", css);
+        Assert.Contains("left: 8px;", css);
+        Assert.Contains("z-index: 25;", css);
+        Assert.Contains("mask-image:", css);
+        Assert.Contains("data-skip-proposal-label", page);
+        Assert.Contains("data-skip-proposal-badge", page);
+        Assert.Contains("skipProposalPlayerIds", page);
+        Assert.Contains("skipProposalBadge?.remove()", page);
+    }
+
+    [Fact]
     public void Gameplay_presence_uses_centered_non_flow_top_right_icons()
     {
         var css = ReadFile(

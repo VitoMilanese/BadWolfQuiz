@@ -18,7 +18,9 @@ For each judged attempt:
 
 When a player answers correctly, that player becomes the active player. If the current active player answers correctly, the active player remains unchanged.
 
-During an active regular buzzer question, a player may explicitly **Skip** the question from their player page. Skipping does not create a `QuestionAnswerAttempt`, does not change the score, and makes that player ineligible to claim the buzzer for the remainder of the current question. The skip action is also available before a manually or media-delayed buzzer opens, but it is not offered for wager, mandatory all-player, or Final Question flows. Skipped-player state is included in active-game recovery. If another player's incorrect answer leaves only players who already answered or skipped, the existing no-eligible-player resolution rule closes the question.
+During an active regular buzzer question, a player may press **Skip** to propose ending the question without a correct answer. A skip proposal does not create a `QuestionAnswerAttempt`, does not change score, and does not remove the player's buzzer eligibility. The player's proposal is shown as a compact overlay icon on their gameplay card. If that player later presses the buzzer, the proposal is withdrawn immediately and the overlay disappears.
+
+The question moves to answer presentation only when every player who is still eligible to answer has an active skip proposal. Players who already produced an answer attempt are not part of that unanimity check. A proposal may be made before a manually or media-delayed buzzer opens, and proposals persist through active-game recovery. If another player is currently answering, proposals may still be collected but cannot resolve the question until the claimed answer phase ends. Wager questions, mandatory all-player questions, and Final Question flows do not expose this action.
 
 ### Optional x2 and 1/2 correct-answer rewards
 

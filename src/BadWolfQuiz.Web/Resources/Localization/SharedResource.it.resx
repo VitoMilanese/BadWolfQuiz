@@ -987,8 +987,8 @@
   <data name="PlayerGame_SkipQuestion" xml:space="preserve">
     <value>Salta</value>
   </data>
-  <data name="PlayerGame_QuestionSkipped" xml:space="preserve">
-    <value>Hai saltato questa domanda.</value>
+  <data name="GameBoard_PlayerProposesSkip" xml:space="preserve">
+    <value>Propone di saltare la domanda</value>
   </data>
   <data name="PlayerGame_BuzzerOpen" xml:space="preserve">
     <value>Il buzzer è attivo.</value>
