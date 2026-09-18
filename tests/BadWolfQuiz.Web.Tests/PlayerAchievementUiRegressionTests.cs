@@ -67,7 +67,7 @@ public sealed class PlayerAchievementUiRegressionTests
         Assert.Contains("/css/achievement-category-filter.css?v=2", tagHelper);
         Assert.Contains("/js/achievement-image-trim.js?v=1", tagHelper);
         Assert.Contains("/js/achievement-category-filter.js?v=2", tagHelper);
-        Assert.Contains("/css/player-lobby-dialog-menu.css?v=3", tagHelper);
+        Assert.Contains("/css/player-lobby-dialog-menu.css?v=4", tagHelper);
         Assert.Contains("/js/player-lobby-dialog-menu.js?v=3", tagHelper);
         Assert.Contains("/js/player-achievements.js?v=2", tagHelper);
         Assert.Contains("/css/player-achievements.css?v=11", hostTagHelper);

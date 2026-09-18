@@ -151,8 +151,8 @@ html.player-lobby-action-menu-open body {
     margin: 14px 16px 0;
     padding: 8px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 2.7rem;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     gap: 8px;
     border: 1px solid color-mix(in srgb, var(--red-bright) 30%, var(--line));
     border-radius: 13px;
@@ -162,11 +162,8 @@ html.player-lobby-action-menu-open body {
 .player-lobby-game-code-copy {
     min-width: 0;
     min-height: 56px;
-    padding: 8px;
-    display: grid;
-    grid-template-columns: 2.3rem minmax(0, 1fr);
-    align-items: center;
-    gap: 10px;
+    padding: 8px 10px;
+    display: block;
     border: 0;
     border-radius: 10px;
     background: transparent;
@@ -184,18 +181,6 @@ html.player-lobby-action-menu-open body {
 .player-lobby-game-code-copy:active,
 .player-lobby-join-link-copy:active {
     transform: translateY(1px);
-}
-
-.player-lobby-game-code-copy-icon {
-    width: 2.3rem;
-    height: 2.3rem;
-    display: grid;
-    place-items: center;
-    border: 1px solid color-mix(in srgb, var(--red-bright) 24%, var(--line));
-    border-radius: 0.72rem;
-    background: color-mix(in srgb, var(--panel) 84%, transparent);
-    font-size: 1rem;
-    line-height: 1;
 }
 
 .player-lobby-game-code-copy-text {
@@ -223,7 +208,8 @@ html.player-lobby-action-menu-open body {
 .player-lobby-join-link-copy {
     width: 2.7rem;
     min-width: 2.7rem;
-    min-height: 56px;
+    height: 2.7rem;
+    min-height: 2.7rem;
     padding: 0;
     display: grid;
     place-items: center;

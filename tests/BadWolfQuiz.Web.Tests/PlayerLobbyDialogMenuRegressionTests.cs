@@ -53,6 +53,9 @@ public sealed class PlayerLobbyDialogMenuRegressionTests
         Assert.Contains(".player-lobby-game-code-card", css);
         Assert.Contains(".player-lobby-game-code-copy", css);
         Assert.Contains(".player-lobby-join-link-copy", css);
+        Assert.DoesNotContain("player-lobby-game-code-copy-icon", page);
+        Assert.DoesNotContain(".player-lobby-game-code-copy-icon", css);
+        Assert.Contains("height: 2.7rem", css);
         Assert.Contains("padding-right: 4rem", css);
         Assert.DoesNotContain("right: calc(0.75rem + 3.35rem)", css);
         Assert.Contains("display: flex !important", css);
