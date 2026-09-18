@@ -28,6 +28,7 @@ These modes use the existing `QuestionPresentationType` field, so they do not re
 - The Correct answer section starts with one required, non-removable **Answer options** structural block.
 - The structural block contains two, three, or four selectable options.
 - Every selectable option is a Text or Image block.
+- Text selectable options are limited to 30 characters; Image options are unaffected by this text-length limit.
 - One or more options inside **Answer options** may be marked as correct. At least one correct option is always required.
 - Existing questions that store only the option count remain backward compatible and treat the first option as the single correct answer until edited otherwise.
 - Correctness belongs to the option card, so reordering the options preserves which options are marked correct rather than implicitly changing correctness to the new first option.

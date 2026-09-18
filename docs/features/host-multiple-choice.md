@@ -9,7 +9,7 @@ Host-selected multiple-choice questions combine the normal buzzer flow with a fi
 - A question contains the normal question content blocks.
 - The Correct answer section starts with one required, non-removable **Answer options** structural block.
 - **Answer options** contains between 4 and 10 distinct Text options.
-- Each selectable option is limited to 20 characters.
+- Each selectable option is limited to 30 characters.
 - The first option inside **Answer options** is the correct option and the editor presents that state explicitly.
 - Reordering options changes which option is correct.
 - Normal answer blocks may be added after **Answer options** as optional reveal-only content. These blocks are not selectable and support the normal answer content types, including Text, Image, Audio, YouTube, Container, and legacy Video compatibility.
