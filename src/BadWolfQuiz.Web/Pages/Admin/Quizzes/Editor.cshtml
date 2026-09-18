@@ -468,12 +468,10 @@
                                 <div class="question-card-actions">
                                     @if (isAnomalous)
                                     {
-                                        <button type="submit"
+                                        <button type="button"
                                                 class="js-question-fix button button-secondary icon-button"
                                                 draggable="false"
-                                                formmethod="post"
-                                                formaction="?handler=FixQuestion&quizId=@Model.Quiz.Id&questionId=@question.Id"
-                                                formnovalidate
+                                                data-fix-url="?handler=FixQuestion&quizId=@Model.Quiz.Id&questionId=@question.Id"
                                                 title="@Localizer["QuizEditor_FixQuestion"]"
                                                 aria-label="@Localizer["QuizEditor_FixQuestion"]">
                                             🔧
@@ -1032,6 +1030,67 @@
                 }, 4000);
             }
         };
+
+        document.addEventListener("click", async event => {
+            const button = event.target.closest(".js-question-fix");
+            if (!button || button.disabled) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            button.disabled = true;
+            button.setAttribute("aria-busy", "true");
+            const startedBusy = window.BadWolfBusy?.show?.() === true;
+
+            const formData = new FormData();
+            const antiforgeryToken = quizBoardForm?.querySelector(
+                'input[name="__RequestVerificationToken"]');
+            if (antiforgeryToken) {
+                formData.append(
+                    "__RequestVerificationToken",
+                    antiforgeryToken.value);
+            }
+
+            try {
+                const response = await fetch(button.dataset.fixUrl, {
+                    method: "POST",
+                    body: formData,
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.error || quizBoardForm.dataset.saveError);
+                }
+
+                const slot = button.closest(".question-cell-slot");
+                const questionCard = slot?.querySelector(".question-cell");
+                questionCard?.classList.remove("question-anomalous");
+                questionCard?.querySelector(".question-anomaly-badge")?.remove();
+
+                if (result.resetToStandard) {
+                    questionCard?.classList.remove("wager-question");
+                    questionCard?.querySelector(".question-wager-badge")?.remove();
+                }
+
+                button.remove();
+                showQuizSaveStatus(result.message, true);
+            } catch (error) {
+                showQuizSaveStatus(
+                    error.message || quizBoardForm.dataset.saveError,
+                    false);
+            } finally {
+                if (startedBusy) {
+                    window.BadWolfBusy?.hide?.();
+                }
+                if (button.isConnected) {
+                    button.disabled = false;
+                    button.removeAttribute("aria-busy");
+                }
+            }
+        });
 
         quizBoardForm?.addEventListener("submit", async event => {
             const submitter = event.submitter;

@@ -874,6 +874,7 @@ public sealed class EditorModel(
         CancellationToken cancellationToken)
     {
         var question = await db.QuizQuestions
+            .AsSplitQuery()
             .Include(item => item.QuestionBlocks)
             .Include(item => item.AnswerBlocks)
             .Include(item => item.Category)
@@ -897,11 +898,31 @@ public sealed class EditorModel(
             question,
             cancellationToken);
 
-        TempData[result.Changed ? "SuccessMessage" : "ErrorMessage"] =
-            localizer[
-                result.Changed
-                    ? "QuizEditor_QuestionFixed"
-                    : "QuizEditor_QuestionFixUnavailable"].Value;
+        var message = localizer[
+            result.Changed
+                ? "QuizEditor_QuestionFixed"
+                : "QuizEditor_QuestionFixUnavailable"].Value;
+
+        if (IsAjaxRequest())
+        {
+            if (!result.Changed)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    error = message
+                });
+            }
+
+            return new JsonResult(new
+            {
+                success = true,
+                message,
+                resetToStandard = result.ResetToStandard
+            });
+        }
+
+        TempData[result.Changed ? "SuccessMessage" : "ErrorMessage"] = message;
 
         return RedirectToPage(new
         {

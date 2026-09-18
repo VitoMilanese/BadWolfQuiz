@@ -113,9 +113,17 @@ public sealed class QuizQuestionAnomalyRepairTests
 
         Assert.Contains("question-anomaly-badge", page);
         Assert.Contains("js-question-fix", page);
-        Assert.Contains("handler=FixQuestion", page);
+        Assert.Contains("data-fix-url", page);
+        Assert.Contains("fetch(button.dataset.fixUrl", page);
+        Assert.Contains("window.BadWolfBusy?.show?.()", page);
+        Assert.Contains("window.BadWolfBusy?.hide?.()", page);
+        Assert.Contains("question-anomaly-badge", page);
+        Assert.Contains("question-anomalous", page);
+        Assert.Contains("button.remove()", page);
         Assert.Contains("QuestionAnomalies", model);
         Assert.Contains("QuizQuestionRepairOperations.RepairAsync", model);
+        Assert.Contains(".AsSplitQuery()", model);
+        Assert.Contains("resetToStandard = result.ResetToStandard", model);
     }
 
     private static string FindRepositoryRoot()
