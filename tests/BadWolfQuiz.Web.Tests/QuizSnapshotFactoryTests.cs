@@ -361,4 +361,51 @@ public sealed class QuizSnapshotFactoryTests
 
         return quiz;
     }
+
+    [Fact]
+    public void Create_reports_round_identity_when_round_has_no_questions()
+    {
+        var quiz = CreateQuiz();
+        var round = quiz.Rounds.Single();
+        foreach (var category in round.Categories)
+        {
+            category.Questions.Clear();
+        }
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => _factory.Create(quiz));
+
+        Assert.Contains($"Round #{round.Id}", exception.Message);
+        Assert.Contains(round.Title, exception.Message);
+        Assert.Contains("does not contain any questions", exception.Message);
+    }
+
+    [Fact]
+    public void Create_reports_question_identity_for_invalid_multiple_choice_structure()
+    {
+        var quiz = CreateQuiz();
+        var question = quiz.Rounds
+            .Single()
+            .Categories
+            .SelectMany(category => category.Questions)
+            .First();
+        question.PresentationType =
+            QuestionPresentationType.AllPlayerMultipleChoice;
+        question.AnswerBlocks.Clear();
+        question.AnswerBlocks.Add(new AnswerContentBlock
+        {
+            Id = 9991,
+            BlockType = ContentBlockType.Text,
+            SortOrder = 1
+        });
+
+        var exception = Assert.Throws<InvalidOperationException>(
+            () => _factory.Create(quiz));
+
+        Assert.Contains($"Question #{question.Id}", exception.Message);
+        Assert.Contains(question.Category.Title, exception.Message);
+        Assert.Contains($"row {question.RowIndex}", exception.Message);
+        Assert.Contains("2 to 4", exception.Message);
+    }
+
 }

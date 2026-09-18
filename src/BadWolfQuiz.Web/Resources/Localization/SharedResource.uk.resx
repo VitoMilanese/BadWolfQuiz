@@ -447,6 +447,18 @@
   <data name="QuizEditor_QuestionDeleted" xml:space="preserve">
     <value>Питання видалено.</value>
   </data>
+  <data name="QuizEditor_QuestionAnomaly" xml:space="preserve">
+    <value>Це питання має пошкоджену структуру, яка може завадити запуску квіза.</value>
+  </data>
+  <data name="QuizEditor_FixQuestion" xml:space="preserve">
+    <value>Пофіксити структуру питання</value>
+  </data>
+  <data name="QuizEditor_QuestionFixed" xml:space="preserve">
+    <value>Структуру питання виправлено. Питання скинуто до стандартного типу, а зміст збережено.</value>
+  </data>
+  <data name="QuizEditor_QuestionFixUnavailable" xml:space="preserve">
+    <value>Це питання неможливо безпечно виправити автоматично.</value>
+  </data>
   <data name="Dialog_DeleteCategory_Title" xml:space="preserve">
     <value>Видалити категорію</value>
   </data>
@@ -803,6 +815,9 @@
   </data>
   <data name="Error_QuizCannotStart" xml:space="preserve">
     <value>Цей квіз неможливо використати для створення гри. Перевірте раунди, питання та рядки балів.</value>
+  </data>
+  <data name="Error_QuizCannotStart_Detail" xml:space="preserve">
+    <value>Цей квіз неможливо використати для створення гри. Причина: {0}</value>
   </data>
   <data name="PlayerPresence_Active" xml:space="preserve">
     <value>Активний</value>

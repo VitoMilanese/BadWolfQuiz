@@ -68,6 +68,9 @@ public sealed class EditorModel(
 
     public Quiz Quiz { get; private set; } = null!;
 
+    public IReadOnlyDictionary<int, QuizQuestionAnomaly> QuestionAnomalies { get; private set; } =
+        new Dictionary<int, QuizQuestionAnomaly>();
+
     public sealed class AddRoundInputModel
     {
         public int QuizId { get; set; }
@@ -186,6 +189,7 @@ public sealed class EditorModel(
         public string? ExternalUrl { get; set; }
         public int SortOrder { get; set; }
         public bool HasFileData { get; set; }
+        public string? FileContentType { get; set; }
     }
 
     private static TBlock CreateLightweightBlock<TBlock>(
@@ -200,7 +204,8 @@ public sealed class EditorModel(
             MediaPath = source.MediaPath,
             ExternalUrl = source.ExternalUrl,
             SortOrder = source.SortOrder,
-            FileData = source.HasFileData ? new byte[1] : null
+            FileData = source.HasFileData ? new byte[1] : null,
+            FileContentType = source.FileContentType
         };
 
         return block;
@@ -275,7 +280,8 @@ public sealed class EditorModel(
                     MediaPath = x.MediaPath,
                     ExternalUrl = x.ExternalUrl,
                     SortOrder = x.SortOrder,
-                    HasFileData = x.FileData != null
+                    HasFileData = x.FileData != null,
+                    FileContentType = x.FileContentType
                 })
                 .ToListAsync();
 
@@ -305,7 +311,8 @@ public sealed class EditorModel(
                     MediaPath = x.MediaPath,
                     ExternalUrl = x.ExternalUrl,
                     SortOrder = x.SortOrder,
-                    HasFileData = x.FileData != null
+                    HasFileData = x.FileData != null,
+                    FileContentType = x.FileContentType
                 })
                 .ToListAsync();
 
@@ -320,6 +327,19 @@ public sealed class EditorModel(
                 block.QuizQuestionId = data.ParentId;
                 question.AnswerBlocks.Add(block);
             }
+
+            QuestionAnomalies = selectedQuestions.Values
+                .Select(question => new
+                {
+                    question.Id,
+                    Anomaly = QuizQuestionAnomalyDetector.Detect(
+                        question,
+                        selectedRound.Rows)
+                })
+                .Where(item => item.Anomaly is not null)
+                .ToDictionary(
+                    item => item.Id,
+                    item => item.Anomaly!);
         }
 
         var finalQuestionBlocks = await db.FinalQuestionContentBlocks
@@ -848,6 +868,48 @@ public sealed class EditorModel(
         });
     }
 
+    public async Task<IActionResult> OnPostFixQuestionAsync(
+        int quizId,
+        int questionId,
+        CancellationToken cancellationToken)
+    {
+        var question = await db.QuizQuestions
+            .Include(item => item.QuestionBlocks)
+            .Include(item => item.AnswerBlocks)
+            .Include(item => item.Category)
+                .ThenInclude(category => category.Round)
+                    .ThenInclude(round => round.Rows)
+            .Include(item => item.Category)
+                .ThenInclude(category => category.Round)
+                    .ThenInclude(round => round.Quiz)
+            .SingleOrDefaultAsync(item =>
+                item.Id == questionId &&
+                item.Category.Round.QuizId == quizId,
+                cancellationToken);
+
+        if (question is null)
+        {
+            return NotFound();
+        }
+
+        var result = await QuizQuestionRepairOperations.RepairAsync(
+            db,
+            question,
+            cancellationToken);
+
+        TempData[result.Changed ? "SuccessMessage" : "ErrorMessage"] =
+            localizer[
+                result.Changed
+                    ? "QuizEditor_QuestionFixed"
+                    : "QuizEditor_QuestionFixUnavailable"].Value;
+
+        return RedirectToPage(new
+        {
+            id = quizId,
+            selectedRoundId = question.Category.QuizRoundId
+        });
+    }
+
     public async Task<IActionResult> OnPostDeleteQuestionAsync()
     {
         var question = await db.QuizQuestions
@@ -1218,20 +1280,20 @@ public sealed class EditorModel(
                     "/Admin/Games/Lobby",
                     new { id = game.Session.Id.Value });
             }
-            catch (ArgumentException)
+            catch (ArgumentException exception)
             {
                 TempData["ErrorMessage"] =
-                    localizer["Error_QuizCannotStart"].Value;
+                    localizer["Error_QuizCannotStart_Detail", exception.Message].Value;
                 return RedirectToPage(new
                 {
                     id = quiz.Id,
                     selectedRoundId = round.Id
                 });
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException exception)
             {
                 TempData["ErrorMessage"] =
-                    localizer["Error_QuizCannotStart"].Value;
+                    localizer["Error_QuizCannotStart_Detail", exception.Message].Value;
                 return RedirectToPage(new
                 {
                     id = quiz.Id,

@@ -370,6 +370,12 @@
                             var hasAnswer = question.AnswerBlocks.Any(HasBlockContent);
                             var previewBlock = orderedQuestionBlocks
                                 .FirstOrDefault(HasBlockContent);
+                            var isAnomalous = Model.QuestionAnomalies.TryGetValue(
+                                question.Id,
+                                out var anomaly);
+                            var anomalyTitle = isAnomalous
+                                ? $"{Localizer["QuizEditor_QuestionAnomaly"].Value} {anomaly!.Detail}"
+                                : null;
                             string? previewImageUrl = null;
 
                             if (previewBlock?.BlockType == ContentBlockType.Image)
@@ -387,9 +393,17 @@
                                  data-question-id="@question.Id"
                                  data-question-title="@category.Title — @roundRow.Points"
                                  title="@Localizer["QuizEditor_DragQuestion"]">
-                                <a class="question-cell @(hasQuestion ? "filled" : null) @(question.IsSpecial ? "wager-question" : null)"
+                                <a class="question-cell @(hasQuestion ? "filled" : null) @(question.IsSpecial ? "wager-question" : null) @(isAnomalous ? "question-anomalous" : null)"
                                    asp-page="QuestionEditor"
                                    asp-route-id="@question.Id">
+                                    @if (isAnomalous)
+                                    {
+                                        <span class="question-anomaly-badge"
+                                              title="@anomalyTitle"
+                                              aria-label="@Localizer["QuizEditor_QuestionAnomaly"]">
+                                            ⚠
+                                        </span>
+                                    }
                                     @if (question.IsSpecial)
                                     {
                                         <span class="question-wager-badge">
@@ -452,6 +466,19 @@
                                 </a>
 
                                 <div class="question-card-actions">
+                                    @if (isAnomalous)
+                                    {
+                                        <button type="submit"
+                                                class="js-question-fix button button-secondary icon-button"
+                                                draggable="false"
+                                                formmethod="post"
+                                                formaction="?handler=FixQuestion&quizId=@Model.Quiz.Id&questionId=@question.Id"
+                                                formnovalidate
+                                                title="@Localizer["QuizEditor_FixQuestion"]"
+                                                aria-label="@Localizer["QuizEditor_FixQuestion"]">
+                                            🔧
+                                        </button>
+                                    }
                                     @if (rounds.Count > 1)
                                     {
                                         <button type="button"
