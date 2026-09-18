@@ -1,5 +1,7 @@
 # Question hints
 
+BadWolfQuiz Web `1.48.0` adds optional authored hints and host-side hint reveal controls for Standard questions.
+
 Standard questions can optionally contain from one to four hint blocks. Hint blocks are independent from question and answer content and support Text and Image content only.
 
 ## Editor
@@ -13,14 +15,16 @@ Standard questions can optionally contain from one to four hint blocks. Hint blo
 
 ## Host gameplay
 
-For an active ordinary Standard question with at least one non-empty hint, the host gets two compact icon actions alongside the normal question controls:
+For an active ordinary Standard question with at least one non-empty hint, the host gets two compact square icon actions alongside the normal question controls:
 
 - reveal the next hint;
 - reveal every remaining hint at once.
 
+The hint buttons match the height of the `x2` / `1/2` judgment controls and remain square so they do not consume unnecessary horizontal space.
+
 The same hint actions stay available after a player claims the buzzer. Revealing one hint or all hints does not release the buzzer, stop the player's answer attempt, or finish the question; the player keeps answering until the host judges the answer as correct/incorrect (or uses `x2` / `1/2` when those modifiers are enabled).
 
-Revealed hints are shown in a persistent panel at the bottom of the question presentation. The panel stays open, is part of the normal layout rather than covering the question, and can contain both text and images.
+Revealed hints are shown in a persistent panel at the bottom of the question presentation. The panel stays open, is part of the normal layout rather than covering the question, and can contain both text and images. It expands across the available question width before its hint grid wraps to additional rows, so vertical growth happens only when the viewport can no longer fit the hints horizontally.
 
 Only hints that contain actual content count toward gameplay. A text hint must contain non-whitespace text; an image hint must contain stored image data.
 
@@ -44,6 +48,8 @@ Hint penalties are always calculated from the question's original point value, n
 The resulting reward is rounded to the nearest whole point using midpoint-away-from-zero rounding and is never lower than 1 point.
 
 Incorrect regular answers continue to use the question's original point value for the normal incorrect-answer penalty; hints reduce only the reward for a correct answer.
+
+When `x2` / `1/2` answer modifiers are enabled, they are applied **after** all current correct-answer reductions. In other words, they multiply or divide the exact value that the normal **Correct** button would award at that moment. This includes reductions from revealed Standard-question hints, the individual answer reward-decay timer, and the extra-clue penalty on Four-clue questions.
 
 ## Runtime state
 
