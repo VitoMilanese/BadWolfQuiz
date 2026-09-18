@@ -39,6 +39,9 @@ public sealed class DiscordModel(
     [BindProperty(SupportsGet = true)]
     public bool Embedded { get; set; }
 
+    [BindProperty(SupportsGet = true)]
+    public bool OAuthCompleted { get; set; }
+
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         ViewData["EmbeddedDiscordSettings"] = Embedded;
@@ -75,12 +78,17 @@ public sealed class DiscordModel(
             await repository.SaveIdentityAsync(
                 currentHost.RequiredId, session.User, cancellationToken);
             TempData["DiscordSuccess"] = localizer["Discord_AccountConnected"].Value;
+            return RedirectToPage(new
+            {
+                embedded = Embedded,
+                oauthCompleted = true
+            });
         }
         catch (HttpRequestException)
         {
             TempData["DiscordError"] = localizer["Discord_AuthorizationFailed"].Value;
+            return RedirectToPage(new { embedded = Embedded });
         }
-        return RedirectToPage(new { embedded = Embedded });
     }
 
     public JsonResult OnGetChannels(string guildId)

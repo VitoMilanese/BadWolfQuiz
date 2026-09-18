@@ -140,6 +140,14 @@ automation, and diagnostics/control sections. When the same page is hosted insid
 the Discord settings dialog, it switches to a compact embedded layout and omits
 the standalone hero so the dialog does not duplicate its outer heading.
 
+Discord OAuth continues to open in a separate browser tab. After a successful
+callback, that tab emits a same-origin completion signal using `BroadcastChannel`
+with storage-event and opener-message fallbacks. The already-open standalone
+settings page or embedded dialog iframe reloads itself immediately, so the
+connected account and server/channel selectors appear without manually refreshing
+or reopening the dialog. The callback tab then attempts to close itself. This is
+event-driven and does not poll Discord or the application.
+
 The automatic-media option is presented as an explicit checkbox with a visible
 unchecked border and a checked mark. Saving it keeps the existing AJAX behavior,
 so changing the preference from an open game is applied without reloading the
