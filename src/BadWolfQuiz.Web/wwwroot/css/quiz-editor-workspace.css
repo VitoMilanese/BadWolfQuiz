@@ -731,7 +731,7 @@ body[data-quiz-editor-workspace="board"] .question-anomaly-badge {
 body[data-quiz-editor-workspace="board"] .question-anomaly-icon {
     display: block;
     line-height: 1;
-    transform: translate(1px, -1px);
+    transform: translate(1px, -3px);
 }
 
 body[data-quiz-editor-workspace="board"] .question-card-actions .js-question-fix {
