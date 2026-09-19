@@ -21,7 +21,50 @@ public sealed class QuestionPreviewFooterVisibilityRegressionTests
             preview,
             StringComparison.Ordinal);
         Assert.Contains(
-            "visibility: hidden;",
+            "opacity: 0;",
+            preview,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "pointer-events: none;",
+            preview,
+            StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Preview_hiding_cannot_be_overridden_by_visible_contributor_children()
+    {
+        var root = FindRepositoryRoot();
+        var preview = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "Pages",
+            "Admin",
+            "Quizzes",
+            "Shared",
+            "_QuestionPreviewModal.cshtml"));
+        var styles = File.ReadAllText(Path.Combine(
+            root,
+            "src",
+            "BadWolfQuiz.Web",
+            "wwwroot",
+            "css",
+            "site.css"));
+
+        Assert.Contains(
+            ".portal-footer-name > [data-footer-contributor][data-current=\"true\"]",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "visibility: visible;",
+            styles,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "body.question-preview-open > .portal-footer",
+            preview,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "opacity: 0;",
             preview,
             StringComparison.Ordinal);
     }
