@@ -21,6 +21,17 @@ public sealed class QuestionPreviewImageRoundingRegressionTests
             "asp-append-version=\"true\"",
             partial,
             StringComparison.Ordinal);
+
+        var modalIndex = partial.IndexOf(
+            "id=\"question-preview-modal\"",
+            StringComparison.Ordinal);
+        var scriptIndex = partial.IndexOf(
+            "question-preview-image-rounding.js",
+            StringComparison.Ordinal);
+
+        Assert.True(
+            modalIndex >= 0 && scriptIndex > modalIndex,
+            "Preview rounding script must execute after the shared preview modal exists in the DOM.");
     }
 
     [Fact]
